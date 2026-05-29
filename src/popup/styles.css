@@ -620,3 +620,245 @@ body {
   flex-shrink: 0;
   margin-left: 4px;
 }
+
+/* ============================================================
+   Login gate
+   ============================================================ */
+.login-gate {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 10px 16px;
+  padding: 12px 14px;
+  background: rgba(243, 156, 18, 0.08);
+  border: 1px solid rgba(243, 156, 18, 0.3);
+  border-radius: var(--radius);
+}
+
+.login-gate-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.login-gate-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.login-gate-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--yellow);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.login-gate-msg {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Now Playing card
+   ============================================================ */
+.now-playing-section {
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  border-left: 3px solid #4a9eff;
+}
+
+.np-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4a9eff;
+  box-shadow: 0 0 6px rgba(74, 158, 255, 0.6);
+  animation: np-pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes np-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+.np-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.np-channel {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.np-not-whitelisted {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.np-is-whitelisted {
+  color: var(--green);
+  font-weight: 600;
+}
+
+/* Progress bar with threshold marker */
+.np-progress-wrap {
+  margin-bottom: 8px;
+}
+
+.np-progress-bar {
+  position: relative;
+  height: 6px;
+  background: #2a2a2a;
+  border-radius: 4px;
+  overflow: visible;
+  margin-bottom: 5px;
+}
+
+/* Filled bar = actual watched time (seek-proof) */
+.np-progress-bar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--watched, 0%);
+  background: linear-gradient(90deg, #4a9eff, #7bc8ff);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* Playhead position tick — small white line showing where you are in the video */
+.np-progress-bar::after {
+  content: '';
+  position: absolute;
+  left: var(--threshold, 50%);
+  top: -3px;
+  width: 2px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 4px var(--accent-glow);
+}
+
+/* Overlay element for the playhead tick (uses a pseudo-element on a child) */
+.np-progress-position {
+  position: absolute;
+  left: var(--position, 0%);
+  top: -2px;
+  width: 2px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 1px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.np-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.np-progress-watched {
+  font-size: 10px;
+  color: #4a9eff;
+  font-weight: 600;
+}
+
+.np-progress-dur {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ETA row */
+.np-eta-row {
+  margin-top: 2px;
+}
+
+.np-eta {
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.np-eta--pending {
+  background: rgba(74, 158, 255, 0.1);
+  color: #4a9eff;
+  border: 1px solid rgba(74, 158, 255, 0.2);
+}
+
+.np-eta--ready {
+  background: rgba(255, 165, 0, 0.1);
+  color: #ffaa33;
+  border: 1px solid rgba(255, 165, 0, 0.2);
+}
+
+.np-eta--done {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+.np-eta--unknown {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  font-weight: 400;
+}
+
+/* ============================================================
+   Not-whitelisted banner
+   ============================================================ */
+.not-whitelisted-banner {
+  margin: 0 16px 0;
+  padding: 8px 12px;
+  background: rgba(255, 0, 0, 0.08);
+  border: 1px solid rgba(255, 0, 0, 0.25);
+  border-radius: var(--radius);
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.not-whitelisted-banner strong {
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   Whitelist item — current playing highlight
+   ============================================================ */
+.whitelist-item--current {
+  border-color: rgba(74, 158, 255, 0.4);
+  background: rgba(74, 158, 255, 0.06);
+}
+
+.whitelist-now {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #4a9eff;
+  background: rgba(74, 158, 255, 0.15);
+  border-radius: 4px;
+  padding: 1px 5px;
+  flex-shrink: 0;
+}

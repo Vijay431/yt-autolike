@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  *  1. Receive HEARTBEAT pings from content scripts and accumulate watch time.
- *     When 3600 s is reached, emit SHOW_REMINDER back to the active YouTube tab.
+ *     When 900 s (15 min) is reached, emit SHOW_REMINDER back to the active YouTube tab.
  *  2. Handle RECORD_LIKE / RECORD_SKIP messages — write to storage so the popup
  *     can read an up-to-date activity feed without race conditions.
  *  3. Track popup open/closed state in chrome.storage.session so content scripts

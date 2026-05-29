@@ -54,6 +54,35 @@ export interface LogEntry {
   reason?: string
 }
 
+/** Live state of the currently playing video/short, returned by the content script. */
+export interface VideoState {
+  /** True if a video/short page is active. */
+  isVideoPage: boolean
+  /** True if the user is logged in to YouTube. */
+  isLoggedIn: boolean
+  /** Video title (null if not a video page). */
+  title: string | null
+  /** Channel name (null if not a video page). */
+  channelName: string | null
+  /** Channel ID (null if not a video page). */
+  channelId: string | null
+  /** Page type — 'video' or 'short' (null if not a video page). */
+  pageType: PageType | null
+  /** Current playback position in seconds (null if not available). */
+  currentTime: number | null
+  /** Total duration in seconds (null if not available). */
+  duration: number | null
+  /** Whether the video has already been liked in this session. */
+  alreadyLiked: boolean
+  /**
+   * Seconds the user has genuinely watched in this video session.
+   * Incremented only when video is playing — NOT when seeking.
+   * This is the value compared against the like threshold.
+   */
+  accumulatedWatchSeconds: number
+}
+
+
 // ---------------------------------------------------------------------------
 // Message types exchanged between content script, popup, and background SW.
 // ---------------------------------------------------------------------------
@@ -69,6 +98,7 @@ export type Message =
   | { type: 'RECORD_SKIP'; entry: LogEntry }
   | { type: 'GET_ACTIVE_TAB_INFO'; response?: ActiveTabInfo }
   | { type: 'ACTIVE_TAB_INFO'; info: ActiveTabInfo }
+  | { type: 'GET_VIDEO_STATE' }
 
 /** Channel metadata extracted from the active tab, sent by the popup. */
 export interface ActiveTabInfo {

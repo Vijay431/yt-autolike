@@ -13,7 +13,7 @@
  *  - Active-watching guard (visible tab OR popup open)
  *  - Guarded like click
  *  - Heartbeat to background worker
- *  - Hourly reminder toast trigger
+ *  - Periodic reminder toast trigger
  */
 
 import {getSettings, getWhitelist} from '../lib/storage'
@@ -27,29 +27,89 @@ import type {PageType, LogEntry, Settings, Whitelist} from '../lib/types'
 
 let progressInterval: ReturnType<typeof setInterval> | null = null
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null
-let likedThisVideo = false // reset per navigation
+let likedThisVideo = false        // reset per navigation
+let accumulatedWatchSeconds = 0   // genuine watch seconds — seek-proof, reset per navigation
+
+/**
+ * Permanent shutdown flag — set to true when the extension context is
+ * invalidated (e.g. after an extension reload/update). Once true, every
+ * interval tick exits immediately without touching any Chrome API.
+ */
+let engineDestroyed = false
+
+// ---------------------------------------------------------------------------
+// Context validity guard
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns true while the extension runtime context is still alive.
+ * Accessing chrome.runtime.id throws "Extension context invalidated"
+ * once the extension is reloaded/updated, making it the best canary.
+ */
+function isContextAlive(): boolean {
+  try {
+    return !!chrome.runtime?.id
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Permanently shuts down the engine and clears all intervals.
+ * Called either on context invalidation or manual teardown.
+ */
+function destroyEngine(): void {
+  engineDestroyed = true
+  teardown()
+}
 
 // ---------------------------------------------------------------------------
 // Public entry point — called once by scripts.ts on injection.
 // ---------------------------------------------------------------------------
 
 export function startEngine(): void {
+  // If somehow this is called after context death, do nothing.
+  if (!isContextAlive()) return
+
   initForCurrentPage()
 
   // YouTube fires 'yt-navigate-finish' on every SPA navigation.
   document.addEventListener('yt-navigate-finish', () => {
+    if (!isContextAlive()) { destroyEngine(); return }
     teardown()
     // Slight delay to let YouTube finish rendering the new page's DOM.
-    setTimeout(initForCurrentPage, 800)
+    setTimeout(() => {
+      if (!isContextAlive()) { destroyEngine(); return }
+      initForCurrentPage()
+    }, 800)
   })
 
-  // Respond to popup requests for channel info.
+  // Respond to popup requests for channel info and video state.
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (!isContextAlive()) { destroyEngine(); return }
+
     if (message?.type === 'GET_CHANNEL_INFO') {
       const pageType = getPageType()
       sendResponse({
         channelId: pageType ? getChannelId(pageType) : null,
         channelName: pageType ? getChannelName(pageType) : null,
+      })
+    }
+
+    if (message?.type === 'GET_VIDEO_STATE') {
+      const pageType = getPageType()
+      const video = document.querySelector<HTMLVideoElement>('video')
+      sendResponse({
+        isVideoPage: pageType !== null,
+        isLoggedIn: isLoggedIn(),
+        title: pageType ? getVideoTitle() : null,
+        channelName: pageType ? getChannelName(pageType) : null,
+        channelId: pageType ? getChannelId(pageType) : null,
+        pageType,
+        currentTime: video && !isNaN(video.currentTime) ? video.currentTime : null,
+        duration: video && !isNaN(video.duration) && video.duration > 0 ? video.duration : null,
+        alreadyLiked: likedThisVideo,
+        accumulatedWatchSeconds,
       })
     }
     // Non-async, no need to return true.
@@ -62,20 +122,27 @@ export function startEngine(): void {
 
 function initForCurrentPage(): void {
   likedThisVideo = false
+  accumulatedWatchSeconds = 0
   teardown()
 
   const pageType = getPageType()
   if (!pageType) return // Not a watch or Shorts page.
 
   // Start the watch-progress poller.
-  progressInterval = setInterval(() => pollProgress(pageType), PROGRESS_POLL_INTERVAL_MS)
+  progressInterval = setInterval(() => {
+    if (engineDestroyed || !isContextAlive()) { destroyEngine(); return }
+    pollProgress(pageType)
+  }, PROGRESS_POLL_INTERVAL_MS)
 
   // Start heartbeat sender.
-  heartbeatInterval = setInterval(() => sendHeartbeat(), HEARTBEAT_INTERVAL_MS)
+  heartbeatInterval = setInterval(() => {
+    if (engineDestroyed || !isContextAlive()) { destroyEngine(); return }
+    sendHeartbeat()
+  }, HEARTBEAT_INTERVAL_MS)
 }
 
 // ---------------------------------------------------------------------------
-// Teardown (called on SPA navigation)
+// Teardown (called on SPA navigation or context death)
 // ---------------------------------------------------------------------------
 
 function teardown(): void {
@@ -105,36 +172,60 @@ function getPageType(): PageType | null {
 // ---------------------------------------------------------------------------
 
 async function pollProgress(pageType: PageType): Promise<void> {
+  // ── Step 1: Accumulate genuine watch time (synchronous, no Chrome API needed) ──
+  // This runs before any guards so the count grows only from real playback.
+  // Seeking does NOT affect this counter — it's purely time-based.
+  const video = document.querySelector<HTMLVideoElement>('video')
+  const videoReady = video && !isNaN(video.duration) && video.duration > 0
+  if (videoReady && !video!.paused && document.visibilityState === 'visible') {
+    // Each poll tick represents PROGRESS_POLL_INTERVAL_MS milliseconds of real watch time.
+    accumulatedWatchSeconds += PROGRESS_POLL_INTERVAL_MS / 1000
+  }
+
+  // ── Step 2: Like-eligibility guards (all the async checks) ──
+
   // Guard: already liked this video in this session.
   if (likedThisVideo) return
+
+  if (!videoReady || video!.paused) return
+
+  // Guard: context must still be alive before any async Chrome API call.
+  if (!isContextAlive()) { destroyEngine(); return }
 
   // Guard: user must be actively watching.
   if (!(await isActivelyWatching())) return
 
-  const video = document.querySelector<HTMLVideoElement>('video')
-  if (!video || isNaN(video.duration) || video.duration === 0) return
-  if (video.paused) return
+  // Re-check after the await — the context may have died during the async gap.
+  if (!isContextAlive()) { destroyEngine(); return }
 
-  const progress = video.currentTime / video.duration
-
-  const settings = await getSettings()
+  let settings: Settings
+  try {
+    settings = await getSettings()
+  } catch {
+    return // Storage unavailable — context likely dying.
+  }
+  if (!isContextAlive()) { destroyEngine(); return }
 
   // Guard: master pause.
   if (settings.is_paused) return
 
-  // Guard: watch percentage threshold.
-  if (progress < settings.target_percentage) return
+  // Guard: accumulated watch time threshold (seek-proof).
+  // Unlike position-based checks, this can only increase through genuine playback.
+  const targetSeconds = video!.duration * settings.target_percentage
+  if (accumulatedWatchSeconds < targetSeconds) return
 
   // Guard: targeting mode.
-  const passesMode = await checkMode(settings, pageType)
-  if (!passesMode) {
+  let passesMode: boolean
+  try {
+    passesMode = await checkMode(settings, pageType)
+  } catch {
     return
   }
+  if (!isContextAlive()) { destroyEngine(); return }
+  if (!passesMode) return
 
   // Guard: user must be logged in.
-  if (!isLoggedIn()) {
-    return
-  }
+  if (!isLoggedIn()) return
 
   // Guard: video must not already be liked or disliked.
   const voteState = getLikeState(pageType)
@@ -152,15 +243,17 @@ async function pollProgress(pageType: PageType): Promise<void> {
   }
 }
 
+
 // ---------------------------------------------------------------------------
 // Active-watching guard
 // ---------------------------------------------------------------------------
 
 async function isActivelyWatching(): Promise<boolean> {
-  // Tab is visible.
+  // Tab is visible — no Chrome API needed.
   if (document.visibilityState === 'visible') return true
 
   // Extension popup is open (background tracks this via POPUP_OPENED/POPUP_CLOSED).
+  if (!isContextAlive()) return false
   try {
     const response = await chrome.runtime.sendMessage({type: 'IS_POPUP_OPEN'})
     return response?.open === true
@@ -196,7 +289,12 @@ async function checkMode(settings: Settings, pageType: PageType): Promise<boolea
     case 'only_videos':
       return pageType === 'video'
     case 'whitelist_only': {
-      const whitelist = await getWhitelist()
+      let whitelist: Whitelist
+      try {
+        whitelist = await getWhitelist()
+      } catch {
+        return false
+      }
       const channelId = getChannelId(pageType)
       const channelName = getChannelName(pageType)
       return whitelist.channels.some(
@@ -405,17 +503,24 @@ async function sendHeartbeat(): Promise<void> {
   if (document.visibilityState !== 'visible') return
   const video = document.querySelector<HTMLVideoElement>('video')
   if (!video || video.paused) return
+  if (!isContextAlive()) { destroyEngine(); return }
 
   try {
     const response = await chrome.runtime.sendMessage({type: 'HEARTBEAT'})
+    if (!isContextAlive()) { destroyEngine(); return }
     if (response?.type === 'SHOW_REMINDER') {
-      const settings = await getSettings()
+      let settings: Settings
+      try {
+        settings = await getSettings()
+      } catch {
+        return
+      }
       if (settings.hourly_reminders_enabled) {
         showReminderToast()
       }
     }
   } catch {
-    // Background SW may not be ready yet; ignore.
+    // Background SW may not be ready yet or context is dying — ignore.
   }
 }
 
@@ -424,6 +529,7 @@ async function sendHeartbeat(): Promise<void> {
 // ---------------------------------------------------------------------------
 
 async function recordLike(pageType: PageType): Promise<void> {
+  if (!isContextAlive()) return
   const entry: LogEntry = {
     timestamp: Date.now(),
     title: getVideoTitle(),
@@ -434,11 +540,12 @@ async function recordLike(pageType: PageType): Promise<void> {
   try {
     await chrome.runtime.sendMessage({type: 'RECORD_LIKE', entry})
   } catch {
-    // SW may be restarting.
+    // SW may be restarting or context invalidated.
   }
 }
 
 async function recordSkip(pageType: PageType, reason: string): Promise<void> {
+  if (!isContextAlive()) return
   const entry: LogEntry = {
     timestamp: Date.now(),
     title: getVideoTitle(),
@@ -450,6 +557,6 @@ async function recordSkip(pageType: PageType, reason: string): Promise<void> {
   try {
     await chrome.runtime.sendMessage({type: 'RECORD_SKIP', entry})
   } catch {
-    // SW may be restarting.
+    // SW may be restarting or context invalidated.
   }
 }

@@ -2,8 +2,8 @@
  * Extension-wide constants.
  */
 
-/** Number of active watch seconds before the hourly reminder fires. */
-export const WATCH_SECONDS_PER_REMINDER = 3600
+/** Number of active watch seconds before the periodic reminder fires (15 minutes). */
+export const WATCH_SECONDS_PER_REMINDER = 900
 
 /** Maximum number of log entries retained in local storage. */
 export const MAX_LOGS = 50

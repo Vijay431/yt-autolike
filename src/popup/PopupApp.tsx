@@ -1,18 +1,20 @@
 /**
  * Popup UI — Auto Like YT Videos
  *
- * Single-screen scrollable popup. All 7 sections from TRD §2.4:
+ * Single-screen scrollable popup. All sections:
  *  1. Header (logo + name + version + master pause)
- *  2. Auto-Like Mode selector (4 radio cards)
- *  3. Watch Percentage slider (10%–90%)
- *  4. Whitelist Manager (Add current channel + list)
- *  5. Statistics (total likes counter)
- *  6. Reminders toggle
- *  7. Activity Feed (last 50 log entries)
+ *  2. Login gate — if not logged in, show message and hide everything
+ *  3. Now Playing card — current video, progress bar, time-to-like ETA
+ *  4. Auto-Like Mode selector (4 radio cards)
+ *  5. Watch Percentage slider (10%–90%)
+ *  6. Whitelist Manager (Add current channel + list)
+ *  7. Statistics (total likes counter)
+ *  8. Reminders toggle (every 15 min)
+ *  9. Activity Feed (last 50 log entries)
  */
 
-import {useEffect, useState, useCallback} from 'react'
-import type {Settings, Whitelist, Stats, LogEntry, Mode} from '../lib/types'
+import {useEffect, useState, useCallback, useRef} from 'react'
+import type {Settings, Whitelist, Stats, LogEntry, Mode, VideoState} from '../lib/types'
 import {
   getSettings,
   setSettings,
@@ -53,6 +55,9 @@ export default function PopupApp() {
     tabId: number | null
   }>({isYouTube: false, channelName: null, channelId: null, tabId: null})
   const [addChannelStatus, setAddChannelStatus] = useState<string | null>(null)
+  // Live video state from the content script
+  const [videoState, setVideoState] = useState<VideoState | null>(null)
+  const activeTabIdRef = useRef<number | null>(null)
 
   // Load all data on mount.
   useEffect(() => {
@@ -88,6 +93,45 @@ export default function PopupApp() {
     }
   }, [])
 
+  // Fetch live video state from the content script.
+  // Called immediately after tab detection and then every second.
+  const fetchVideoState = useCallback(async (tabId: number) => {
+    try {
+      const state = await chrome.tabs.sendMessage(tabId, {type: 'GET_VIDEO_STATE'})
+      // Only update if we got a real response object back
+      if (state && typeof state === 'object') {
+        setVideoState(state as VideoState)
+      }
+    } catch {
+      // Content script not ready yet — keep previous state, don't blank it out.
+      // videoState will update once the content script responds.
+    }
+  }, [])
+
+  // Poll the content script for live video state every 500 ms.
+  // Faster cadence = channel name, progress, and ETA update near-instantly.
+  useEffect(() => {
+    const poll = setInterval(() => {
+      const tabId = activeTabIdRef.current
+      if (tabId != null) fetchVideoState(tabId)
+    }, 500)
+    return () => clearInterval(poll)
+  }, [fetchVideoState])
+
+  // Sync channel info from videoState back into activeTabInfo.
+  // This is the fast path: if GET_CHANNEL_INFO missed on mount (DOM not ready yet),
+  // the 500 ms video-state poll picks up the channel name and feeds it here.
+  useEffect(() => {
+    if (videoState?.channelName && !activeTabInfo.channelName) {
+      setActiveTabInfo((prev) => ({
+        ...prev,
+        isYouTube: true,
+        channelName: videoState.channelName,
+        channelId: videoState.channelId,
+      }))
+    }
+  }, [videoState?.channelName, activeTabInfo.channelName])
+
   async function detectActiveTab() {
     try {
       const [tab] = await chrome.tabs.query({active: true, currentWindow: true})
@@ -96,8 +140,13 @@ export default function PopupApp() {
       const isYouTube =
         tab.url.includes('youtube.com/watch') || tab.url.includes('youtube.com/shorts/')
 
+      // Always store the tab ID so the polling interval can start sending messages.
+      activeTabIdRef.current = tab.id
+
       if (!isYouTube) {
         setActiveTabInfo({isYouTube: false, channelName: null, channelId: null, tabId: tab.id})
+        // Still do an immediate fetch — content script reports isVideoPage:false which is correct.
+        fetchVideoState(tab.id)
         return
       }
 
@@ -113,10 +162,14 @@ export default function PopupApp() {
       } catch {
         setActiveTabInfo({isYouTube: true, channelName: null, channelId: null, tabId: tab.id})
       }
+
+      // Immediately fetch live video state (don't wait for the 1s interval).
+      fetchVideoState(tab.id)
     } catch {
       // Tabs API failure — ignore.
     }
   }
+
 
   // ---------------------------------------------------------------------------
   // Settings updaters
@@ -172,10 +225,31 @@ export default function PopupApp() {
   }
 
   // ---------------------------------------------------------------------------
-  // Render
+  // Derived state helpers
   // ---------------------------------------------------------------------------
 
   const isPaused = settings.is_paused
+
+  // Is the user logged in? (from live video state, or null if unknown)
+  const isLoggedIn: boolean | null = videoState ? videoState.isLoggedIn : null
+
+  // Is the current channel in the whitelist?
+  const currentChannelWhitelisted: boolean | null =
+    settings.mode === 'whitelist_only' && videoState?.channelName
+      ? whitelist.channels.some(
+          (c) =>
+            (videoState.channelId && c.id === videoState.channelId) ||
+            (videoState.channelName &&
+              c.name.toLowerCase() === videoState.channelName!.toLowerCase()),
+        )
+      : null
+
+  // Time-to-like calculation
+  const timeToLike = computeTimeToLike(videoState, settings)
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
 
   return (
     <div className="popup-root">
@@ -205,7 +279,121 @@ export default function PopupApp() {
         </div>
       )}
 
+      {/* ── Login Gate ── */}
+      {isLoggedIn === false && (
+        <div className="login-gate" role="alert">
+          <span className="login-gate-icon">🔒</span>
+          <div className="login-gate-body">
+            <span className="login-gate-title">Not Signed In</span>
+            <span className="login-gate-msg">
+              Auto-liking only works when you're logged in to YouTube. Please sign in to your Google account.
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="popup-body">
+        {/* ── Now Playing Card ── */}
+        {videoState?.isVideoPage && (
+          <section className="section now-playing-section">
+            <h2 className="section-title">
+              <span className="np-dot" aria-hidden="true" />
+              Now Playing
+            </h2>
+
+            <div className="np-title" title={videoState.title ?? undefined}>
+              {videoState.title
+                ? videoState.title.length > 52
+                  ? videoState.title.slice(0, 52) + '…'
+                  : videoState.title
+                : 'Loading…'}
+            </div>
+
+            {videoState.channelName && (
+              <div className="np-channel">
+                {videoState.pageType === 'short' ? '⚡' : '🎬'} {videoState.channelName}
+                {/* Whitelist mode: flag non-whitelisted channel inline */}
+                {settings.mode === 'whitelist_only' && currentChannelWhitelisted === false && (
+                  <span className="np-not-whitelisted" title="This channel is not in your whitelist">
+                    · Not whitelisted
+                  </span>
+                )}
+                {settings.mode === 'whitelist_only' && currentChannelWhitelisted === true && (
+                  <span className="np-is-whitelisted" title="This channel is whitelisted">
+                    · ✅ Whitelisted
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Progress bar — shows actual WATCHED time, not playhead position */}
+            {videoState.duration != null && (
+              <div className="np-progress-wrap">
+                <div
+                  className="np-progress-bar"
+                  style={{
+                    '--watched': `${Math.min(100, (videoState.accumulatedWatchSeconds / videoState.duration) * 100).toFixed(1)}%`,
+                    '--position': videoState.currentTime != null
+                      ? `${Math.min(100, (videoState.currentTime / videoState.duration) * 100).toFixed(1)}%`
+                      : '0%',
+                    '--threshold': `${Math.min(100, settings.target_percentage * 100).toFixed(1)}%`,
+                  } as React.CSSProperties}
+                  role="progressbar"
+                  aria-valuenow={Math.round((videoState.accumulatedWatchSeconds / videoState.duration) * 100)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label="Actual watch time progress"
+                >
+                  {/* White tick showing current playhead position in video */}
+                  <div className="np-progress-position" aria-hidden="true" />
+                </div>
+
+                <div className="np-progress-labels">
+                  <span className="np-progress-watched">
+                    ⏱ {formatDuration(videoState.accumulatedWatchSeconds)} watched
+                  </span>
+                  {videoState.currentTime != null && (
+                    <span className="np-progress-dur">
+                      ▶ {formatDuration(videoState.currentTime)} / {formatDuration(videoState.duration)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Time to like ETA */}
+            <div className="np-eta-row">
+              {videoState.alreadyLiked ? (
+                <span className="np-eta np-eta--done">✅ Already liked this video</span>
+              ) : timeToLike === null ? (
+                <span className="np-eta np-eta--unknown">⏳ Waiting for video to load…</span>
+              ) : timeToLike <= 0 ? (
+                <span className="np-eta np-eta--ready">
+                  {settings.is_paused
+                    ? '⏸ Auto-like ready (paused)'
+                    : settings.mode === 'whitelist_only' && currentChannelWhitelisted === false
+                      ? '🚫 Channel not whitelisted — will not auto-like'
+                      : '🎯 Threshold reached — auto-liking shortly…'}
+                </span>
+              ) : (
+                <span className="np-eta np-eta--pending">
+                  ⏱ {formatMinutes(timeToLike)} to auto-like
+                </span>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ── Whitelist mode banner: non-whitelisted channel ── */}
+        {settings.mode === 'whitelist_only' &&
+          videoState?.isVideoPage &&
+          currentChannelWhitelisted === false && (
+            <div className="not-whitelisted-banner" role="status">
+              🚫 <strong>{videoState.channelName ?? 'This channel'}</strong> is not in your whitelist
+              — auto-like will be skipped for this video.
+            </div>
+          )}
+
         {/* ── Stats ── */}
         <section className="section stats-section">
           <div className="stats-counter">
@@ -301,31 +489,44 @@ export default function PopupApp() {
             <p className="empty-hint">No channels whitelisted yet.</p>
           ) : (
             <ul className="whitelist" aria-label="Whitelisted channels">
-              {whitelist.channels.map((ch) => (
-                <li key={ch.id} className="whitelist-item">
-                  <span className="whitelist-icon">📺</span>
-                  <span className="whitelist-name">{ch.name}</span>
-                  <button
-                    className="whitelist-remove"
-                    onClick={() => removeChannel(ch.id)}
-                    aria-label={`Remove ${ch.name}`}
-                    title="Remove from whitelist"
+              {whitelist.channels.map((ch) => {
+                // Mark the currently playing channel in whitelist mode
+                const isCurrent =
+                  settings.mode === 'whitelist_only' &&
+                  videoState?.channelName &&
+                  ((videoState.channelId && ch.id === videoState.channelId) ||
+                    ch.name.toLowerCase() === (videoState.channelName ?? '').toLowerCase())
+
+                return (
+                  <li
+                    key={ch.id}
+                    className={`whitelist-item ${isCurrent ? 'whitelist-item--current' : ''}`}
                   >
-                    ✕
-                  </button>
-                </li>
-              ))}
+                    <span className="whitelist-icon">📺</span>
+                    <span className="whitelist-name">{ch.name}</span>
+                    {isCurrent && <span className="whitelist-now">Now Playing</span>}
+                    <button
+                      className="whitelist-remove"
+                      onClick={() => removeChannel(ch.id)}
+                      aria-label={`Remove ${ch.name}`}
+                      title="Remove from whitelist"
+                    >
+                      ✕
+                    </button>
+                  </li>
+                )
+              })}
             </ul>
           )}
         </section>
 
         {/* ── Reminders Toggle ── */}
         <section className="section">
-          <h2 className="section-title">Hourly Reminders</h2>
+          <h2 className="section-title">Reminders</h2>
           <label className="toggle-row" htmlFor="reminders-toggle">
             <span className="toggle-label">
               <span className="toggle-icon">🔔</span>
-              Show hourly support messages
+              Show tips every 15 minutes
             </span>
             <div className="toggle-switch-wrapper">
               <input
@@ -339,7 +540,7 @@ export default function PopupApp() {
             </div>
           </label>
           <p className="toggle-hint">
-            A friendly message appears every hour of active watch time.
+            A friendly tip appears every 15 minutes of active watch time.
           </p>
         </section>
 
@@ -388,4 +589,39 @@ function formatTime(ts: number): string {
   const h = date.getHours().toString().padStart(2, '0')
   const m = date.getMinutes().toString().padStart(2, '0')
   return `${h}:${m}`
+}
+
+/** Format seconds as mm:ss or h:mm:ss */
+function formatDuration(seconds: number): string {
+  const s = Math.floor(seconds)
+  const hh = Math.floor(s / 3600)
+  const mm = Math.floor((s % 3600) / 60)
+  const ss = s % 60
+  if (hh > 0) {
+    return `${hh}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`
+  }
+  return `${mm}:${ss.toString().padStart(2, '0')}`
+}
+
+/**
+ * Returns seconds of genuine watch time remaining before the auto-like fires.
+ * Based on accumulatedWatchSeconds (seek-proof), not the video playhead position.
+ * Returns null if duration is unknown. Returns 0 if threshold is already reached.
+ */
+function computeTimeToLike(videoState: VideoState | null, settings: Settings): number | null {
+  if (!videoState?.isVideoPage) return null
+  if (videoState.duration == null) return null
+  const targetSeconds = videoState.duration * settings.target_percentage
+  const remaining = targetSeconds - videoState.accumulatedWatchSeconds
+  return Math.max(0, remaining)
+}
+
+/** Format seconds remaining as a human-readable string like "2 min 30 sec" */
+function formatMinutes(seconds: number): string {
+  const totalSecs = Math.max(0, Math.ceil(seconds))
+  const m = Math.floor(totalSecs / 60)
+  const s = totalSecs % 60
+  if (m === 0) return `${s} sec`
+  if (s === 0) return `${m} min`
+  return `${m} min ${s} sec`
 }
