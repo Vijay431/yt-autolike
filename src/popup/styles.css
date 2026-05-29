@@ -715,77 +715,7 @@ body {
   font-weight: 600;
 }
 
-/* Progress bar with threshold marker */
-.np-progress-wrap {
-  margin-bottom: 8px;
-}
 
-.np-progress-bar {
-  position: relative;
-  height: 6px;
-  background: #2a2a2a;
-  border-radius: 4px;
-  overflow: visible;
-  margin-bottom: 5px;
-}
-
-/* Filled bar = actual watched time (seek-proof) */
-.np-progress-bar::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: var(--watched, 0%);
-  background: linear-gradient(90deg, #4a9eff, #7bc8ff);
-  border-radius: 4px;
-  transition: width 0.4s ease;
-}
-
-/* Playhead position tick — small white line showing where you are in the video */
-.np-progress-bar::after {
-  content: '';
-  position: absolute;
-  left: var(--threshold, 50%);
-  top: -3px;
-  width: 2px;
-  height: 12px;
-  background: var(--accent);
-  border-radius: 2px;
-  transform: translateX(-50%);
-  box-shadow: 0 0 4px var(--accent-glow);
-}
-
-/* Overlay element for the playhead tick (uses a pseudo-element on a child) */
-.np-progress-position {
-  position: absolute;
-  left: var(--position, 0%);
-  top: -2px;
-  width: 2px;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 1px;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-.np-progress-labels {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.np-progress-watched {
-  font-size: 10px;
-  color: #4a9eff;
-  font-weight: 600;
-}
-
-.np-progress-dur {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
 
 /* ETA row */
 .np-eta-row {

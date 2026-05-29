@@ -4,7 +4,7 @@
  * Single-screen scrollable popup. All sections:
  *  1. Header (logo + name + version + master pause)
  *  2. Login gate — if not logged in, show message and hide everything
- *  3. Now Playing card — current video, progress bar, time-to-like ETA
+ *  3. Now Playing card — current video, time-to-like ETA
  *  4. Auto-Like Mode selector (4 radio cards)
  *  5. Watch Percentage slider (10%–90%)
  *  6. Whitelist Manager (Add current channel + list)
@@ -109,7 +109,7 @@ export default function PopupApp() {
   }, [])
 
   // Poll the content script for live video state every 500 ms.
-  // Faster cadence = channel name, progress, and ETA update near-instantly.
+  // Faster cadence = channel name and ETA update near-instantly.
   useEffect(() => {
     const poll = setInterval(() => {
       const tabId = activeTabIdRef.current
@@ -326,40 +326,7 @@ export default function PopupApp() {
               </div>
             )}
 
-            {/* Progress bar — shows actual WATCHED time, not playhead position */}
-            {videoState.duration != null && (
-              <div className="np-progress-wrap">
-                <div
-                  className="np-progress-bar"
-                  style={{
-                    '--watched': `${Math.min(100, (videoState.accumulatedWatchSeconds / videoState.duration) * 100).toFixed(1)}%`,
-                    '--position': videoState.currentTime != null
-                      ? `${Math.min(100, (videoState.currentTime / videoState.duration) * 100).toFixed(1)}%`
-                      : '0%',
-                    '--threshold': `${Math.min(100, settings.target_percentage * 100).toFixed(1)}%`,
-                  } as React.CSSProperties}
-                  role="progressbar"
-                  aria-valuenow={Math.round((videoState.accumulatedWatchSeconds / videoState.duration) * 100)}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label="Actual watch time progress"
-                >
-                  {/* White tick showing current playhead position in video */}
-                  <div className="np-progress-position" aria-hidden="true" />
-                </div>
 
-                <div className="np-progress-labels">
-                  <span className="np-progress-watched">
-                    ⏱ {formatDuration(videoState.accumulatedWatchSeconds)} watched
-                  </span>
-                  {videoState.currentTime != null && (
-                    <span className="np-progress-dur">
-                      ▶ {formatDuration(videoState.currentTime)} / {formatDuration(videoState.duration)}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* Time to like ETA */}
             <div className="np-eta-row">
@@ -591,17 +558,7 @@ function formatTime(ts: number): string {
   return `${h}:${m}`
 }
 
-/** Format seconds as mm:ss or h:mm:ss */
-function formatDuration(seconds: number): string {
-  const s = Math.floor(seconds)
-  const hh = Math.floor(s / 3600)
-  const mm = Math.floor((s % 3600) / 60)
-  const ss = s % 60
-  if (hh > 0) {
-    return `${hh}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`
-  }
-  return `${mm}:${ss.toString().padStart(2, '0')}`
-}
+
 
 /**
  * Returns seconds of genuine watch time remaining before the auto-like fires.
