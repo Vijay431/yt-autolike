@@ -1,5 +1,5 @@
 /**
- * Typed wrappers around chrome.storage.local for the Auto Like YT Videos extension.
+ * Typed wrappers around chrome.storage.local for the YT AutoLike extension.
  * All defaults match the schema in the TRD.
  */
 

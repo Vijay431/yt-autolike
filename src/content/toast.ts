@@ -1,5 +1,5 @@
 /**
- * Toast overlay injector — Auto Like YT Videos
+ * Toast overlay injector — YT AutoLike
  *
  * Injects a styled overlay directly into document.body (NOT inside Shadow DOM)
  * so it appears on top of all YouTube content. Uses `all: initial` + scoped

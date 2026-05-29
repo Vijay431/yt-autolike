@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript types for the Auto Like YT Videos extension.
+ * Shared TypeScript types for the YT AutoLike extension.
  * These types mirror the chrome.storage.local schema defined in the TRD.
  */
 

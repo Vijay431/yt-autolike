@@ -1,4 +1,4 @@
-# Privacy Policy — Auto Like YT Videos
+# Privacy Policy — YT AutoLike
 
 **Last Updated: 2026-05-29**
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-Auto Like YT Videos is a browser extension that automatically likes YouTube videos and Shorts after you have watched a customizable percentage of them. It is designed with a strict local-only data posture: **no data ever leaves your device**, and **no third-party services are used**.
+YT AutoLike is a browser extension that automatically likes YouTube videos and Shorts after you have watched a customizable percentage of them. It is designed with a strict local-only data posture: **no data ever leaves your device**, and **no third-party services are used**.
 
 ---
 
@@ -114,4 +114,4 @@ If the extension's data practices change in a future version, this privacy polic
 
 For privacy questions, concerns, or data deletion requests, please open an issue on the project repository or contact the developer directly.
 
-> This privacy policy applies to the "Auto Like YT Videos" browser extension version 1.0.0 and above.
+> This privacy policy applies to the "YT AutoLike" browser extension version 1.0.0 and above.

@@ -1,5 +1,5 @@
 /**
- * Background Service Worker — Auto Like YT Videos
+ * Background Service Worker — YT AutoLike
  *
  * Responsibilities:
  *  1. Receive HEARTBEAT pings from content scripts and accumulate watch time.

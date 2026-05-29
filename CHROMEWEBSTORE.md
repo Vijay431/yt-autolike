@@ -1,4 +1,4 @@
-# Chrome Web Store Listing — Auto Like YT Videos
+# Chrome Web Store Listing — YT AutoLike
 
 > Last Updated: 2026-05-29
 
@@ -7,7 +7,7 @@
 ## Store Listing
 
 **Extension Name**
-Auto Like YT Videos
+YT AutoLike
 
 **Short Description** *(max 132 characters)*
 Automatically like YouTube videos and Shorts after you've watched a set percentage. Fully local — no data leaves your device.
@@ -17,7 +17,7 @@ Automatically like YouTube videos and Shorts after you've watched a set percenta
 **Detailed Description** *(max 16,000 characters — use plain text, CWS strips markdown)*
 
 ```
-Auto Like YT Videos automatically likes YouTube videos and Shorts once you've watched a customizable percentage of them — helping you support the creators you actually watch.
+YT AutoLike automatically likes YouTube videos and Shorts once you've watched a customizable percentage of them — helping you support the creators you actually watch.
 
 FEATURES
 • Four targeting modes — Global (all videos), Only Shorts, Only Videos, or Whitelist Only (approved channels only)
@@ -32,7 +32,7 @@ FEATURES
 • Fully local — all data stays on your device; nothing is ever sent to any server
 
 HOW TO USE
-1. Click the Auto Like YT Videos icon in the Chrome toolbar to open the popup.
+1. Click the YT AutoLike icon in the Chrome toolbar to open the popup.
 2. Choose your auto-like mode (Global is the default).
 3. Adjust the watch threshold slider to your preferred percentage.
 4. If using Whitelist Only mode, navigate to a YouTube video and click "Add Current Channel" in the popup.
@@ -188,7 +188,7 @@ Before submitting, verify every item:
 **Manifest & Package**
 - [x] `manifest_version: 3`
 - [x] Version is `1.0.0`
-- [x] Name matches this document: "Auto Like YT Videos"
+- [x] Name matches this document: "YT AutoLike"
 - [x] Description in manifest ≤ 132 chars
 - [ ] Build output ZIP contains only compiled files (no source maps, no node_modules)
 - [ ] ZIP is under 2GB (expected: ~500KB)

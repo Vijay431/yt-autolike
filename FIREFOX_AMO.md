@@ -1,4 +1,4 @@
-# Firefox Add-ons (AMO) Listing — Auto Like YT Videos
+# Firefox Add-ons (AMO) Listing — YT AutoLike
 
 > Last Updated: 2026-05-29
 
@@ -9,7 +9,7 @@ Firefox AMO (addons.mozilla.org) uses different submission flows and policies fr
 ## Store Listing
 
 **Add-on Name**
-Auto Like YT Videos
+YT AutoLike
 
 **Add-on Slug** *(URL identifier — lowercase, hyphens)*
 `auto-like-yt-videos`
@@ -20,7 +20,7 @@ Automatically like YouTube videos and Shorts after you've watched a configurable
 **Detailed Description** *(plain text — AMO renders basic HTML)*
 
 ```
-Auto Like YT Videos automatically likes YouTube videos and Shorts once you've watched a customizable percentage of them — helping you support the creators you actually watch.
+YT AutoLike automatically likes YouTube videos and Shorts once you've watched a customizable percentage of them — helping you support the creators you actually watch.
 
 <b>FEATURES</b>
 • Four targeting modes — Global (all videos), Only Shorts, Only Videos, or Whitelist Only (approved channels only)

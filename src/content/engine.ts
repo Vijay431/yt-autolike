@@ -1,5 +1,5 @@
 /**
- * Auto-Like Engine — Auto Like YT Videos
+ * Auto-Like Engine — YT AutoLike
  *
  * Injected into every youtube.com page by the content script.
  * Handles:

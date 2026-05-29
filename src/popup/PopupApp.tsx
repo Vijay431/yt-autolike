@@ -1,5 +1,5 @@
 /**
- * Popup UI — Auto Like YT Videos
+ * Popup UI — YT AutoLike
  *
  * Single-screen scrollable popup. All sections:
  *  1. Header (logo + name + version + master pause)
@@ -256,9 +256,9 @@ export default function PopupApp() {
       {/* ── Header ── */}
       <header className="popup-header">
         <div className="popup-header-left">
-          <span className="popup-logo">👍</span>
+          <img src={chrome.runtime.getURL("icons/icon-128.png")} alt="YT AutoLike Logo" className="popup-logo" width="32" height="32" />
           <div>
-            <h1 className="popup-title">Auto Like YT</h1>
+            <h1 className="popup-title">YT AutoLike</h1>
             <span className="popup-version">v{VERSION}</span>
           </div>
         </div>

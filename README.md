@@ -1,4 +1,4 @@
-# Auto Like YT Videos
+# YT AutoLike
 
 A cross-browser extension built with [Extension.js](https://extension.js.org) that automatically likes YouTube videos and Shorts after you've watched a customizable percentage of them. Supports Chrome, Edge, and Firefox.
 

@@ -1,5 +1,5 @@
 /**
- * Content script entrypoint — Auto Like YT Videos
+ * Content script entrypoint — YT AutoLike
  *
  * Extension.js calls the default export on injection and calls the returned
  * cleanup function on HMR teardown. The engine is imported dynamically so
