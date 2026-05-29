@@ -1,10 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/chrome-manifest.json",
   "chromium:manifest_version": 3,
-  "firefox:manifest_version": 2,
+  "firefox:manifest_version": 3,
   "version": "1.0.0",
-  "name": "my-extension",
-  "description": "React-based extension with a sidebar panel. Adds a sidebar with a simple page.",
+  "name": "Auto Like YT Videos",
+  "description": "Automatically like YouTube videos and Shorts after watching a set percentage. Fully local — no data leaves your device.",
   "icons": {
     "16": "images/icon.png",
     "32": "images/icon.png",
@@ -12,7 +12,8 @@
     "64": "images/icon.png",
     "128": "images/icon.png"
   },
-  "chromium:action": {
+  "action": {
+    "default_popup": "popup/index.html",
     "default_icon": {
       "16": "images/icon.png",
       "32": "images/icon.png",
@@ -20,29 +21,8 @@
       "64": "images/icon.png",
       "128": "images/icon.png"
     },
-    "default_title": "Open Side Panel"
+    "default_title": "Auto Like YT Videos"
   },
-  "firefox:browser_action": {
-    "default_icon": {
-      "16": "images/icon.png",
-      "32": "images/icon.png",
-      "48": "images/icon.png",
-      "64": "images/icon.png",
-      "128": "images/icon.png"
-    },
-    "default_title": "Open Side Panel"
-  },
-  "chromium:side_panel": {
-    "default_path": "sidebar/index.html",
-    "default_title": "Side Panel Content"
-  },
-  "firefox:sidebar_action": {
-    "default_panel": "sidebar/index.html",
-    "default_title": "Side Panel Content"
-  },
-  "chromium:permissions": [
-    "sidePanel"
-  ],
   "background": {
     "chromium:service_worker": "background.ts",
     "firefox:scripts": [
@@ -52,12 +32,20 @@
   "content_scripts": [
     {
       "matches": [
-        "<all_urls>"
+        "*://*.youtube.com/*"
       ],
       "js": [
-        "content/scripts.tsx"
-      ]
+        "content/scripts.ts"
+      ],
+      "run_at": "document_idle"
     }
   ],
-  "author": "Your Name"
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.youtube.com/*"
+  ],
+  "author": "Vijay"
 }
