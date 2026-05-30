@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
     branches:
-      - "**"
+      - '**'
   push:
     branches:
       - main
@@ -22,9 +22,10 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Cache node_modules
+        id: cache-node-modules
         uses: actions/cache@v5
         with:
           path: node_modules
@@ -33,6 +34,7 @@ jobs:
             ${{ runner.os }}-node-modules-
 
       - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Build
@@ -53,9 +55,10 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Cache node_modules
+        id: cache-node-modules
         uses: actions/cache@v5
         with:
           path: node_modules
@@ -64,6 +67,7 @@ jobs:
             ${{ runner.os }}-node-modules-
 
       - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Package Extension
