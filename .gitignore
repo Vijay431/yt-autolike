@@ -11,6 +11,7 @@ coverage
 
 # production
 dist
+graphify-out/
 
 # misc
 .DS_Store
