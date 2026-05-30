@@ -4,8 +4,6 @@ Hey there! 👋 Tired of forgetting to hit that like button on videos you love? 
 
 **🔒 100% Private & Local** — No data ever leaves your device. No servers, no trackers, just you and your favorite creators.
 
----
-
 ## ✨ Why YT AutoLike? (The MVP Selling Point) 💡
 
 Unlike other auto-likers that might be clunky or data-hungry, **YT AutoLike** is built with a "Privacy First" mindset. It's designed to be a "set it and forget it" companion that purely encourages community growth.
@@ -16,8 +14,6 @@ Unlike other auto-likers that might be clunky or data-hungry, **YT AutoLike** is
 - **Privacy Core:** We don't have servers. We don't want your data. Everything stays in your browser.
 - **Smart Logic:** We won't like videos if you're logged out, or if you've already voted. We only act when you're _really_ watching!
 
----
-
 ## 🛠️ Awesome Features
 
 - **🎯 Four targeting modes** — Global, Only Shorts, Only Videos, or Whitelist Only!
@@ -27,16 +23,12 @@ Unlike other auto-likers that might be clunky or data-hungry, **YT AutoLike** is
 - **📜 Activity feed** — See your last 50 supported videos!
 - **👋 Friendly reminders** — Get a nice toast message every hour of watch time! (You can turn it off, but we hope you don't! 😊)
 
----
-
 ## 🚀 Getting Started
 
 1. **Install** the extension.
 2. **Open the popup** to set your mode and percentage.
 3. **Watch YouTube** as usual! 📺
 4. **Feel good** knowing you're supporting creators! 💖
-
----
 
 ## 👨‍💻 For Developers
 
@@ -55,13 +47,9 @@ pnpm build:edge
 pnpm build:firefox
 ```
 
----
-
 ## 📄 Project Docs
 
 Check out our [Project Docs](project-docs/) folder for deep dives into how this works!
-
----
 
 ## 🤝 Engagement
 
@@ -69,8 +57,6 @@ Found an issue? Have a cool idea? Reach out!
 
 - **Email:** vijayanand431@gmail.com
 - **GitHub:** Star the repo, open an issue, or send a PR! 🚀
-
----
 
 ## ⚖️ License & Privacy
 

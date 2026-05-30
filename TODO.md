@@ -6,5 +6,3 @@
 - [ ] Chrome Web Store: Run E2E tests to verify performance & Back/Forward cache
 - [ ] Chrome Web Store: Register Developer Account ($5 fee) [I can do that]
 - [ ] Chrome Web Store: Fill Privacy/Justification forms based on `CHROMEWEBSTORE.md`
-
-- [x] Need lint, prettier, husky to prepare the codebase
