@@ -40,8 +40,8 @@ importers:
         specifier: ^7.1.1
         version: 7.1.1(eslint@8.57.1)
       extension:
-        specifier: ^3.17.0
-        version: 3.17.0(svelte@5.55.10(@typescript-eslint/types@8.60.0))(webpack@5.107.2(postcss@8.5.10))
+        specifier: ^3.18.1
+        version: 3.18.1(svelte@5.55.10(@typescript-eslint/types@8.60.0))(webpack@5.107.2(postcss@8.5.10))
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -1258,8 +1258,8 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  electron-to-chromium@1.5.363:
-    resolution: {integrity: sha512-VjUKPyWzGnT1fujlkEGC/BvN70Hh70KXtAqcmniXviYlJC/ivcT+BWGPyxWVbJZLfvtKR6dqg1L7T7pgAMBtWA==}
+  electron-to-chromium@1.5.364:
+    resolution: {integrity: sha512-G/dYE3+AYhyHwzTwg8UbnXf7zqMERYh7l2jJ3QujhFsH8agSYwtnGAR2aZ7f0AakIKJXd5En/Hre4igIUrdlYw==}
 
   emoji-regex@10.6.0:
     resolution: {integrity: sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A==}
@@ -1429,12 +1429,12 @@ packages:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
 
-  extension-create@3.17.0:
-    resolution: {integrity: sha512-ubkmaUCSk/udtm3DZkhZZ2Fke2yBTOxX+78iO5P6JKmZsIFfWr9CXrlSbYHqT7qT48P700xhAy0BspKcWQ1pCA==}
+  extension-create@3.18.1:
+    resolution: {integrity: sha512-Vuh3I+9yLuOwgFkxsdSqQRrSSZGCWfBRKto8uo9UrM398rRsf6LcKKu/H/YMAtjTRsYEhRhmqz8F42bpmpX0Zg==}
     engines: {node: '>=18'}
 
-  extension-develop@3.17.0:
-    resolution: {integrity: sha512-A31DkAfsGyCIcgOHUXx9/XEK/xOKsxRZpBxetmTx4HNKAzqe4Ck+QS0k5Szm5tGny3Uca78nSiHZw5Tvnxh0RA==}
+  extension-develop@3.18.1:
+    resolution: {integrity: sha512-lva4kSV/0MgBBC63iyZGJEAeLkvQx17H28rSUMuKIIth1m/aQWP3JWUqXz4iLJyim5SS6rawEhDsCRvLG503CA==}
     engines: {node: '>=20.18'}
 
   extension-from-store@0.1.1:
@@ -1442,12 +1442,12 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  extension-install@3.17.0:
-    resolution: {integrity: sha512-gtfgL9P1oZ1LZh+qYzrYg4XI2LyOzCo73n1VV5y3lr8MiVHD4+UVJ6S9Hwm4Tv6FkAqy/NMGrpFCNCLbjNsPeA==}
+  extension-install@3.18.1:
+    resolution: {integrity: sha512-JtobIn499QHA3CSkH77qHABhrpJTRU32B/w3WUgrtrbqB+S6md+pBEnW55frczC24WpUFOruNs8b6HC3fstNXA==}
     engines: {node: '>=18'}
 
-  extension@3.17.0:
-    resolution: {integrity: sha512-RvgRKdjSIiJVXeCEMJ1jan+Dsw4DK/k0qPBvIMZDfbilOvo9f/nVUTIyowNWbvEWTSLzwUxrYoYwqD7CFYfOtA==}
+  extension@3.18.1:
+    resolution: {integrity: sha512-nHNLQGLU4HUHQGjBgyCqpln45Jm/7jnhzvZpKQAZbpR/b4BQE3E2j/tR++5mM7VySMmhgbyKbca1uyJcHuZ3GA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -1633,8 +1633,8 @@ packages:
   hash-sum@2.0.0:
     resolution: {integrity: sha512-WdZTbAByD+pHfl/g9QSsBIIwy8IT+EsPiKDs0KNX+zSHhdDLFKdZu0BQHljvO+0QI/BasbMSUa8wYNCZTvhslg==}
 
-  hasown@2.0.3:
-    resolution: {integrity: sha512-ej4AhfhfL2Q2zpMmLo7U1Uv9+PyhIZpgQLGT1F9miIGmiCJIoCgSmczFdrc97mWT4kVY72KA+WnnhJ5pghSvSg==}
+  hasown@2.0.4:
+    resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
 
   hermes-estree@0.25.1:
@@ -3981,7 +3981,7 @@ snapshots:
     dependencies:
       baseline-browser-mapping: 2.10.32
       caniuse-lite: 1.0.30001793
-      electron-to-chromium: 1.5.363
+      electron-to-chromium: 1.5.364
       node-releases: 2.0.46
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
 
@@ -4170,7 +4170,7 @@ snapshots:
     dependencies:
       which: 2.0.2
 
-  electron-to-chromium@1.5.363: {}
+  electron-to-chromium@1.5.364: {}
 
   emoji-regex@10.6.0: {}
 
@@ -4230,7 +4230,7 @@ snapshots:
       has-property-descriptors: 1.0.2
       has-proto: 1.2.0
       has-symbols: 1.1.0
-      hasown: 2.0.3
+      hasown: 2.0.4
       internal-slot: 1.1.0
       is-array-buffer: 3.0.5
       is-callable: 1.2.7
@@ -4297,11 +4297,11 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       has-tostringtag: 1.0.2
-      hasown: 2.0.3
+      hasown: 2.0.4
 
   es-shim-unscopables@1.1.0:
     dependencies:
-      hasown: 2.0.3
+      hasown: 2.0.4
 
   es-to-primitive@1.3.0:
     dependencies:
@@ -4338,7 +4338,7 @@ snapshots:
       es-iterator-helpers: 1.3.2
       eslint: 8.57.1
       estraverse: 5.3.0
-      hasown: 2.0.3
+      hasown: 2.0.4
       jsx-ast-utils: 3.3.5
       minimatch: 3.1.5
       object.entries: 1.1.9
@@ -4441,7 +4441,7 @@ snapshots:
 
   events@3.3.0: {}
 
-  extension-create@3.17.0:
+  extension-create@3.18.1:
     dependencies:
       adm-zip: 0.5.17
       axios: 1.16.1
@@ -4452,7 +4452,7 @@ snapshots:
       - debug
       - supports-color
 
-  extension-develop@3.17.0(svelte@5.55.10(@typescript-eslint/types@8.60.0))(webpack@5.107.2(postcss@8.5.10)):
+  extension-develop@3.18.1(svelte@5.55.10(@typescript-eslint/types@8.60.0))(webpack@5.107.2(postcss@8.5.10)):
     dependencies:
       '@prefresh/core': 1.5.9(preact@10.27.3)
       '@prefresh/utils': 1.2.1
@@ -4495,14 +4495,17 @@ snapshots:
       webextension-polyfill: 0.12.0
       webpack-merge: 6.0.1
       webpack-target-webextension: 2.1.3(webpack@5.107.2(postcss@8.5.10))
+      ws: 8.21.0
     transitivePeerDependencies:
       - '@module-federation/runtime-tools'
+      - bufferutil
       - node-sass
       - sass
       - sass-embedded
       - selfsigned
       - supports-color
       - svelte
+      - utf-8-validate
       - webpack
       - webpack-hot-middleware
 
@@ -4512,12 +4515,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  extension-install@3.17.0:
+  extension-install@3.18.1:
     dependencies:
       cross-spawn: 7.0.6
       pintor: 0.3.0
 
-  extension@3.17.0(svelte@5.55.10(@typescript-eslint/types@8.60.0))(webpack@5.107.2(postcss@8.5.10)):
+  extension@3.18.1(svelte@5.55.10(@typescript-eslint/types@8.60.0))(webpack@5.107.2(postcss@8.5.10)):
     dependencies:
       '@types/chrome': 0.1.42
       '@types/node': 25.9.1
@@ -4527,9 +4530,9 @@ snapshots:
       commander: 14.0.3
       cross-spawn: 7.0.6
       edge-location: 2.2.0
-      extension-create: 3.17.0
-      extension-develop: 3.17.0(svelte@5.55.10(@typescript-eslint/types@8.60.0))(webpack@5.107.2(postcss@8.5.10))
-      extension-install: 3.17.0
+      extension-create: 3.18.1
+      extension-develop: 3.18.1(svelte@5.55.10(@typescript-eslint/types@8.60.0))(webpack@5.107.2(postcss@8.5.10))
+      extension-install: 3.18.1
       firefox-location2: 3.0.0
       pintor: 0.3.0
       semver: 7.8.1
@@ -4615,7 +4618,7 @@ snapshots:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       es-set-tostringtag: 2.1.0
-      hasown: 2.0.3
+      hasown: 2.0.4
       mime-types: 2.1.35
 
   fraction.js@5.3.4: {}
@@ -4630,7 +4633,7 @@ snapshots:
       call-bound: 1.0.4
       define-properties: 1.2.1
       functions-have-names: 1.2.3
-      hasown: 2.0.3
+      hasown: 2.0.4
       is-callable: 1.2.7
 
   functions-have-names@1.2.3: {}
@@ -4651,7 +4654,7 @@ snapshots:
       get-proto: 1.0.1
       gopd: 1.2.0
       has-symbols: 1.1.0
-      hasown: 2.0.3
+      hasown: 2.0.4
       math-intrinsics: 1.1.0
 
   get-proto@1.0.1:
@@ -4727,7 +4730,7 @@ snapshots:
 
   hash-sum@2.0.0: {}
 
-  hasown@2.0.3:
+  hasown@2.0.4:
     dependencies:
       function-bind: 1.1.2
 
@@ -4777,7 +4780,7 @@ snapshots:
   internal-slot@1.1.0:
     dependencies:
       es-errors: 1.3.0
-      hasown: 2.0.3
+      hasown: 2.0.4
       side-channel: 1.1.0
 
   is-array-buffer@3.0.5:
@@ -4809,7 +4812,7 @@ snapshots:
 
   is-core-module@2.16.2:
     dependencies:
-      hasown: 2.0.3
+      hasown: 2.0.4
 
   is-data-view@1.0.2:
     dependencies:
@@ -4868,7 +4871,7 @@ snapshots:
       call-bound: 1.0.4
       gopd: 1.2.0
       has-tostringtag: 1.0.2
-      hasown: 2.0.3
+      hasown: 2.0.4
 
   is-set@2.0.3: {}
 
