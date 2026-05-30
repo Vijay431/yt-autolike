@@ -16,8 +16,8 @@ The extension collects and stores only the minimum data required for its feature
 
 | Data Type | Collected? | What It Is | Purpose |
 |-----------|-----------|------------|---------|
-| Settings preferences | **Yes — local only** | Your chosen auto-like mode, watch percentage threshold, pause state, and reminder opt-out preference | Persist your configuration between browser sessions |
-| Whitelisted YouTube channels | **Yes — local only** | Channel IDs and display names you explicitly add to the whitelist | Determine which channels to auto-like in Whitelist-Only mode |
+| Settings preferences | **Yes — local/sync** | Your chosen auto-like mode, watch percentage threshold, pause state, and reminder opt-out preference | Persist your configuration between browser sessions and across devices (via Chrome Sync) |
+| Whitelisted YouTube channels | **Yes — local/sync** | Channel IDs and display names you explicitly add to the whitelist | Determine which channels to auto-like in Whitelist-Only mode across your devices |
 | Like activity statistics | **Yes — local only** | A running total count of auto-likes performed and your cumulative active watch time in seconds | Display your total likes counter in the popup UI; trigger the hourly reminder |
 | Activity log entries | **Yes — local only** | Video title, channel name, content type (video or Short), action status (liked/skipped/error), and timestamp for up to 50 recent actions | Display the recent activity feed in the popup UI |
 
@@ -32,12 +32,12 @@ The extension collects and stores only the minimum data required for its feature
 
 ## 2. How Data Is Stored
 
-All data is stored in your browser's `chrome.storage.local` API, which keeps data on your local device only. This is distinct from `chrome.storage.sync`, which uploads data to Google's servers.
+The extension uses the standard Chrome Storage APIs to keep your data safe and private.
 
-- **Storage location:** Your local browser profile on your device
-- **No cloud sync:** Data is never synced to any cloud service, including Google Sync
-- **No external servers:** The extension makes no outbound network requests of any kind
-- **Retention:** Data remains until you clear it manually (via browser extension data reset) or uninstall the extension
+- **Settings & Whitelist:** Stored in `chrome.storage.sync`. If you are signed in to your browser with sync enabled, this data may be synced across your devices. This data is private to your account and is never shared with us or any third parties.
+- **Statistics & Activity Logs:** Stored in `chrome.storage.local`. This data remains on your current device only.
+- **No external servers:** The extension makes no outbound network requests of any kind (other than what the browser itself does for sync).
+- **Retention:** Data remains until you clear it manually or uninstall the extension.
 
 ---
 
@@ -45,10 +45,10 @@ All data is stored in your browser's `chrome.storage.local` API, which keeps dat
 
 Each data item is used exclusively for its declared purpose:
 
-- **Settings** → Applied by the content script each time you watch a YouTube video to determine whether and when to auto-like
-- **Whitelist** → Checked against the current video's channel when operating in "Whitelist Only" mode
-- **Statistics** → Displayed in the extension popup; the accumulated watch seconds counter is reset every 3,600 seconds to trigger the hourly reminder toast
-- **Activity log** → Displayed in the extension popup's activity feed; automatically capped at 50 entries (oldest entries are discarded)
+- **Settings** → Applied by the content script each time you watch a YouTube video to determine whether and when to auto-like.
+- **Whitelist** → Checked against the current video's channel when operating in "Whitelist Only" mode.
+- **Statistics** → Displayed in the extension popup; used to trigger the hourly reminder toast.
+- **Activity log** → Displayed in the extension popup's activity feed.
 
 ---
 
@@ -57,10 +57,10 @@ Each data item is used exclusively for its declared purpose:
 The extension requests the following browser permissions:
 
 ### `storage`
-Used to read and write your settings, whitelist, statistics, and activity log to `chrome.storage.local`. Without this permission, no configuration can be saved between browser sessions.
+Used to read and write your data. `chrome.storage.sync` is used for settings/whitelist (to follow you across devices), and `chrome.storage.local` is used for logs/stats (device-specific).
 
 ### `tabs`
-Used exclusively by the popup UI to detect whether you are currently on a YouTube watch or Shorts page, and to query the URL of your active tab so the "Add Current Channel" button can be shown or hidden accordingly. The extension does **not** read or store tab URLs as data.
+Used exclusively by the popup UI to detect whether you are on YouTube so it can show appropriate controls.
 
 ### Host permission: `*://*.youtube.com/*`
 Required to inject the content script on YouTube pages. The content script monitors the HTML5 video element's `currentTime` and `duration` properties to compute your watch progress, and interacts with YouTube's like button DOM element when the threshold is reached. The extension operates **only** on `youtube.com` — no other websites.

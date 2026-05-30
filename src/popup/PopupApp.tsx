@@ -473,7 +473,18 @@ export default function PopupApp() {
           </p>
         </section>
 
-
+        {/* ── Community Support Footer ── */}
+        <footer className="popup-footer">
+          <p className="community-note">
+            🌟 This extension is purely for encouraging community growth. Help creators you love by giving them the engagement they deserve!
+          </p>
+          <div className="footer-links">
+            <a href="https://github.com/Vijay431/yt-autolike" target="_blank" rel="noreferrer" title="Star on GitHub">⭐ Star</a>
+            <a href="https://github.com/Vijay431/yt-autolike/issues" target="_blank" rel="noreferrer" title="Raise an Issue">🛠️ Issue</a>
+            <a href="mailto:vijayanand431@gmail.com" title="Email for help">📧 Help</a>
+          </div>
+          <p className="version-text">YT AutoLike v{VERSION}</p>
+        </footer>
       </div>
     </div>
   )

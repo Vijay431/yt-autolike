@@ -792,3 +792,49 @@ body {
   padding: 1px 5px;
   flex-shrink: 0;
 }
+
+/* ============================================================
+   Popup Footer & Community Note
+   ============================================================ */
+.popup-footer {
+  padding: 16px;
+  background: linear-gradient(0deg, #1c1c1c 0%, var(--bg-base) 100%);
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.community-note {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  transition: color var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+}
+
+.version-text {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+}

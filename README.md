@@ -1,26 +1,45 @@
-# YT AutoLike
+# 🚀 YT AutoLike — Support Creators Automatically! 👍
 
-A cross-browser extension built with [Extension.js](https://extension.js.org) that automatically likes YouTube videos and Shorts after you've watched a customizable percentage of them. Supports Chrome, Edge, and Firefox.
+Hey there! 👋 Tired of forgetting to hit that like button on videos you love? **YT AutoLike** has your back! It automatically likes YouTube videos and Shorts after you've watched a set percentage. It's the ultimate tool for supporting the community while you just sit back and enjoy the show! 🍿
 
-**All data stays fully local — nothing ever leaves your device.**
-
----
-
-## Features
-
-- **Four targeting modes** — Global, Only Shorts, Only Videos, Whitelist Only
-- **Configurable watch threshold** — 10%–90% (default 50%)
-- **Whitelist manager** — Add trusted channels from the popup
-- **Active-watching guard** — Only acts on visible tabs
-- **Skip logic** — Skips already-liked/disliked videos and logged-out state
-- **Hourly reminder toasts** — Friendly messages every hour of watch time (opt-out available)
-- **Total likes counter** — Track how many videos you've supported
-- **Activity feed** — Last 50 auto-like/skip events
-- **Master pause** — Pause with one click
+**🔒 100% Private & Local** — No data ever leaves your device. No servers, no trackers, just you and your favorite creators.
 
 ---
 
-## Development
+## ✨ Why YT AutoLike? (The MVP Selling Point) 💡
+
+Unlike other auto-likers that might be clunky or data-hungry, **YT AutoLike** is built with a "Privacy First" mindset. It's designed to be a "set it and forget it" companion that purely encourages community growth. 
+
+**What makes us different?**
+- **Community Focused:** Our goal is to help creators grow by ensuring they get the engagement they deserve.
+- **Privacy Core:** We don't have servers. We don't want your data. Everything stays in your browser.
+- **Smart Logic:** We won't like videos if you're logged out, or if you've already voted. We only act when you're *really* watching!
+
+---
+
+## 🛠️ Awesome Features
+
+- **🎯 Four targeting modes** — Global, Only Shorts, Only Videos, or Whitelist Only!
+- **⏲️ Configurable watch threshold** — You decide! 10%–90% (default 50%).
+- **📝 Whitelist manager** — Only support your absolute favorite channels!
+- **🛡️ Active-watching guard** — Only works on the tab you're actually looking at.
+- **📜 Activity feed** — See your last 50 supported videos!
+- **👋 Friendly reminders** — Get a nice toast message every hour of watch time! (You can turn it off, but we hope you don't! 😊)
+
+---
+
+## 🚀 Getting Started
+
+1. **Install** the extension.
+2. **Open the popup** to set your mode and percentage.
+3. **Watch YouTube** as usual! 📺
+4. **Feel good** knowing you're supporting creators! 💖
+
+---
+
+## 👨‍💻 For Developers
+
+We love contributors! Please star ⭐, comment, or raise issues if you find something or want to help us improve.
 
 ```bash
 # Install dependencies
@@ -37,51 +56,22 @@ pnpm build:firefox
 
 ---
 
-## Project Docs
+## 📄 Project Docs
 
-| Document | Purpose |
-|----------|---------|
-| [`project-docs/prd.md`](project-docs/prd.md) | Product Requirements Document |
-| [`project-docs/trd.md`](project-docs/trd.md) | Technical Requirements Document |
-| [`project-docs/discussion.md`](project-docs/discussion.md) | Design decisions log |
+Check out our [Project Docs](project-docs/) folder for deep dives into how this works!
 
 ---
 
-## Publishing Docs
+## 🤝 Engagement
 
-| Document | Purpose |
-|----------|---------|
-| [`PRIVACY_POLICY.md`](PRIVACY_POLICY.md) | Full privacy policy (host publicly before submitting) |
-| [`CHROMEWEBSTORE.md`](CHROMEWEBSTORE.md) | Chrome Web Store listing, permissions justification, submission checklist |
-| [`FIREFOX_AMO.md`](FIREFOX_AMO.md) | Firefox AMO listing, source code submission instructions |
-| [`package-extension.sh`](package-extension.sh) | Script to build and zip all three browser packages |
+Found an issue? Have a cool idea? Reach out!
+- **Email:** vijayanand431@gmail.com
+- **GitHub:** Star the repo, open an issue, or send a PR! 🚀
 
 ---
 
-## Privacy
+## ⚖️ License & Privacy
 
-This extension stores your settings, whitelist, and activity log locally in `chrome.storage.local`. No data is transmitted to any server. See [`PRIVACY_POLICY.md`](PRIVACY_POLICY.md) for the full policy.
+MIT Licensed. All data is stored locally. See [`PRIVACY_POLICY.md`](PRIVACY_POLICY.md) for details.
 
----
-
-## Architecture
-
-```
-src/
-├── manifest.json          # Extension.js manifest (cross-browser prefixed keys)
-├── background.ts          # Service worker: watch timer, stats writer, popup state
-├── lib/
-│   ├── types.ts           # Shared TypeScript interfaces
-│   ├── storage.ts         # Typed chrome.storage.local wrappers
-│   ├── messages.ts        # 100 positive reminder messages pool
-│   └── constants.ts       # Extension-wide constants
-├── content/
-│   ├── scripts.ts         # Content script entrypoint
-│   ├── engine.ts          # Auto-like engine (core logic)
-│   └── toast.ts           # Hourly reminder toast overlay
-└── popup/
-    ├── index.html         # Popup HTML shell
-    ├── scripts.tsx        # React mount entrypoint
-    ├── PopupApp.tsx       # Full popup UI (7 sections)
-    └── styles.css         # Premium dark UI styles
-```
+**Let's grow the community together!** 🌟

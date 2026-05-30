@@ -25,16 +25,16 @@ export const DEFAULT_STATS: Stats = {
 }
 
 // ---------------------------------------------------------------------------
-// Settings
+// Settings (Stored in sync storage)
 // ---------------------------------------------------------------------------
 
 export async function getSettings(): Promise<Settings> {
-  const result = await chrome.storage.local.get('settings')
+  const result = await chrome.storage.sync.get('settings')
   return result.settings ? {...DEFAULT_SETTINGS, ...result.settings} : DEFAULT_SETTINGS
 }
 
 export async function setSettings(settings: Settings): Promise<void> {
-  await chrome.storage.local.set({settings})
+  await chrome.storage.sync.set({settings})
 }
 
 export async function patchSettings(patch: Partial<Settings>): Promise<Settings> {
@@ -45,16 +45,16 @@ export async function patchSettings(patch: Partial<Settings>): Promise<Settings>
 }
 
 // ---------------------------------------------------------------------------
-// Whitelist
+// Whitelist (Stored in sync storage)
 // ---------------------------------------------------------------------------
 
 export async function getWhitelist(): Promise<Whitelist> {
-  const result = await chrome.storage.local.get('whitelist')
+  const result = await chrome.storage.sync.get('whitelist')
   return result.whitelist ?? DEFAULT_WHITELIST
 }
 
 export async function setWhitelist(whitelist: Whitelist): Promise<void> {
-  await chrome.storage.local.set({whitelist})
+  await chrome.storage.sync.set({whitelist})
 }
 
 // ---------------------------------------------------------------------------
