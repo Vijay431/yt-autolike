@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.git/
+.antigravitycli/
+coverage/
+.DS_Store
+project-docs/
+.env*
+yarn.lock
+package-lock.json
+*.log
+extension-env.d.ts

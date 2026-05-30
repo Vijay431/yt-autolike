@@ -14,10 +14,10 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/react": "^18.2.64",
-    "@types/react-dom": "^18.2.21",
-    "typescript": "5.3.3",
-    "extension": "^3.17.0"
+    "@types/react": "^18.3.29",
+    "@types/react-dom": "^18.3.7",
+    "extension": "^3.17.0",
+    "typescript": "5.3.3"
   },
   "scripts": {
     "dev": "extension dev",
@@ -28,5 +28,9 @@
     "build:firefox": "extension build --browser firefox",
     "build:edge": "extension build --browser edge"
   },
-  "packageManager": "pnpm@11.2.2"
+  "packageManager": "pnpm@11.2.2",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=11.0.0"
+  }
 }
