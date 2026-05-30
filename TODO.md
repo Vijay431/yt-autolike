@@ -28,7 +28,7 @@
 - [x] Wordings to make sure that star, comment, raise issues, enagage with the repo, email id for any issues.
 
 ## Cave 5: Send to World (Publishing)
-- [x] Github workflow to automate the extension publishment. Should be compatible for max possible versions usage 95% browser version coverage required
+- [ ] Github workflow to automate the extension publishment. (Tried, but needs 'workflow' scope for token)
 - [x] Required documentations to publish the extension.
 - [x] use caveman skill to talk always in that mode.
 - [x] use `rtk` to prepend any command, if it is not running just fallback to run the command without `rtk`
