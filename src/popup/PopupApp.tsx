@@ -14,14 +14,13 @@
  */
 
 import {useEffect, useState, useCallback, useRef} from 'react'
-import type {Settings, Whitelist, Stats, LogEntry, Mode, VideoState} from '../lib/types'
+import type {Settings, Whitelist, Stats, Mode, VideoState} from '../lib/types'
 import {
   getSettings,
   setSettings,
   getWhitelist,
   setWhitelist,
   getStats,
-  getLogs,
 } from '../lib/storage'
 import {DEFAULT_SETTINGS, DEFAULT_WHITELIST, DEFAULT_STATS} from '../lib/storage'
 
@@ -47,7 +46,6 @@ export default function PopupApp() {
   const [settings, setSettingsState] = useState<Settings>(DEFAULT_SETTINGS)
   const [whitelist, setWhitelistState] = useState<Whitelist>(DEFAULT_WHITELIST)
   const [stats, setStatsState] = useState<Stats>(DEFAULT_STATS)
-  const [logs, setLogsState] = useState<LogEntry[]>([])
   const [activeTabInfo, setActiveTabInfo] = useState<{
     isYouTube: boolean
     channelName: string | null
@@ -62,16 +60,14 @@ export default function PopupApp() {
   // Load all data on mount.
   useEffect(() => {
     async function load() {
-      const [s, w, st, l] = await Promise.all([
+      const [s, w, st] = await Promise.all([
         getSettings(),
         getWhitelist(),
         getStats(),
-        getLogs(),
       ])
       setSettingsState(s)
       setWhitelistState(w)
       setStatsState(st)
-      setLogsState(l)
     }
     load()
 
@@ -81,10 +77,9 @@ export default function PopupApp() {
     // Detect active tab (YouTube + channel info).
     detectActiveTab()
 
-    // Reload stats/logs periodically while popup is open.
+    // Reload stats periodically while popup is open.
     const refresh = setInterval(() => {
       getStats().then(setStatsState)
-      getLogs().then(setLogsState)
     }, 3000)
 
     return () => {
@@ -119,10 +114,9 @@ export default function PopupApp() {
   }, [fetchVideoState])
 
   // Sync channel info from videoState back into activeTabInfo.
-  // This is the fast path: if GET_CHANNEL_INFO missed on mount (DOM not ready yet),
-  // the 500 ms video-state poll picks up the channel name and feeds it here.
+  // Whenever videoState returns a new channelName or channelId, we sync it.
   useEffect(() => {
-    if (videoState?.channelName && !activeTabInfo.channelName) {
+    if (videoState?.isVideoPage) {
       setActiveTabInfo((prev) => ({
         ...prev,
         isYouTube: true,
@@ -130,7 +124,7 @@ export default function PopupApp() {
         channelId: videoState.channelId,
       }))
     }
-  }, [videoState?.channelName, activeTabInfo.channelName])
+  }, [videoState?.isVideoPage, videoState?.channelName, videoState?.channelId])
 
   async function detectActiveTab() {
     try {
@@ -296,38 +290,6 @@ export default function PopupApp() {
         {/* ── Now Playing Card ── */}
         {videoState?.isVideoPage && (
           <section className="section now-playing-section">
-            <h2 className="section-title">
-              <span className="np-dot" aria-hidden="true" />
-              Now Playing
-            </h2>
-
-            <div className="np-title" title={videoState.title ?? undefined}>
-              {videoState.title
-                ? videoState.title.length > 52
-                  ? videoState.title.slice(0, 52) + '…'
-                  : videoState.title
-                : 'Loading…'}
-            </div>
-
-            {videoState.channelName && (
-              <div className="np-channel">
-                {videoState.pageType === 'short' ? '⚡' : '🎬'} {videoState.channelName}
-                {/* Whitelist mode: flag non-whitelisted channel inline */}
-                {settings.mode === 'whitelist_only' && currentChannelWhitelisted === false && (
-                  <span className="np-not-whitelisted" title="This channel is not in your whitelist">
-                    · Not whitelisted
-                  </span>
-                )}
-                {settings.mode === 'whitelist_only' && currentChannelWhitelisted === true && (
-                  <span className="np-is-whitelisted" title="This channel is whitelisted">
-                    · ✅ Whitelisted
-                  </span>
-                )}
-              </div>
-            )}
-
-
-
             {/* Time to like ETA */}
             <div className="np-eta-row">
               {videoState.alreadyLiked ? (
@@ -511,37 +473,7 @@ export default function PopupApp() {
           </p>
         </section>
 
-        {/* ── Activity Feed ── */}
-        <section className="section">
-          <h2 className="section-title">
-            Activity Feed
-            {logs.length > 0 && <span className="count-badge">{logs.length}</span>}
-          </h2>
 
-          {logs.length === 0 ? (
-            <p className="empty-hint">No activity yet. Start watching a YouTube video!</p>
-          ) : (
-            <ul className="activity-feed" aria-label="Recent activity">
-              {logs.map((log, i) => (
-                <li key={i} className={`log-item log-item--${log.status}`}>
-                  <span className="log-status-icon">
-                    {log.status === 'liked' ? '👍' : log.status === 'skipped' ? '⏭' : '⚠️'}
-                  </span>
-                  <div className="log-details">
-                    <span className="log-title" title={log.title}>
-                      {log.title.length > 40 ? log.title.slice(0, 40) + '…' : log.title}
-                    </span>
-                    <span className="log-meta">
-                      {log.channel} · {log.type === 'short' ? '⚡ Short' : '🎬 Video'}
-                      {log.reason ? ` · ${log.reason}` : ''}
-                    </span>
-                  </div>
-                  <span className="log-time">{formatTime(log.timestamp)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
       </div>
     </div>
   )
@@ -551,12 +483,7 @@ export default function PopupApp() {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatTime(ts: number): string {
-  const date = new Date(ts)
-  const h = date.getHours().toString().padStart(2, '0')
-  const m = date.getMinutes().toString().padStart(2, '0')
-  return `${h}:${m}`
-}
+
 
 
 

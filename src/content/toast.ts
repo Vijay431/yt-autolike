@@ -11,12 +11,10 @@ import {TOAST_DURATION_MS} from '../lib/constants'
 
 const TOAST_ID = 'yt-autolike-toast'
 
-/** Inject and display the hourly reminder toast. Auto-closes after TOAST_DURATION_MS. */
-export function showReminderToast(): void {
+/** Inject and display a generic toast message. Auto-closes after TOAST_DURATION_MS. */
+export function showToast(title: string, message: string): void {
   // Don't stack multiple toasts.
   if (document.getElementById(TOAST_ID)) return
-
-  const message = randomMessage()
 
   // Create host element.
   const host = document.createElement('div')
@@ -30,7 +28,7 @@ export function showReminderToast(): void {
     <div class="yt-al-toast-inner">
       <div class="yt-al-toast-icon">👍</div>
       <div class="yt-al-toast-body">
-        <span class="yt-al-toast-title">Auto Like YT</span>
+        <span class="yt-al-toast-title">${escapeHtml(title)}</span>
         <span class="yt-al-toast-msg">${escapeHtml(message)}</span>
       </div>
       <button class="yt-al-toast-close" aria-label="Dismiss">✕</button>
@@ -53,6 +51,12 @@ export function showReminderToast(): void {
   requestAnimationFrame(() => {
     host.classList.add('yt-al-toast-visible')
   })
+}
+
+/** Inject and display the hourly reminder toast. Auto-closes after TOAST_DURATION_MS. */
+export function showReminderToast(): void {
+  const message = randomMessage()
+  showToast('Auto Like YT', message)
 }
 
 function dismiss(host: HTMLElement): void {

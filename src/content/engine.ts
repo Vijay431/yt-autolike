@@ -18,7 +18,7 @@
 
 import {getSettings, getWhitelist} from '../lib/storage'
 import {HEARTBEAT_INTERVAL_MS, PROGRESS_POLL_INTERVAL_MS} from '../lib/constants'
-import {showReminderToast} from './toast'
+import {showReminderToast, showToast} from './toast'
 import type {PageType, LogEntry, Settings, Whitelist} from '../lib/types'
 
 // ---------------------------------------------------------------------------
@@ -29,6 +29,18 @@ let progressInterval: ReturnType<typeof setInterval> | null = null
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null
 let likedThisVideo = false        // reset per navigation
 let accumulatedWatchSeconds = 0   // genuine watch seconds — seek-proof, reset per navigation
+
+let currentVideoId: string | null = null
+let cachedSettings: Settings | null = null
+let notifiedSettingsChange = false
+
+// Cache to prevent flickers on navigation/swiping
+interface VideoMetadata {
+  title: string
+  channelName: string | null
+  channelId: string | null
+}
+const metadataCache = new Map<string, VideoMetadata>()
 
 /**
  * Permanent shutdown flag — set to true when the extension context is
@@ -98,11 +110,11 @@ export function startEngine(): void {
 
     if (message?.type === 'GET_VIDEO_STATE') {
       const pageType = getPageType()
-      const video = document.querySelector<HTMLVideoElement>('video')
+      const video = getActiveVideo(pageType)
       sendResponse({
         isVideoPage: pageType !== null,
         isLoggedIn: isLoggedIn(),
-        title: pageType ? getVideoTitle() : null,
+        title: pageType ? getVideoTitle(pageType) : null,
         channelName: pageType ? getChannelName(pageType) : null,
         channelId: pageType ? getChannelId(pageType) : null,
         pageType,
@@ -123,6 +135,9 @@ export function startEngine(): void {
 function initForCurrentPage(): void {
   likedThisVideo = false
   accumulatedWatchSeconds = 0
+  currentVideoId = location.pathname
+  cachedSettings = null
+  notifiedSettingsChange = false
   teardown()
 
   const pageType = getPageType()
@@ -172,10 +187,16 @@ function getPageType(): PageType | null {
 // ---------------------------------------------------------------------------
 
 async function pollProgress(pageType: PageType): Promise<void> {
+  // Check if URL changed (e.g. Shorts swipe without yt-navigate-finish)
+  if (currentVideoId && currentVideoId !== location.pathname) {
+    initForCurrentPage()
+    return
+  }
+
   // ── Step 1: Accumulate genuine watch time (synchronous, no Chrome API needed) ──
   // This runs before any guards so the count grows only from real playback.
   // Seeking does NOT affect this counter — it's purely time-based.
-  const video = document.querySelector<HTMLVideoElement>('video')
+  const video = getActiveVideo(pageType)
   const videoReady = video && !isNaN(video.duration) && video.duration > 0
   if (videoReady && !video!.paused && document.visibilityState === 'visible') {
     // Each poll tick represents PROGRESS_POLL_INTERVAL_MS milliseconds of real watch time.
@@ -198,13 +219,26 @@ async function pollProgress(pageType: PageType): Promise<void> {
   // Re-check after the await — the context may have died during the async gap.
   if (!isContextAlive()) { destroyEngine(); return }
 
-  let settings: Settings
+  let liveSettings: Settings
   try {
-    settings = await getSettings()
+    liveSettings = await getSettings()
   } catch {
     return // Storage unavailable — context likely dying.
   }
   if (!isContextAlive()) { destroyEngine(); return }
+
+  if (!cachedSettings) {
+    cachedSettings = liveSettings
+  } else {
+    // Check if settings changed
+    const settingsChanged = JSON.stringify(liveSettings) !== JSON.stringify(cachedSettings)
+    if (settingsChanged && !notifiedSettingsChange) {
+      notifiedSettingsChange = true
+      showToast('Settings Saved', 'Changes will take effect from the next video/shorts.')
+    }
+  }
+
+  const settings = cachedSettings
 
   // Guard: master pause.
   if (settings.is_paused) return
@@ -416,12 +450,8 @@ function findVideoDislikeButton(): HTMLButtonElement | null {
 }
 
 function findShortsLikeButton(): HTMLButtonElement | null {
-  // Shorts active renderer is the one not hidden.
-  const containers = document.querySelectorAll<Element>('ytd-reel-video-renderer')
-  for (const container of containers) {
-    if (!isElementVisible(container as HTMLElement)) continue
-
-    // Strategy 1: like-button-view-model inside shorts container
+  const container = getActiveContainer('short')
+  if (container && container !== document) {
     const btn = container.querySelector<HTMLButtonElement>(
       'like-button-view-model button, ytd-like-button-renderer button',
     )
@@ -435,9 +465,8 @@ function findShortsLikeButton(): HTMLButtonElement | null {
 }
 
 function findShortsDislikeButton(): HTMLButtonElement | null {
-  const containers = document.querySelectorAll<Element>('ytd-reel-video-renderer')
-  for (const container of containers) {
-    if (!isElementVisible(container as HTMLElement)) continue
+  const container = getActiveContainer('short')
+  if (container && container !== document) {
     const btn = container.querySelector<HTMLButtonElement>(
       'dislike-button-view-model button, ytd-dislike-button-renderer button',
     )
@@ -446,6 +475,28 @@ function findShortsDislikeButton(): HTMLButtonElement | null {
   return document.querySelector<HTMLButtonElement>(
     'ytd-shorts dislike-button-view-model button, ytd-shorts ytd-dislike-button-renderer button',
   )
+}
+
+function getActiveContainer(pageType: PageType | null): Element | Document {
+  if (pageType === 'short') {
+    // Attempt to locate the active container via YouTube's is-active or active attributes
+    const active = document.querySelector('ytd-reel-video-renderer[is-active], ytd-reel-video-renderer[active]')
+    if (active) return active
+
+    // Fallback to visible containers if attributes aren't present yet
+    const containers = document.querySelectorAll<Element>('ytd-reel-video-renderer')
+    for (const container of containers) {
+      if (isElementVisible(container as HTMLElement)) {
+        return container
+      }
+    }
+  }
+  return document
+}
+
+function getActiveVideo(pageType: PageType | null): HTMLVideoElement | null {
+  const container = getActiveContainer(pageType)
+  return container.querySelector<HTMLVideoElement>('video')
 }
 
 function isElementVisible(el: HTMLElement): boolean {
@@ -457,42 +508,142 @@ function isElementVisible(el: HTMLElement): boolean {
 // Channel metadata extraction (for whitelist mode + logging)
 // ---------------------------------------------------------------------------
 
-export function getChannelId(_pageType: PageType): string | null {
-  // Standard video: channel link href contains /channel/UC... or /@handle
-  const channelLink = document.querySelector<HTMLAnchorElement>(
-    'ytd-video-owner-renderer a, ytd-watch-metadata a.yt-simple-endpoint[href*="/channel/"], ytd-watch-metadata a.yt-simple-endpoint[href*="/@"]',
+export function getChannelId(pageType: PageType): string | null {
+  const container = getActiveContainer(pageType)
+  let channelId: string | null = null
+
+  const channelLink = container.querySelector<HTMLAnchorElement>(
+    'ytd-video-owner-renderer a, ytd-watch-metadata a.yt-simple-endpoint[href*="/channel/"], ytd-watch-metadata a.yt-simple-endpoint[href*="/@"], ytd-reel-player-header-renderer ytd-channel-name a, ytd-reel-player-header-renderer a.yt-simple-endpoint, ytd-reel-player-header-renderer a, ytd-channel-name a, #channel-info a'
   )
   if (channelLink) {
     const href = channelLink.getAttribute('href') ?? ''
     const match = href.match(/\/channel\/(UC[^/?]+)/)
-    if (match) return match[1]
+    if (match) {
+      channelId = match[1]
+    } else {
+      const handleMatch = href.match(/\/@([^/?]+)/) || href.match(/@([^/?]+)/)
+      if (handleMatch) {
+        channelId = '@' + handleMatch[1]
+      } else {
+        const userMatch = href.match(/\/user\/([^/?]+)/) || href.match(/\/c\/([^/?]+)/)
+        if (userMatch) {
+          channelId = userMatch[1]
+        }
+      }
+    }
   }
-  return null
-}
 
-export function getChannelName(_pageType: PageType): string | null {
-  // Standard video: owner renderer
-  const ownerName = document.querySelector<HTMLElement>(
-    'ytd-video-owner-renderer #channel-name a, ytd-watch-metadata #owner-name a',
-  )
-  if (ownerName?.textContent?.trim()) return ownerName.textContent.trim()
+  const key = currentVideoId || location.pathname
+  if (channelId) {
+    const existing = metadataCache.get(key) || { title: 'Unknown title', channelName: null }
+    metadataCache.set(key, { ...existing, channelId })
+    return channelId
+  }
 
-  // Shorts: active short's owner
-  const shortsOwner = document.querySelector<HTMLElement>(
-    'ytd-reel-video-renderer #channel-info a, ytd-shorts #channel-info a',
-  )
-  if (shortsOwner?.textContent?.trim()) return shortsOwner.textContent.trim()
+  const cached = metadataCache.get(key)
+  if (cached?.channelId) {
+    return cached.channelId
+  }
 
   return null
 }
 
-function getVideoTitle(): string {
-  return (
-    document.querySelector<HTMLElement>('ytd-watch-metadata #title h1')?.textContent?.trim() ??
-    document.querySelector<HTMLElement>('h1.title')?.textContent?.trim() ??
-    document.title ??
-    'Unknown title'
-  )
+export function getChannelName(pageType: PageType): string | null {
+  const container = getActiveContainer(pageType)
+  let channelName = ''
+  
+  if (pageType === 'video') {
+    const ownerName = container.querySelector<HTMLElement>(
+      'ytd-video-owner-renderer #channel-name a, ytd-watch-metadata #owner-name a'
+    )
+    if (ownerName?.textContent?.trim()) {
+      channelName = ownerName.textContent.trim()
+    }
+  } else {
+    const shortsOwner = container.querySelector<HTMLElement>(
+      'ytd-reel-player-header-renderer ytd-channel-name a, ytd-reel-player-header-renderer ytd-channel-name, ytd-reel-player-header-renderer #channel-name a, ytd-reel-player-header-renderer #channel-name, ytd-channel-name a, ytd-channel-name, yt-formatted-string.ytd-channel-name, #channel-name a, #channel-info a, ytd-reel-channel-bar-renderer #channel-name a, .channel-name'
+    )
+    if (shortsOwner?.textContent?.trim()) {
+      channelName = shortsOwner.textContent.trim()
+    }
+  }
+
+  const isGeneric = !channelName || channelName.toLowerCase() === 'loading...' || channelName.toLowerCase() === 'loading'
+  const key = currentVideoId || location.pathname
+
+  if (!isGeneric) {
+    const existing = metadataCache.get(key) || { title: 'Unknown title', channelId: null }
+    metadataCache.set(key, { ...existing, channelName })
+    return channelName
+  }
+
+  const cached = metadataCache.get(key)
+  if (cached?.channelName) {
+    return cached.channelName
+  }
+
+  return null
+}
+
+function getVideoTitle(pageType: PageType): string {
+  const container = getActiveContainer(pageType)
+  let title = ''
+
+  if (pageType === 'short') {
+    const shortTitle = 
+      container.querySelector<HTMLElement>('#video-title') ||
+      container.querySelector<HTMLElement>('h2.style-scope.ytd-reel-player-overlay') ||
+      container.querySelector<HTMLElement>('#overlay h2') ||
+      container.querySelector<HTMLElement>('h2.title') ||
+      container.querySelector<HTMLElement>('h2')
+    
+    if (shortTitle?.textContent?.trim()) {
+      title = shortTitle.textContent.trim()
+    }
+  } else {
+    title = (
+      container.querySelector<HTMLElement>('ytd-watch-metadata #title h1')?.textContent?.trim() ||
+      container.querySelector<HTMLElement>('h1.title')?.textContent?.trim() ||
+      container.querySelector<HTMLElement>('h2.title')?.textContent?.trim() ||
+      ''
+    )
+  }
+
+  if (!title) {
+    title = document.title?.trim() || ''
+  }
+
+  if (!title) {
+    title = 'Unknown title'
+  }
+
+  const isGeneric = 
+    title.toLowerCase() === 'youtube' || 
+    title.toLowerCase() === 'youtube shorts' || 
+    title.toLowerCase() === 'shorts' || 
+    title.toLowerCase() === 'loading...' || 
+    title.toLowerCase() === 'loading' ||
+    title === 'Unknown title'
+
+  const key = currentVideoId || location.pathname
+
+  if (!isGeneric) {
+    const existing = metadataCache.get(key) || { channelName: null, channelId: null }
+    metadataCache.set(key, { ...existing, title })
+    
+    if (metadataCache.size > 50) {
+      const firstKey = metadataCache.keys().next().value
+      if (firstKey) metadataCache.delete(firstKey)
+    }
+    return title
+  }
+
+  const cached = metadataCache.get(key)
+  if (cached?.title) {
+    return cached.title
+  }
+
+  return title
 }
 
 // ---------------------------------------------------------------------------
@@ -501,7 +652,7 @@ function getVideoTitle(): string {
 
 async function sendHeartbeat(): Promise<void> {
   if (document.visibilityState !== 'visible') return
-  const video = document.querySelector<HTMLVideoElement>('video')
+  const video = getActiveVideo(getPageType())
   if (!video || video.paused) return
   if (!isContextAlive()) { destroyEngine(); return }
 
@@ -532,7 +683,7 @@ async function recordLike(pageType: PageType): Promise<void> {
   if (!isContextAlive()) return
   const entry: LogEntry = {
     timestamp: Date.now(),
-    title: getVideoTitle(),
+    title: getVideoTitle(pageType),
     channel: getChannelName(pageType) ?? 'Unknown',
     type: pageType,
     status: 'liked',
@@ -548,7 +699,7 @@ async function recordSkip(pageType: PageType, reason: string): Promise<void> {
   if (!isContextAlive()) return
   const entry: LogEntry = {
     timestamp: Date.now(),
-    title: getVideoTitle(),
+    title: getVideoTitle(pageType),
     channel: getChannelName(pageType) ?? 'Unknown',
     type: pageType,
     status: 'skipped',
