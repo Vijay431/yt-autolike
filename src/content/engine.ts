@@ -71,8 +71,17 @@ function isContextAlive(): boolean {
  * Called either on context invalidation or manual teardown.
  */
 function destroyEngine(): void {
+  if (engineDestroyed) return
   engineDestroyed = true
   teardown()
+
+  // Remove persistent listeners
+  document.removeEventListener('yt-navigate-finish', onNavigateFinish)
+  try {
+    chrome.runtime.onMessage.removeListener(onMessage)
+  } catch {
+    // ignore context invalidation errors
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -86,21 +95,41 @@ export function startEngine(): void {
   initForCurrentPage()
 
   // YouTube fires 'yt-navigate-finish' on every SPA navigation.
-  document.addEventListener('yt-navigate-finish', () => {
-    if (!isContextAlive()) { destroyEngine(); return }
-    teardown()
-    // Slight delay to let YouTube finish rendering the new page's DOM.
-    setTimeout(() => {
-      if (!isContextAlive()) { destroyEngine(); return }
-      initForCurrentPage()
-    }, 800)
-  })
+  document.addEventListener('yt-navigate-finish', onNavigateFinish)
 
   // Respond to popup requests for channel info and video state.
-  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    if (!isContextAlive()) { destroyEngine(); return }
+  chrome.runtime.onMessage.addListener(onMessage)
+}
 
-    if (message?.type === 'GET_CHANNEL_INFO') {
+/**
+ * Handle SPA navigation.
+ */
+function onNavigateFinish(): void {
+  if (!isContextAlive()) {
+    destroyEngine()
+    return
+  }
+  teardown()
+  // Slight delay to let YouTube finish rendering the new page's DOM.
+  setTimeout(() => {
+    if (!isContextAlive()) {
+      destroyEngine()
+      return
+    }
+    initForCurrentPage()
+  }, 800)
+}
+
+/**
+ * Handle messages from popup or background.
+ */
+function onMessage(message: any, _sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void): boolean | void {
+  if (!isContextAlive()) {
+    destroyEngine()
+    return
+  }
+
+  if (message?.type === 'GET_CHANNEL_INFO') {
       const pageType = getPageType()
       sendResponse({
         channelId: pageType ? getChannelId(pageType) : null,
@@ -125,7 +154,6 @@ export function startEngine(): void {
       })
     }
     // Non-async, no need to return true.
-  })
 }
 
 // ---------------------------------------------------------------------------
