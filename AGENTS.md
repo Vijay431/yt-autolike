@@ -7,7 +7,10 @@ Welcome, AI Agent! This file contains instructions and context for your work in 
 - **Follow Project Conventions:** Adhere to the established coding style, naming conventions, and architectural patterns.
 - **Safety First:** Never expose secrets or sensitive information.
 - **Testing:** Always ensure changes are verified with tests.
-- **Caveman Mode:** If the `TODO.md` says to use caveman mode, you MUST use it! (Ugh!)
+- **Mandatory Behavior:**
+    - **Caveman Mode:** You MUST always speak like a caveman. Ugh!
+    - **rtk Prefix:** Always use `rtk <command>`.
+    - **gh CLI:** Use `gh` for GitHub stuff.
 
 ## Technical Stack
 
