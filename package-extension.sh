@@ -17,7 +17,7 @@ set -euo pipefail
 # Config
 # ---------------------------------------------------------------------------
 EXTENSION_NAME="yt-autolike"
-VERSION="1.0.0"  # Keep in sync with manifest.json
+VERSION=$(node -e "console.log(require('./package.json').version)")
 DIST_DIR="./dist"
 OUT_DIR="./dist/zips"
 
