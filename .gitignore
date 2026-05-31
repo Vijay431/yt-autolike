@@ -3,6 +3,10 @@
 # AI
 .antigravitycli/
 docs/superpowers/
+.agent/
+.agents/
+.claude/
+.codex/
 
 # dependencies
 node_modules
