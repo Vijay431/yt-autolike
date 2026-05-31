@@ -112,7 +112,7 @@ body {
   font-weight: 600;
   border: none;
   border-radius: 20px;
-  padding: 6px 14px;
+  padding: 8px 16px;
   cursor: pointer;
   transition:
     background var(--transition),
@@ -392,9 +392,9 @@ body {
 .add-channel-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
-  padding: 9px 12px;
+  padding: 11px 16px;
   background: var(--bg-card);
   border: 1px dashed #444;
   border-radius: var(--radius);
@@ -407,7 +407,7 @@ body {
     background var(--transition),
     border-color var(--transition),
     color var(--transition);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .add-channel-btn:not(.add-channel-btn--disabled):hover {
@@ -952,7 +952,7 @@ body {
 
 .timer-btn {
   flex: 1;
-  padding: 8px;
+  padding: 10px 8px;
   background: var(--bg-card-hover);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -971,8 +971,8 @@ body {
 
 .timer-cancel-btn {
   width: 100%;
-  margin-top: 8px;
-  padding: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
   background: rgba(255, 0, 0, 0.1);
   border: 1px solid var(--accent);
   border-radius: var(--radius-sm);
@@ -980,4 +980,26 @@ body {
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.manage-whitelist-btn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-dim);
+  transition:
+    background var(--transition),
+    transform var(--transition);
+}
+
+.manage-whitelist-btn:hover {
+  background: rgba(255, 0, 0, 0.25);
+  transform: translateY(-1px);
 }

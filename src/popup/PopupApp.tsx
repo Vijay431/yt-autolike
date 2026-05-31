@@ -538,19 +538,6 @@ export default function PopupApp() {
               whileTap={{ scale: 0.95 }}
               onClick={() => chrome.runtime.openOptionsPage()}
               className="manage-whitelist-btn"
-              style={{
-                all: 'unset',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '11px',
-                fontWeight: 600,
-                color: 'var(--accent)',
-                cursor: 'pointer',
-                padding: '4px 8px',
-                borderRadius: 'var(--radius-sm)',
-                background: 'var(--accent-dim)',
-              }}
             >
               <ExternalLink size={12} />
               Manage

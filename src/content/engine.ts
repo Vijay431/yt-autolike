@@ -231,22 +231,15 @@ async function pollProgress(pageType: PageType): Promise<void> {
     return;
   }
 
-  // ── Step 1: Accumulate genuine watch time (synchronous, no Chrome API needed) ──
-  // This runs before any guards so the count grows only from real playback.
-  // Seeking does NOT affect this counter — it's purely time-based.
+  // ── Step 1: Video state check ──
   const video = getActiveVideo(pageType);
   const videoReady = video && !isNaN(video.duration) && video.duration > 0;
-  if (videoReady && !video!.paused && document.visibilityState === 'visible') {
-    // Each poll tick represents PROGRESS_POLL_INTERVAL_MS milliseconds of real watch time.
-    accumulatedWatchSeconds += PROGRESS_POLL_INTERVAL_MS / 1000;
-  }
+  if (!videoReady || video!.paused) return;
 
   // ── Step 2: Like-eligibility guards (all the async checks) ──
 
   // Guard: already liked this video in this session.
   if (likedThisVideo) return;
-
-  if (!videoReady || video!.paused) return;
 
   // Guard: context must still be alive before any async Chrome API call.
   if (!isContextAlive()) {
@@ -292,6 +285,13 @@ async function pollProgress(pageType: PageType): Promise<void> {
 
   // Guard: pause timer.
   if (settings.pause_until !== null && Date.now() < settings.pause_until) return;
+
+  // ── Step 3: Accumulate genuine watch time (guarded by pause) ──
+  // This runs after guards so it only increases when NOT paused.
+  if (document.visibilityState === 'visible') {
+    // Each poll tick represents PROGRESS_POLL_INTERVAL_MS milliseconds of real watch time.
+    accumulatedWatchSeconds += PROGRESS_POLL_INTERVAL_MS / 1000;
+  }
 
   // Guard: accumulated watch time threshold (seek-proof).
   // Unlike position-based checks, this can only increase through genuine playback.
