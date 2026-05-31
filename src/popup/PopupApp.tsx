@@ -24,6 +24,8 @@ import {
   PauseCircle,
   Settings,
   Activity,
+  ExternalLink,
+  Clock,
 } from 'lucide-react';
 import type { Settings, Whitelist, Stats, Mode, VideoState } from '../lib/types';
 import { getSettings, setSettings, getWhitelist, setWhitelist, getStats } from '../lib/storage';
@@ -246,7 +248,10 @@ export default function PopupApp() {
   // Derived state helpers
   // ---------------------------------------------------------------------------
 
-  const isPaused = settings.is_paused;
+  const isPaused =
+    settings.is_paused || (settings.pause_until !== null && Date.now() < settings.pause_until);
+  const remainingPauseTime =
+    settings.pause_until !== null ? Math.max(0, settings.pause_until - Date.now()) : 0;
 
   // Is the user logged in? (from live video state, or null if unknown)
   const isLoggedIn: boolean | null = videoState ? videoState.isLoggedIn : null;
@@ -291,25 +296,97 @@ export default function PopupApp() {
           whileTap={{ scale: 0.95 }}
           id="master-pause-btn"
           className={`pause-toggle ${isPaused ? 'pause-toggle--paused' : 'pause-toggle--active'}`}
-          onClick={() => updateSettings({ is_paused: !isPaused })}
+          onClick={() => {
+            if (isPaused) {
+              updateSettings({ is_paused: false, pause_until: null });
+            } else {
+              updateSettings({ is_paused: true });
+            }
+          }}
           aria-label={isPaused ? 'Resume auto-liking' : 'Pause auto-liking'}
           title={isPaused ? 'Click to resume' : 'Click to pause'}
         >
-          {isPaused ? (
-            <>
-              <PlayCircle size={14} /> Resume
-            </>
-          ) : (
-            <>
-              <PauseCircle size={14} /> Pause
-            </>
-          )}
+          {isPaused ? <PlayCircle size={14} /> : <PauseCircle size={14} />}
         </motion.button>
       </header>
 
-      {isPaused && (
-        <div className="paused-banner" role="status">
-          ⏸ Auto-liking is paused
+      {/* ── Pause Timer UI ── */}
+      <AnimatePresence>
+        {!settings.is_paused && settings.pause_until === null && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="pause-quick-controls"
+            style={{ padding: '8px 16px', display: 'flex', gap: '8px', overflow: 'hidden' }}
+          >
+            {[10, 30, 60, 120].map((mins) => (
+              <button
+                key={mins}
+                className="timer-btn"
+                onClick={() => updateSettings({ pause_until: Date.now() + mins * 60 * 1000 })}
+              >
+                {mins >= 60 ? `${mins / 60}h` : `${mins}m`}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {(settings.is_paused || (settings.pause_until !== null && remainingPauseTime > 0)) && (
+        <div
+          className="paused-banner"
+          role="status"
+          style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '20px' }}
+        >
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
+          >
+            <Clock size={16} />
+            <span>{settings.is_paused ? 'Auto-liking is paused' : 'Paused for duration'}</span>
+          </div>
+
+          {!settings.is_paused && settings.pause_until !== null && (
+            <div className="timer-ring-container" style={{ margin: '0 auto' }}>
+              <svg className="timer-ring-svg" width="100" height="100">
+                <circle className="timer-ring-bg" cx="50" cy="50" r="45" />
+                <motion.circle
+                  className="timer-ring-progress"
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  strokeDasharray="282.7"
+                  initial={{ strokeDashoffset: 282.7 }}
+                  animate={{
+                    strokeDashoffset:
+                      282.7 -
+                      (282.7 * remainingPauseTime) /
+                        (settings.pause_until - (settings.pause_until - 7200000)),
+                  }} // Rough max 2h ref
+                  style={{
+                    strokeDashoffset:
+                      282.7 *
+                      (1 -
+                        remainingPauseTime /
+                          (settings.pause_until -
+                            (settings.pause_until -
+                              (remainingPauseTime > 3600000 ? 7200000 : 3600000)))),
+                  }}
+                />
+              </svg>
+              <div className="timer-text">{Math.ceil(remainingPauseTime / 60000)}m</div>
+            </div>
+          )}
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => updateSettings({ is_paused: false, pause_until: null })}
+            className="timer-cancel-btn"
+            style={{ margin: 0 }}
+          >
+            Resume Now
+          </motion.button>
         </div>
       )}
 
@@ -329,7 +406,7 @@ export default function PopupApp() {
 
       <div className="popup-body">
         {/* ── Now Playing Card ── */}
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           {videoState?.isVideoPage && (
             <motion.section
               initial={{ opacity: 0, y: -10 }}
@@ -442,15 +519,46 @@ export default function PopupApp() {
 
         {/* ── Whitelist Manager ── */}
         <section className="section">
-          <h2 className="section-title">
-            Whitelist
-            {whitelist.channels.length > 0 && (
-              <span className="count-badge">{whitelist.channels.length}</span>
-            )}
-          </h2>
+          <div
+            className="section-header-row"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '10px',
+            }}
+          >
+            <h2 className="section-title" style={{ marginBottom: 0 }}>
+              Whitelist
+            </h2>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => chrome.runtime.openOptionsPage()}
+              className="manage-whitelist-btn"
+              style={{
+                all: 'unset',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '11px',
+                fontWeight: 600,
+                color: 'var(--accent)',
+                cursor: 'pointer',
+                padding: '4px 8px',
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--accent-dim)',
+              }}
+            >
+              <ExternalLink size={12} />
+              Manage
+            </motion.button>
+          </div>
 
-          <button
+          <motion.button
             id="add-channel-btn"
+            whileHover={activeTabInfo.isYouTube ? { scale: 1.02 } : {}}
+            whileTap={activeTabInfo.isYouTube ? { scale: 0.98 } : {}}
             className={`add-channel-btn ${activeTabInfo.isYouTube ? '' : 'add-channel-btn--disabled'}`}
             onClick={addCurrentChannel}
             disabled={!activeTabInfo.isYouTube}
@@ -468,46 +576,12 @@ export default function PopupApp() {
               : activeTabInfo.isYouTube
                 ? 'Add Current Channel'
                 : 'Open a YouTube video first'}
-          </button>
+          </motion.button>
 
           {addChannelStatus && (
             <p className="channel-status" role="status">
               {addChannelStatus}
             </p>
-          )}
-
-          {whitelist.channels.length === 0 ? (
-            <p className="empty-hint">No channels whitelisted yet.</p>
-          ) : (
-            <ul className="whitelist" aria-label="Whitelisted channels">
-              {whitelist.channels.map((ch) => {
-                // Mark the currently playing channel in whitelist mode
-                const isCurrent =
-                  settings.mode === 'whitelist_only' &&
-                  videoState?.channelName &&
-                  ((videoState.channelId && ch.id === videoState.channelId) ||
-                    ch.name.toLowerCase() === (videoState.channelName ?? '').toLowerCase());
-
-                return (
-                  <li
-                    key={ch.id}
-                    className={`whitelist-item ${isCurrent ? 'whitelist-item--current' : ''}`}
-                  >
-                    <span className="whitelist-icon">📺</span>
-                    <span className="whitelist-name">{ch.name}</span>
-                    {isCurrent && <span className="whitelist-now">Now Playing</span>}
-                    <button
-                      className="whitelist-remove"
-                      onClick={() => removeChannel(ch.id)}
-                      aria-label={`Remove ${ch.name}`}
-                      title="Remove from whitelist"
-                    >
-                      ✕
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
           )}
         </section>
 

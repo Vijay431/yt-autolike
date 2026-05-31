@@ -14,17 +14,17 @@
  * in module-level variables.
  */
 
-import {appendLog, getStats, setStats} from './lib/storage'
-import {WATCH_SECONDS_PER_REMINDER, HEARTBEAT_INTERVAL_MS} from './lib/constants'
-import type {LogEntry} from './lib/types'
+import { appendLog, getStats, setStats, getSettings } from './lib/storage';
+import { WATCH_SECONDS_PER_REMINDER, HEARTBEAT_INTERVAL_MS } from './lib/constants';
+import type { LogEntry } from './lib/types';
 
 // ---------------------------------------------------------------------------
 // Message handler
 // ---------------------------------------------------------------------------
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  ;(async () => {
-    if (!message?.type) return
+  (async () => {
+    if (!message?.type) return;
 
     switch (message.type) {
       // -----------------------------------------------------------------------
@@ -32,101 +32,122 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // the user is actively watching (tab visible + video playing).
       // -----------------------------------------------------------------------
       case 'HEARTBEAT': {
-        const stats = await getStats()
-        const secondsToAdd = HEARTBEAT_INTERVAL_MS / 1000
-        const newAccumulated = stats.accumulated_watch_seconds + secondsToAdd
+        const settings = await getSettings();
+        const isPaused =
+          settings.is_paused ||
+          (settings.pause_until !== null && Date.now() < settings.pause_until);
+
+        if (isPaused) {
+          chrome.action.setBadgeText({ text: 'PAUSE', tabId: sender.tab?.id });
+          chrome.action.setBadgeBackgroundColor({ color: '#666666', tabId: sender.tab?.id });
+          sendResponse({ type: 'HEARTBEAT_ACK' });
+          break;
+        }
+
+        const stats = await getStats();
+        const secondsToAdd = HEARTBEAT_INTERVAL_MS / 1000;
+        const newAccumulated = stats.accumulated_watch_seconds + secondsToAdd;
+
+        const remaining = Math.max(0, WATCH_SECONDS_PER_REMINDER - newAccumulated);
+        const min = Math.floor(remaining / 60);
+        const sec = Math.floor(remaining % 60);
+        const formatted = `${min}:${sec.toString().padStart(2, '0')}`;
+
+        chrome.action.setBadgeText({ text: formatted, tabId: sender.tab?.id });
+        chrome.action.setBadgeBackgroundColor({ color: '#ff0000', tabId: sender.tab?.id });
 
         if (newAccumulated >= WATCH_SECONDS_PER_REMINDER) {
           // Reset counter and instruct the content script to show the reminder.
-          await setStats({...stats, accumulated_watch_seconds: 0})
+          await setStats({ ...stats, accumulated_watch_seconds: 0 });
+          chrome.action.setBadgeText({ text: '', tabId: sender.tab?.id });
           // Reply so the content script can handle the reminder synchronously.
-          sendResponse({type: 'SHOW_REMINDER'})
+          sendResponse({ type: 'SHOW_REMINDER' });
         } else {
-          await setStats({...stats, accumulated_watch_seconds: newAccumulated})
-          sendResponse({type: 'HEARTBEAT_ACK'})
+          await setStats({ ...stats, accumulated_watch_seconds: newAccumulated });
+          sendResponse({ type: 'HEARTBEAT_ACK' });
         }
-        break
+        break;
       }
 
       // -----------------------------------------------------------------------
       // Content script reports a successful auto-like.
       // -----------------------------------------------------------------------
       case 'RECORD_LIKE': {
-        const entry: LogEntry = message.entry
-        const stats = await getStats()
-        await setStats({...stats, total_likes_performed: stats.total_likes_performed + 1})
-        await appendLog(entry)
-        sendResponse({ok: true})
-        break
+        const entry: LogEntry = message.entry;
+        const stats = await getStats();
+        await setStats({ ...stats, total_likes_performed: stats.total_likes_performed + 1 });
+        await appendLog(entry);
+        sendResponse({ ok: true });
+        break;
       }
 
       // -----------------------------------------------------------------------
       // Content script reports a skipped like.
       // -----------------------------------------------------------------------
       case 'RECORD_SKIP': {
-        const entry: LogEntry = message.entry
-        await appendLog(entry)
-        sendResponse({ok: true})
-        break
+        const entry: LogEntry = message.entry;
+        await appendLog(entry);
+        sendResponse({ ok: true });
+        break;
       }
 
       // -----------------------------------------------------------------------
       // Popup notifies background it is open.
       // -----------------------------------------------------------------------
       case 'POPUP_OPENED': {
-        await chrome.storage.session.set({popupOpen: true})
-        sendResponse({ok: true})
-        break
+        await chrome.storage.session.set({ popupOpen: true });
+        sendResponse({ ok: true });
+        break;
       }
 
       // -----------------------------------------------------------------------
       // Popup notifies background it is closing.
       // -----------------------------------------------------------------------
       case 'POPUP_CLOSED': {
-        await chrome.storage.session.set({popupOpen: false})
-        sendResponse({ok: true})
-        break
+        await chrome.storage.session.set({ popupOpen: false });
+        sendResponse({ ok: true });
+        break;
       }
 
       // -----------------------------------------------------------------------
       // Content script asks whether the popup is currently open.
       // -----------------------------------------------------------------------
       case 'IS_POPUP_OPEN': {
-        const session = await chrome.storage.session.get('popupOpen')
-        sendResponse({type: 'IS_POPUP_OPEN_RESPONSE', open: !!session.popupOpen})
-        break
+        const session = await chrome.storage.session.get('popupOpen');
+        sendResponse({ type: 'IS_POPUP_OPEN_RESPONSE', open: !!session.popupOpen });
+        break;
       }
 
       default:
-        break
+        break;
     }
-  })()
+  })();
 
   // Return true to keep the message channel open for async sendResponse.
-  return true
-})
+  return true;
+});
 
 // ---------------------------------------------------------------------------
 // On install / update: initialise storage defaults if missing.
 // ---------------------------------------------------------------------------
 
 chrome.runtime.onInstalled.addListener(async () => {
-  const existing = await chrome.storage.local.get(['settings', 'whitelist', 'stats', 'logs'])
+  const existing = await chrome.storage.local.get(['settings', 'whitelist', 'stats', 'logs']);
 
-  const defaults: Record<string, unknown> = {}
+  const defaults: Record<string, unknown> = {};
   if (!existing.settings) {
     defaults.settings = {
       mode: 'global',
       target_percentage: 0.5,
       hourly_reminders_enabled: true,
       is_paused: false,
-    }
+    };
   }
-  if (!existing.whitelist) defaults.whitelist = {channels: []}
-  if (!existing.stats) defaults.stats = {total_likes_performed: 0, accumulated_watch_seconds: 0}
-  if (!existing.logs) defaults.logs = []
+  if (!existing.whitelist) defaults.whitelist = { channels: [] };
+  if (!existing.stats) defaults.stats = { total_likes_performed: 0, accumulated_watch_seconds: 0 };
+  if (!existing.logs) defaults.logs = [];
 
   if (Object.keys(defaults).length > 0) {
-    await chrome.storage.local.set(defaults)
+    await chrome.storage.local.set(defaults);
   }
-})
+});

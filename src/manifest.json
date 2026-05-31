@@ -25,27 +25,20 @@
   },
   "background": {
     "chromium:service_worker": "background.ts",
-    "firefox:scripts": [
-      "background.ts"
-    ]
+    "firefox:scripts": ["background.ts"]
   },
   "content_scripts": [
     {
-      "matches": [
-        "*://*.youtube.com/*"
-      ],
-      "js": [
-        "content/scripts.ts"
-      ],
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content/scripts.ts"],
       "run_at": "document_idle"
     }
   ],
-  "permissions": [
-    "storage",
-    "tabs"
-  ],
-  "host_permissions": [
-    "*://*.youtube.com/*"
-  ],
+  "permissions": ["storage", "tabs"],
+  "options_ui": {
+    "page": "options/index.html",
+    "open_in_tab": true
+  },
+  "host_permissions": ["*://*.youtube.com/*"],
   "author": "Vijay"
 }
