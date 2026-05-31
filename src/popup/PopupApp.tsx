@@ -72,7 +72,6 @@ export default function PopupApp() {
   const [addChannelStatus, setAddChannelStatus] = useState<string | null>(null);
   // Live video state from the content script
   const [videoState, setVideoState] = useState<VideoState | null>(null);
-  const [showPauseOptions, setShowPauseOptions] = useState(false);
   const activeTabIdRef = useRef<number | null>(null);
 
   // Fetch live video state from the content script.
@@ -249,10 +248,7 @@ export default function PopupApp() {
   // Derived state helpers
   // ---------------------------------------------------------------------------
 
-  const isPaused =
-    settings.is_paused || (settings.pause_until !== null && Date.now() < settings.pause_until);
-  const remainingPauseTime =
-    settings.pause_until !== null ? Math.max(0, settings.pause_until - Date.now()) : 0;
+  const isPaused = settings.is_paused;
 
   // Is the user logged in? (from live video state, or null if unknown)
   const isLoggedIn: boolean | null = videoState ? videoState.isLoggedIn : null;
@@ -297,14 +293,7 @@ export default function PopupApp() {
           whileTap={{ scale: 0.95 }}
           id="master-pause-btn"
           className={`pause-toggle ${isPaused ? 'pause-toggle--paused' : 'pause-toggle--active'}`}
-          onClick={() => {
-            if (isPaused) {
-              updateSettings({ is_paused: false, pause_until: null, pause_duration: null });
-              setShowPauseOptions(false);
-            } else {
-              setShowPauseOptions(!showPauseOptions);
-            }
-          }}
+          onClick={() => updateSettings({ is_paused: !isPaused })}
           aria-label={isPaused ? 'Resume auto-liking' : 'Pause auto-liking'}
           title={isPaused ? 'Click to resume' : 'Click to pause'}
         >
@@ -312,83 +301,9 @@ export default function PopupApp() {
         </motion.button>
       </header>
 
-      {/* ── Pause Timer UI ── */}
-      <AnimatePresence>
-        {!isPaused && showPauseOptions && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="pause-quick-controls"
-            style={{ padding: '8px 16px', display: 'flex', gap: '8px', overflow: 'hidden' }}
-          >
-            {[10, 30, 60, 120].map((mins) => (
-              <button
-                key={mins}
-                className="timer-btn"
-                onClick={() => {
-                  const duration = mins * 60 * 1000;
-                  updateSettings({
-                    pause_until: Date.now() + duration,
-                    pause_duration: duration,
-                  });
-                  setShowPauseOptions(false);
-                }}
-              >
-                {mins >= 60 ? `${mins / 60}h` : `${mins}m`}
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {(settings.is_paused || (settings.pause_until !== null && remainingPauseTime > 0)) && (
-        <div
-          className="paused-banner"
-          role="status"
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '20px' }}
-        >
-          <div
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
-          >
-            <Clock size={16} />
-            <span>{settings.is_paused ? 'Auto-liking is paused' : 'Paused for duration'}</span>
-          </div>
-
-          {!settings.is_paused && settings.pause_until !== null && (
-            <div className="timer-ring-container" style={{ margin: '0 auto' }}>
-              <svg className="timer-ring-svg" width="100" height="100">
-                <circle className="timer-ring-bg" cx="50" cy="50" r="45" />
-                <motion.circle
-                  className="timer-ring-progress"
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  strokeDasharray="282.7"
-                  initial={{ strokeDashoffset: 282.7 }}
-                  animate={{
-                    strokeDashoffset:
-                      282.7 * (1 - remainingPauseTime / (settings.pause_duration || 1)),
-                  }}
-                  transition={{ duration: 0.5, ease: 'linear' }}
-                />
-              </svg>
-              <div className="timer-text">{Math.ceil(remainingPauseTime / 60000)}m</div>
-            </div>
-          )}
-
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => {
-              updateSettings({ is_paused: false, pause_until: null, pause_duration: null });
-              setShowPauseOptions(false);
-            }}
-            className="timer-cancel-btn"
-            style={{ margin: 0 }}
-          >
-            Resume Now
-          </motion.button>
+      {isPaused && (
+        <div className="paused-banner" role="status">
+          ⏸ Auto-liking is paused
         </div>
       )}
 

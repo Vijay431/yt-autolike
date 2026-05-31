@@ -15,8 +15,6 @@ export const DEFAULT_SETTINGS: Settings = {
   target_percentage: DEFAULT_PERCENTAGE,
   hourly_reminders_enabled: true,
   is_paused: false,
-  pause_until: null,
-  pause_duration: null,
 };
 
 export const DEFAULT_WHITELIST: Whitelist = { channels: [] };

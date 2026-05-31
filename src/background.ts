@@ -33,9 +33,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // -----------------------------------------------------------------------
       case 'HEARTBEAT': {
         const settings = await getSettings();
-        const isPaused =
-          settings.is_paused ||
-          (settings.pause_until !== null && Date.now() < settings.pause_until);
+        const isPaused = settings.is_paused;
 
         if (isPaused) {
           chrome.action.setBadgeText({ text: '', tabId: sender.tab?.id });

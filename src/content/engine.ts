@@ -283,9 +283,6 @@ async function pollProgress(pageType: PageType): Promise<void> {
   // Guard: master pause.
   if (settings.is_paused) return;
 
-  // Guard: pause timer.
-  if (settings.pause_until !== null && Date.now() < settings.pause_until) return;
-
   // ── Step 3: Accumulate genuine watch time (guarded by pause) ──
   // This runs after guards so it only increases when NOT paused.
   if (document.visibilityState === 'visible') {
