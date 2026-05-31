@@ -14,8 +14,6 @@ export interface Settings {
   target_percentage: number;
   /** Whether the hourly positive-message toast should appear. */
   hourly_reminders_enabled: boolean;
-  /** Master pause: when true the engine skips all auto-like logic. */
-  is_paused: boolean;
 }
 
 /** A single whitelisted YouTube channel. */

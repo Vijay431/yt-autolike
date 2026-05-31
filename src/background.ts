@@ -14,13 +14,9 @@
  * in module-level variables.
  */
 
-import { appendLog, getStats, setStats, getSettings } from './lib/storage';
+import { appendLog, getStats, setStats } from './lib/storage';
 import { WATCH_SECONDS_PER_REMINDER, HEARTBEAT_INTERVAL_MS } from './lib/constants';
 import type { LogEntry } from './lib/types';
-
-// ---------------------------------------------------------------------------
-// Message handler
-// ---------------------------------------------------------------------------
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
@@ -32,32 +28,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // the user is actively watching (tab visible + video playing).
       // -----------------------------------------------------------------------
       case 'HEARTBEAT': {
-        const settings = await getSettings();
-        const isPaused = settings.is_paused;
-
-        if (isPaused) {
-          chrome.action.setBadgeText({ text: '', tabId: sender.tab?.id });
-          sendResponse({ type: 'HEARTBEAT_ACK' });
-          break;
-        }
-
         const stats = await getStats();
         const secondsToAdd = HEARTBEAT_INTERVAL_MS / 1000;
         const newAccumulated = stats.accumulated_watch_seconds + secondsToAdd;
 
-        const remaining = Math.max(0, WATCH_SECONDS_PER_REMINDER - newAccumulated);
-        const min = Math.floor(remaining / 60);
-        const sec = Math.floor(remaining % 60);
-        const formatted = `${min}:${sec.toString().padStart(2, '0')}`;
-
-        chrome.action.setBadgeText({ text: formatted, tabId: sender.tab?.id });
-        chrome.action.setBadgeBackgroundColor({ color: '#ff0000', tabId: sender.tab?.id });
-
         if (newAccumulated >= WATCH_SECONDS_PER_REMINDER) {
-          // Reset counter and instruct the content script to show the reminder.
           await setStats({ ...stats, accumulated_watch_seconds: 0 });
-          chrome.action.setBadgeText({ text: '', tabId: sender.tab?.id });
-          // Reply so the content script can handle the reminder synchronously.
           sendResponse({ type: 'SHOW_REMINDER' });
         } else {
           await setStats({ ...stats, accumulated_watch_seconds: newAccumulated });
@@ -137,7 +113,6 @@ chrome.runtime.onInstalled.addListener(async () => {
       mode: 'global',
       target_percentage: 0.5,
       hourly_reminders_enabled: true,
-      is_paused: false,
     };
   }
   if (!existing.whitelist) defaults.whitelist = { channels: [] };

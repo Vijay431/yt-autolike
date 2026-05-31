@@ -34,6 +34,21 @@ let currentVideoId: string | null = null;
 let cachedSettings: Settings | null = null;
 let notifiedSettingsChange = false;
 
+/**
+ * Reentrancy guard for pollProgress.
+ * Because pollProgress is async (awaits isActivelyWatching + getSettings),
+ * the setInterval can fire a new tick before the previous one finishes.
+ * This flag prevents overlapping executions that would double-count watch time.
+ */
+let pollInProgress = false;
+
+/**
+ * Set to true between yt-navigate-finish and initForCurrentPage completing.
+ * During this window the DOM is mid-transition, so the popup suppresses the
+ * timer and shows "Waiting for video to load…" instead of a stale value.
+ */
+let isNavigating = false;
+
 // Cache to prevent flickers on navigation/swiping
 interface VideoMetadata {
   title: string;
@@ -109,6 +124,7 @@ function onNavigateFinish(): void {
     destroyEngine();
     return;
   }
+  isNavigating = true;
   teardown();
   // Slight delay to let YouTube finish rendering the new page's DOM.
   setTimeout(() => {
@@ -152,7 +168,14 @@ function onMessage(
       channelId: pageType ? getChannelId(pageType) : null,
       pageType,
       currentTime: video && !isNaN(video.currentTime) ? video.currentTime : null,
-      duration: video && !isNaN(video.duration) && video.duration > 0 ? video.duration : null,
+      // Suppress duration (and therefore the timer) while the page is
+      // mid-navigation so the popup shows "Waiting for video to load…"
+      // instead of a stale or flickering countdown.
+      duration: isNavigating
+        ? null
+        : video && !isNaN(video.duration) && video.duration > 0
+          ? video.duration
+          : null,
       alreadyLiked: likedThisVideo,
       accumulatedWatchSeconds,
     });
@@ -165,11 +188,13 @@ function onMessage(
 // ---------------------------------------------------------------------------
 
 function initForCurrentPage(): void {
+  isNavigating = false; // DOM settled — timer can show again
   likedThisVideo = false;
   accumulatedWatchSeconds = 0;
   currentVideoId = location.pathname;
   cachedSettings = null;
   notifiedSettingsChange = false;
+  pollInProgress = false; // reset so new page starts clean
   teardown();
 
   const pageType = getPageType();
@@ -199,6 +224,7 @@ function initForCurrentPage(): void {
 // ---------------------------------------------------------------------------
 
 function teardown(): void {
+  pollInProgress = false; // allow next page's pollProgress to start immediately
   if (progressInterval !== null) {
     clearInterval(progressInterval);
     progressInterval = null;
@@ -225,105 +251,113 @@ function getPageType(): PageType | null {
 // ---------------------------------------------------------------------------
 
 async function pollProgress(pageType: PageType): Promise<void> {
-  // Check if URL changed (e.g. Shorts swipe without yt-navigate-finish)
-  if (currentVideoId && currentVideoId !== location.pathname) {
-    initForCurrentPage();
-    return;
-  }
+  // Reentrancy guard: if a previous async invocation is still in-flight
+  // (awaiting isActivelyWatching or getSettings), skip this tick entirely.
+  // Without this, overlapping calls double-count accumulatedWatchSeconds,
+  // making the timer oscillate.
+  if (pollInProgress) return;
+  pollInProgress = true;
 
-  // ── Step 1: Video state check ──
-  const video = getActiveVideo(pageType);
-  const videoReady = video && !isNaN(video.duration) && video.duration > 0;
-  if (!videoReady || video!.paused) return;
-
-  // ── Step 2: Like-eligibility guards (all the async checks) ──
-
-  // Guard: already liked this video in this session.
-  if (likedThisVideo) return;
-
-  // Guard: context must still be alive before any async Chrome API call.
-  if (!isContextAlive()) {
-    destroyEngine();
-    return;
-  }
-
-  // Guard: user must be actively watching.
-  if (!(await isActivelyWatching())) return;
-
-  // Re-check after the await — the context may have died during the async gap.
-  if (!isContextAlive()) {
-    destroyEngine();
-    return;
-  }
-
-  let liveSettings: Settings;
   try {
-    liveSettings = await getSettings();
-  } catch {
-    return; // Storage unavailable — context likely dying.
-  }
-  if (!isContextAlive()) {
-    destroyEngine();
-    return;
-  }
-
-  if (!cachedSettings) {
-    cachedSettings = liveSettings;
-  } else {
-    // Check if settings changed
-    const settingsChanged = JSON.stringify(liveSettings) !== JSON.stringify(cachedSettings);
-    if (settingsChanged && !notifiedSettingsChange) {
-      notifiedSettingsChange = true;
-      showToast('Settings Saved', 'Changes will take effect from the next video/shorts.');
+    // Check if URL changed (e.g. Shorts swipe without yt-navigate-finish)
+    if (currentVideoId && currentVideoId !== location.pathname) {
+      initForCurrentPage();
+      return;
     }
-  }
 
-  const settings = cachedSettings;
+    // ── Step 1: Video state check + watch-time accumulation ──
+    const video = getActiveVideo(pageType);
+    const videoReady = video && !isNaN(video.duration) && video.duration > 0;
+    if (!videoReady || video!.paused) return;
 
-  // Guard: master pause.
-  if (settings.is_paused) return;
+    // Accumulate genuine watch time whenever the video is playing and tab is
+    // visible. This runs unconditionally before any like-eligibility guards so
+    // the timer always counts regardless of whether a like will fire this tick.
+    if (document.visibilityState === 'visible') {
+      accumulatedWatchSeconds += PROGRESS_POLL_INTERVAL_MS / 1000;
+    }
 
-  // ── Step 3: Accumulate genuine watch time (guarded by pause) ──
-  // This runs after guards so it only increases when NOT paused.
-  if (document.visibilityState === 'visible') {
-    // Each poll tick represents PROGRESS_POLL_INTERVAL_MS milliseconds of real watch time.
-    accumulatedWatchSeconds += PROGRESS_POLL_INTERVAL_MS / 1000;
-  }
+    // ── Step 2: Like-eligibility guards (all the async checks) ──
 
-  // Guard: accumulated watch time threshold (seek-proof).
-  // Unlike position-based checks, this can only increase through genuine playback.
-  const targetSeconds = video!.duration * settings.target_percentage;
-  if (accumulatedWatchSeconds < targetSeconds) return;
+    // Guard: already liked this video in this session.
+    if (likedThisVideo) return;
 
-  // Guard: targeting mode.
-  let passesMode: boolean;
-  try {
-    passesMode = await checkMode(settings, pageType);
-  } catch {
-    return;
-  }
-  if (!isContextAlive()) {
-    destroyEngine();
-    return;
-  }
-  if (!passesMode) return;
+    // Guard: context must still be alive before any async Chrome API call.
+    if (!isContextAlive()) {
+      destroyEngine();
+      return;
+    }
 
-  // Guard: user must be logged in.
-  if (!isLoggedIn()) return;
+    // Guard: user must be actively watching.
+    if (!(await isActivelyWatching())) return;
 
-  // Guard: video must not already be liked or disliked.
-  const voteState = getLikeState(pageType);
-  if (voteState === 'liked' || voteState === 'disliked') {
-    likedThisVideo = true;
-    await recordSkip(pageType, voteState === 'liked' ? 'already liked' : 'already disliked');
-    return;
-  }
+    // Re-check after the await — the context may have died during the async gap.
+    if (!isContextAlive()) {
+      destroyEngine();
+      return;
+    }
 
-  // All checks passed — perform the like.
-  const clicked = clickLikeButton(pageType);
-  if (clicked) {
-    likedThisVideo = true;
-    await recordLike(pageType);
+    let liveSettings: Settings;
+    try {
+      liveSettings = await getSettings();
+    } catch {
+      return; // Storage unavailable — context likely dying.
+    }
+    if (!isContextAlive()) {
+      destroyEngine();
+      return;
+    }
+
+    if (!cachedSettings) {
+      cachedSettings = liveSettings;
+    } else {
+      // Check if settings changed
+      const settingsChanged = JSON.stringify(liveSettings) !== JSON.stringify(cachedSettings);
+      if (settingsChanged && !notifiedSettingsChange) {
+        notifiedSettingsChange = true;
+        showToast('Settings Saved', 'Changes will take effect from the next video/shorts.');
+      }
+    }
+
+    const settings = cachedSettings;
+
+    // ── Step 3: Accumulated watch time threshold check (seek-proof) ──
+    // Unlike position-based checks, this can only increase through genuine playback.
+    const targetSeconds = video!.duration * settings.target_percentage;
+    if (accumulatedWatchSeconds < targetSeconds) return;
+
+    // Guard: targeting mode.
+    let passesMode: boolean;
+    try {
+      passesMode = await checkMode(settings, pageType);
+    } catch {
+      return;
+    }
+    if (!isContextAlive()) {
+      destroyEngine();
+      return;
+    }
+    if (!passesMode) return;
+
+    // Guard: user must be logged in.
+    if (!isLoggedIn()) return;
+
+    // Guard: video must not already be liked or disliked.
+    const voteState = getLikeState(pageType);
+    if (voteState === 'liked' || voteState === 'disliked') {
+      likedThisVideo = true;
+      await recordSkip(pageType, voteState === 'liked' ? 'already liked' : 'already disliked');
+      return;
+    }
+
+    // All checks passed — perform the like.
+    const clicked = clickLikeButton(pageType);
+    if (clicked) {
+      likedThisVideo = true;
+      await recordLike(pageType);
+    }
+  } finally {
+    pollInProgress = false;
   }
 }
 

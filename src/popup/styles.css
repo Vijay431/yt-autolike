@@ -105,108 +105,19 @@ body {
   font-weight: 500;
 }
 
-/* ── Master pause toggle ── */
+/* ── Generic icon button (used in Options whitelist list) ── */
 .pause-toggle {
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
-  border-radius: 20px;
-  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  padding: 8px;
   cursor: pointer;
   transition:
     background var(--transition),
     color var(--transition),
     transform var(--transition);
-  white-space: nowrap;
-}
-
-.pause-toggle--active {
-  background: var(--accent-dim);
-  color: var(--accent);
-  border: 1px solid rgba(255, 0, 0, 0.3);
-}
-
-.pause-toggle--active:hover {
-  background: var(--accent);
-  color: #fff;
-  transform: scale(1.03);
-}
-
-.pause-toggle--paused {
-  background: var(--green-dim);
-  color: var(--green);
-  border: 1px solid rgba(46, 204, 113, 0.3);
-}
-
-.pause-toggle--paused:hover {
-  background: var(--green);
-  color: #000;
-  transform: scale(1.03);
-}
-
-/* ── Paused banner ── */
-.paused-banner {
-  background: rgba(243, 156, 18, 0.1);
-  border-bottom: 1px solid rgba(243, 156, 18, 0.25);
-  color: var(--yellow);
-  font-size: 11px;
-  font-weight: 600;
-  text-align: center;
-  padding: 6px 16px;
-}
-
-.paused-overlay {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  text-align: center;
-  padding: 40px 24px;
-  background: radial-gradient(circle at center, rgba(243, 156, 18, 0.05) 0%, transparent 70%);
-}
-
-.paused-overlay-icon {
-  font-size: 64px;
-  margin-bottom: 24px;
-  display: block;
-}
-
-.paused-overlay-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text-primary);
-  margin-bottom: 12px;
-  letter-spacing: -0.02em;
-}
-
-.paused-overlay-msg {
-  font-size: 14px;
-  color: var(--text-secondary);
-  max-width: 260px;
-  line-height: 1.6;
-  margin-bottom: 32px;
-}
-
-.paused-overlay-btn {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: var(--radius);
-  padding: 12px 32px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 15px var(--accent-glow);
-  transition:
-    transform var(--transition),
-    background var(--transition);
-}
-
-.paused-overlay-btn:hover {
-  background: #ff2222;
-  transform: translateY(-2px);
 }
 
 /* ============================================================
