@@ -72,6 +72,7 @@ export default function PopupApp() {
   const [addChannelStatus, setAddChannelStatus] = useState<string | null>(null);
   // Live video state from the content script
   const [videoState, setVideoState] = useState<VideoState | null>(null);
+  const [showPauseOptions, setShowPauseOptions] = useState(false);
   const activeTabIdRef = useRef<number | null>(null);
 
   // Fetch live video state from the content script.
@@ -298,9 +299,10 @@ export default function PopupApp() {
           className={`pause-toggle ${isPaused ? 'pause-toggle--paused' : 'pause-toggle--active'}`}
           onClick={() => {
             if (isPaused) {
-              updateSettings({ is_paused: false, pause_until: null });
+              updateSettings({ is_paused: false, pause_until: null, pause_duration: null });
+              setShowPauseOptions(false);
             } else {
-              updateSettings({ is_paused: true });
+              setShowPauseOptions(!showPauseOptions);
             }
           }}
           aria-label={isPaused ? 'Resume auto-liking' : 'Pause auto-liking'}
@@ -312,7 +314,7 @@ export default function PopupApp() {
 
       {/* ── Pause Timer UI ── */}
       <AnimatePresence>
-        {!settings.is_paused && settings.pause_until === null && (
+        {!isPaused && showPauseOptions && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -324,7 +326,14 @@ export default function PopupApp() {
               <button
                 key={mins}
                 className="timer-btn"
-                onClick={() => updateSettings({ pause_until: Date.now() + mins * 60 * 1000 })}
+                onClick={() => {
+                  const duration = mins * 60 * 1000;
+                  updateSettings({
+                    pause_until: Date.now() + duration,
+                    pause_duration: duration,
+                  });
+                  setShowPauseOptions(false);
+                }}
               >
                 {mins >= 60 ? `${mins / 60}h` : `${mins}m`}
               </button>
@@ -359,19 +368,9 @@ export default function PopupApp() {
                   initial={{ strokeDashoffset: 282.7 }}
                   animate={{
                     strokeDashoffset:
-                      282.7 -
-                      (282.7 * remainingPauseTime) /
-                        (settings.pause_until - (settings.pause_until - 7200000)),
-                  }} // Rough max 2h ref
-                  style={{
-                    strokeDashoffset:
-                      282.7 *
-                      (1 -
-                        remainingPauseTime /
-                          (settings.pause_until -
-                            (settings.pause_until -
-                              (remainingPauseTime > 3600000 ? 7200000 : 3600000)))),
+                      282.7 * (1 - remainingPauseTime / (settings.pause_duration || 1)),
                   }}
+                  transition={{ duration: 0.5, ease: 'linear' }}
                 />
               </svg>
               <div className="timer-text">{Math.ceil(remainingPauseTime / 60000)}m</div>
@@ -381,7 +380,10 @@ export default function PopupApp() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => updateSettings({ is_paused: false, pause_until: null })}
+            onClick={() => {
+              updateSettings({ is_paused: false, pause_until: null, pause_duration: null });
+              setShowPauseOptions(false);
+            }}
             className="timer-cancel-btn"
             style={{ margin: 0 }}
           >

@@ -18,6 +18,8 @@ export interface Settings {
   is_paused: boolean;
   /** Timestamp in ms until which the extension is paused. null means not set. */
   pause_until: number | null;
+  /** The total duration in ms the pause was initially set for, used for circle calculation. */
+  pause_duration: number | null;
 }
 
 /** A single whitelisted YouTube channel. */

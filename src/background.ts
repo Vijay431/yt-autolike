@@ -38,8 +38,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           (settings.pause_until !== null && Date.now() < settings.pause_until);
 
         if (isPaused) {
-          chrome.action.setBadgeText({ text: 'PAUSE', tabId: sender.tab?.id });
-          chrome.action.setBadgeBackgroundColor({ color: '#666666', tabId: sender.tab?.id });
+          chrome.action.setBadgeText({ text: '', tabId: sender.tab?.id });
           sendResponse({ type: 'HEARTBEAT_ACK' });
           break;
         }
