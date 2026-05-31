@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, ExternalLink, ShieldCheck } from 'lucide-react';
-import { getWhitelist, setWhitelist } from '../lib/storage';
+import { getWhitelist, setWhitelist, DEFAULT_WHITELIST } from '../lib/storage';
 import type { Whitelist } from '../lib/types';
 
 export default function OptionsApp() {
-  const [whitelist, setWhitelistState] = useState<Whitelist>([]);
+  const [whitelist, setWhitelistState] = useState<Whitelist>(DEFAULT_WHITELIST);
 
   useEffect(() => {
     getWhitelist().then(setWhitelistState);
   }, []);
 
   const removeChannel = async (channelId: string) => {
-    const newList = whitelist.filter((c) => c.channelId !== channelId);
+    const newChannels = whitelist.channels.filter((c) => c.id !== channelId);
+    const newList = { channels: newChannels };
     setWhitelistState(newList);
     await setWhitelist(newList);
   };
@@ -21,11 +22,14 @@ export default function OptionsApp() {
     <div
       className="popup-root"
       style={{
-        minWidth: '600px',
+        width: '100%',
         maxWidth: '800px',
-        margin: '0 auto',
-        height: '100vh',
+        maxHeight: '90vh',
         overflowY: 'auto',
+        borderRadius: '16px',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+        border: '1px solid var(--border)',
+        background: 'var(--bg-card)',
       }}
     >
       <header className="popup-header">
@@ -43,7 +47,7 @@ export default function OptionsApp() {
       <main className="popup-body" style={{ padding: '24px' }}>
         <section className="section">
           <h2 className="section-title">Whitelisted Channels</h2>
-          {whitelist.length === 0 ? (
+          {whitelist.channels.length === 0 ? (
             <div
               className="empty-state"
               style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}
@@ -56,9 +60,9 @@ export default function OptionsApp() {
           ) : (
             <div className="whitelist-grid" style={{ display: 'grid', gap: '12px' }}>
               <AnimatePresence>
-                {whitelist.map((channel) => (
+                {whitelist.channels.map((channel) => (
                   <motion.div
-                    key={channel.channelId}
+                    key={channel.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
@@ -73,15 +77,15 @@ export default function OptionsApp() {
                   >
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <span className="mode-name" style={{ fontSize: '16px' }}>
-                        {channel.channelName}
+                        {channel.name}
                       </span>
                       <span className="mode-desc" style={{ fontSize: '11px' }}>
-                        ID: {channel.channelId}
+                        ID: {channel.id}
                       </span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <a
-                        href={`https://youtube.com/channel/${channel.channelId}`}
+                        href={`https://youtube.com/channel/${channel.id}`}
                         target="_blank"
                         rel="noreferrer"
                         className="pause-toggle"
@@ -96,7 +100,7 @@ export default function OptionsApp() {
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => removeChannel(channel.channelId)}
+                        onClick={() => removeChannel(channel.id)}
                         className="pause-toggle"
                         style={{
                           padding: '8px',

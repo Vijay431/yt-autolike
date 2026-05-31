@@ -216,7 +216,7 @@ export default function PopupApp() {
     }
 
     const already = whitelist.channels.some(
-      (c) => (id && c.id === id) || (name && c.name.toLowerCase() === name.toLowerCase()),
+      (c) => (id && c.id === id) || (name && c.name && c.name.toLowerCase() === name.toLowerCase()),
     );
     if (already) {
       setAddChannelStatus('Channel is already whitelisted.');
@@ -248,16 +248,31 @@ export default function PopupApp() {
 
   const isLoggedIn: boolean | null = videoState ? videoState.isLoggedIn : null;
 
+  const isWhitelistMode = settings.mode === 'whitelist_only';
+
   // Is the current channel in the whitelist?
-  const currentChannelWhitelisted: boolean | null =
-    settings.mode === 'whitelist_only' && videoState?.channelName
-      ? whitelist.channels.some(
-          (c) =>
-            (videoState.channelId && c.id === videoState.channelId) ||
-            (videoState.channelName &&
-              c.name.toLowerCase() === videoState.channelName!.toLowerCase()),
-        )
-      : null;
+  const currentChannelWhitelisted: boolean = !!(
+    isWhitelistMode &&
+    videoState?.isVideoPage &&
+    whitelist.channels.some(
+      (c) =>
+        (videoState.channelId && c.id === videoState.channelId) ||
+        (videoState.channelName &&
+          c.name &&
+          c.name.toLowerCase() === videoState.channelName.toLowerCase()),
+    )
+  );
+
+  const isAlreadyAdded = !!(
+    activeTabInfo.isYouTube &&
+    whitelist.channels.some(
+      (c) =>
+        (activeTabInfo.channelId && c.id === activeTabInfo.channelId) ||
+        (activeTabInfo.channelName &&
+          c.name &&
+          c.name.toLowerCase() === activeTabInfo.channelName.toLowerCase()),
+    )
+  );
 
   // Time-to-like calculation
   const timeToLike = computeTimeToLike(videoState, settings);
@@ -319,7 +334,7 @@ export default function PopupApp() {
                     <span className="np-eta np-eta--unknown">⏳ Waiting for video to load…</span>
                   ) : timeToLike <= 0 ? (
                     <span className="np-eta np-eta--ready">
-                      {settings.mode === 'whitelist_only' && currentChannelWhitelisted === false
+                      {isWhitelistMode && !currentChannelWhitelisted
                         ? '🚫 Channel not whitelisted — will not auto-like'
                         : '🎯 Threshold reached — auto-liking shortly…'}
                     </span>
@@ -334,14 +349,12 @@ export default function PopupApp() {
           </AnimatePresence>
 
           {/* ── Whitelist mode banner: non-whitelisted channel ── */}
-          {settings.mode === 'whitelist_only' &&
-            videoState?.isVideoPage &&
-            currentChannelWhitelisted === false && (
-              <div className="not-whitelisted-banner" role="status">
-                🚫 <strong>{videoState.channelName ?? 'This channel'}</strong> is not in your
-                whitelist — auto-like will be skipped for this video.
-              </div>
-            )}
+          {isWhitelistMode && videoState?.isVideoPage && !currentChannelWhitelisted && (
+            <div className="not-whitelisted-banner" role="status">
+              🚫 <strong>{videoState.channelName ?? 'This channel'}</strong> is not in your
+              whitelist — auto-like will be skipped for this video.
+            </div>
+          )}
 
           {/* ── Stats ── */}
           <section className="section stats-section">
@@ -427,38 +440,44 @@ export default function PopupApp() {
               <h2 className="section-title" style={{ marginBottom: 0 }}>
                 Whitelist
               </h2>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => chrome.runtime.openOptionsPage()}
-                className="manage-whitelist-btn"
-              >
-                <ExternalLink size={12} />
-                Manage
-              </motion.button>
+              {whitelist.channels.length > 0 && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => chrome.runtime.openOptionsPage()}
+                  className="manage-whitelist-btn"
+                >
+                  <ExternalLink size={12} />
+                  Manage
+                </motion.button>
+              )}
             </div>
 
             <motion.button
               id="add-channel-btn"
-              whileHover={activeTabInfo.isYouTube ? { scale: 1.02 } : {}}
-              whileTap={activeTabInfo.isYouTube ? { scale: 0.98 } : {}}
-              className={`add-channel-btn ${activeTabInfo.isYouTube ? '' : 'add-channel-btn--disabled'}`}
+              whileHover={activeTabInfo.isYouTube && !isAlreadyAdded ? { scale: 1.02 } : {}}
+              whileTap={activeTabInfo.isYouTube && !isAlreadyAdded ? { scale: 0.98 } : {}}
+              className={`add-channel-btn ${activeTabInfo.isYouTube && !isAlreadyAdded ? '' : 'add-channel-btn--disabled'}`}
               onClick={addCurrentChannel}
-              disabled={!activeTabInfo.isYouTube}
+              disabled={!activeTabInfo.isYouTube || isAlreadyAdded}
               title={
-                activeTabInfo.isYouTube
-                  ? activeTabInfo.channelName
-                    ? `Add "${activeTabInfo.channelName}"`
-                    : 'Add current channel'
-                  : 'Open a YouTube video to add a channel'
+                isAlreadyAdded
+                  ? 'Already whitelisted'
+                  : activeTabInfo.isYouTube
+                    ? activeTabInfo.channelName
+                      ? `Add "${activeTabInfo.channelName}"`
+                      : 'Add current channel'
+                    : 'Open a YouTube video to add a channel'
               }
             >
-              <span>+</span>
-              {activeTabInfo.channelName
-                ? `Add "${activeTabInfo.channelName}"`
-                : activeTabInfo.isYouTube
-                  ? 'Add Current Channel'
-                  : 'Open a YouTube video first'}
+              <span>{isAlreadyAdded ? '✅' : '+'}</span>
+              {isAlreadyAdded
+                ? ' Already Whitelisted'
+                : activeTabInfo.channelName
+                  ? ` Add "${activeTabInfo.channelName}"`
+                  : activeTabInfo.isYouTube
+                    ? ' Add Current Channel'
+                    : ' Open a YouTube video first'}
             </motion.button>
 
             {addChannelStatus && (
