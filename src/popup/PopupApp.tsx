@@ -14,6 +14,17 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Globe,
+  Zap,
+  Film,
+  CheckCircle,
+  PlayCircle,
+  PauseCircle,
+  Settings,
+  Activity,
+} from 'lucide-react';
 import type { Settings, Whitelist, Stats, Mode, VideoState } from '../lib/types';
 import { getSettings, setSettings, getWhitelist, setWhitelist, getStats } from '../lib/storage';
 import { DEFAULT_SETTINGS, DEFAULT_WHITELIST, DEFAULT_STATS } from '../lib/storage';
@@ -25,11 +36,21 @@ const VERSION = '1.0.0';
 // Mode metadata
 // ---------------------------------------------------------------------------
 
-const MODES: { value: Mode; label: string; desc: string; icon: string }[] = [
-  { value: 'global', label: 'Global', desc: 'All videos & Shorts', icon: '🌍' },
-  { value: 'only_shorts', label: 'Only Shorts', desc: 'Shorts only', icon: '⚡' },
-  { value: 'only_videos', label: 'Only Videos', desc: 'Standard videos only', icon: '🎬' },
-  { value: 'whitelist_only', label: 'Whitelist Only', desc: 'Approved channels only', icon: '✅' },
+const MODES: { value: Mode; label: string; desc: string; icon: React.ReactNode }[] = [
+  { value: 'global', label: 'Global', desc: 'All videos & Shorts', icon: <Globe size={20} /> },
+  { value: 'only_shorts', label: 'Only Shorts', desc: 'Shorts only', icon: <Zap size={20} /> },
+  {
+    value: 'only_videos',
+    label: 'Only Videos',
+    desc: 'Standard videos only',
+    icon: <Film size={20} />,
+  },
+  {
+    value: 'whitelist_only',
+    label: 'Whitelist Only',
+    desc: 'Approved channels only',
+    icon: <CheckCircle size={20} />,
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -265,15 +286,25 @@ export default function PopupApp() {
             <span className="popup-version">v{VERSION}</span>
           </div>
         </div>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           id="master-pause-btn"
           className={`pause-toggle ${isPaused ? 'pause-toggle--paused' : 'pause-toggle--active'}`}
           onClick={() => updateSettings({ is_paused: !isPaused })}
           aria-label={isPaused ? 'Resume auto-liking' : 'Pause auto-liking'}
           title={isPaused ? 'Click to resume' : 'Click to pause'}
         >
-          {isPaused ? '▶ Resume' : '⏸ Pause'}
-        </button>
+          {isPaused ? (
+            <>
+              <PlayCircle size={14} /> Resume
+            </>
+          ) : (
+            <>
+              <PauseCircle size={14} /> Pause
+            </>
+          )}
+        </motion.button>
       </header>
 
       {isPaused && (
@@ -298,30 +329,38 @@ export default function PopupApp() {
 
       <div className="popup-body">
         {/* ── Now Playing Card ── */}
-        {videoState?.isVideoPage && (
-          <section className="section now-playing-section">
-            {/* Time to like ETA */}
-            <div className="np-eta-row">
-              {videoState.alreadyLiked ? (
-                <span className="np-eta np-eta--done">✅ Already liked this video</span>
-              ) : timeToLike === null ? (
-                <span className="np-eta np-eta--unknown">⏳ Waiting for video to load…</span>
-              ) : timeToLike <= 0 ? (
-                <span className="np-eta np-eta--ready">
-                  {settings.is_paused
-                    ? '⏸ Auto-like ready (paused)'
-                    : settings.mode === 'whitelist_only' && currentChannelWhitelisted === false
-                      ? '🚫 Channel not whitelisted — will not auto-like'
-                      : '🎯 Threshold reached — auto-liking shortly…'}
-                </span>
-              ) : (
-                <span className="np-eta np-eta--pending">
-                  ⏱ {formatMinutes(timeToLike)} to auto-like
-                </span>
-              )}
-            </div>
-          </section>
-        )}
+        <AnimatePresence mode="wait">
+          {videoState?.isVideoPage && (
+            <motion.section
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="section now-playing-section"
+            >
+              {/* Time to like ETA */}
+              <div className="np-eta-row">
+                {videoState.alreadyLiked ? (
+                  <span className="np-eta np-eta--done">✅ Already liked this video</span>
+                ) : timeToLike === null ? (
+                  <span className="np-eta np-eta--unknown">⏳ Waiting for video to load…</span>
+                ) : timeToLike <= 0 ? (
+                  <span className="np-eta np-eta--ready">
+                    {settings.is_paused
+                      ? '⏸ Auto-like ready (paused)'
+                      : settings.mode === 'whitelist_only' && currentChannelWhitelisted === false
+                        ? '🚫 Channel not whitelisted — will not auto-like'
+                        : '🎯 Threshold reached — auto-liking shortly…'}
+                  </span>
+                ) : (
+                  <span className="np-eta np-eta--pending">
+                    ⏱ {formatMinutes(timeToLike)} to auto-like
+                  </span>
+                )}
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
 
         {/* ── Whitelist mode banner: non-whitelisted channel ── */}
         {settings.mode === 'whitelist_only' &&
@@ -345,20 +384,33 @@ export default function PopupApp() {
         <section className="section">
           <h2 className="section-title">Auto-Like Mode</h2>
           <div className="mode-grid" role="radiogroup" aria-label="Auto-like mode">
-            {MODES.map((m) => (
-              <button
-                key={m.value}
-                id={`mode-${m.value}`}
-                role="radio"
-                aria-checked={settings.mode === m.value}
-                className={`mode-card ${settings.mode === m.value ? 'mode-card--active' : ''}`}
-                onClick={() => updateSettings({ mode: m.value })}
-              >
-                <span className="mode-icon">{m.icon}</span>
-                <span className="mode-name">{m.label}</span>
-                <span className="mode-desc">{m.desc}</span>
-              </button>
-            ))}
+            {MODES.map((m) => {
+              const isActive = settings.mode === m.value;
+              return (
+                <motion.button
+                  key={m.value}
+                  id={`mode-${m.value}`}
+                  role="radio"
+                  aria-checked={isActive}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`mode-card ${isActive ? 'mode-card--active' : ''}`}
+                  onClick={() => updateSettings({ mode: m.value })}
+                >
+                  <span className="mode-icon">{m.icon}</span>
+                  <span className="mode-name">{m.label}</span>
+                  <span className="mode-desc">{m.desc}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeModeIndicator"
+                      className="mode-card-active-bg"
+                      initial={false}
+                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                </motion.button>
+              );
+            })}
           </div>
         </section>
 
