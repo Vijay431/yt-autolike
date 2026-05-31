@@ -301,248 +301,271 @@ export default function PopupApp() {
         </motion.button>
       </header>
 
-      {isPaused && (
-        <div className="paused-banner" role="status">
-          ⏸ Auto-liking is paused
-        </div>
-      )}
-
-      {/* ── Login Gate ── */}
-      {isLoggedIn === false && (
-        <div className="login-gate" role="alert">
-          <span className="login-gate-icon">🔒</span>
-          <div className="login-gate-body">
-            <span className="login-gate-title">Not Signed In</span>
-            <span className="login-gate-msg">
-              Auto-liking only works when you&apos;re logged in to YouTube. Please sign in to your
-              Google account.
-            </span>
-          </div>
-        </div>
-      )}
-
-      <div className="popup-body">
-        {/* ── Now Playing Card ── */}
-        <AnimatePresence mode="wait" initial={false}>
-          {videoState?.isVideoPage && (
-            <motion.section
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="section now-playing-section"
-            >
-              {/* Time to like ETA */}
-              <div className="np-eta-row">
-                {videoState.alreadyLiked ? (
-                  <span className="np-eta np-eta--done">✅ Already liked this video</span>
-                ) : timeToLike === null ? (
-                  <span className="np-eta np-eta--unknown">⏳ Waiting for video to load…</span>
-                ) : timeToLike <= 0 ? (
-                  <span className="np-eta np-eta--ready">
-                    {settings.is_paused
-                      ? '⏸ Auto-like ready (paused)'
-                      : settings.mode === 'whitelist_only' && currentChannelWhitelisted === false
-                        ? '🚫 Channel not whitelisted — will not auto-like'
-                        : '🎯 Threshold reached — auto-liking shortly…'}
-                  </span>
-                ) : (
-                  <span className="np-eta np-eta--pending">
-                    ⏱ {formatMinutes(timeToLike)} to auto-like
-                  </span>
-                )}
-              </div>
-            </motion.section>
-          )}
-        </AnimatePresence>
-
-        {/* ── Whitelist mode banner: non-whitelisted channel ── */}
-        {settings.mode === 'whitelist_only' &&
-          videoState?.isVideoPage &&
-          currentChannelWhitelisted === false && (
-            <div className="not-whitelisted-banner" role="status">
-              🚫 <strong>{videoState.channelName ?? 'This channel'}</strong> is not in your
-              whitelist — auto-like will be skipped for this video.
-            </div>
-          )}
-
-        {/* ── Stats ── */}
-        <section className="section stats-section">
-          <div className="stats-counter">
-            <span className="stats-number">{stats.total_likes_performed}</span>
-            <span className="stats-label">likes done</span>
-          </div>
-        </section>
-
-        {/* ── Mode Selector ── */}
-        <section className="section">
-          <h2 className="section-title">Auto-Like Mode</h2>
-          <div className="mode-grid" role="radiogroup" aria-label="Auto-like mode">
-            {MODES.map((m) => {
-              const isActive = settings.mode === m.value;
-              return (
-                <motion.button
-                  key={m.value}
-                  id={`mode-${m.value}`}
-                  role="radio"
-                  aria-checked={isActive}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`mode-card ${isActive ? 'mode-card--active' : ''}`}
-                  onClick={() => updateSettings({ mode: m.value })}
-                >
-                  <span className="mode-icon">{m.icon}</span>
-                  <span className="mode-name">{m.label}</span>
-                  <span className="mode-desc">{m.desc}</span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeModeIndicator"
-                      className="mode-card-active-bg"
-                      initial={false}
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                </motion.button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ── Watch Percentage Slider ── */}
-        <section className="section">
-          <h2 className="section-title">
-            Watch Threshold
-            <span className="slider-value-badge">
-              {Math.round(settings.target_percentage * 100)}%
-            </span>
-          </h2>
-          <div className="slider-container">
-            <span className="slider-bound">10%</span>
-            <input
-              id="watch-percentage-slider"
-              type="range"
-              className="slider"
-              min={10}
-              max={90}
-              step={5}
-              value={Math.round(settings.target_percentage * 100)}
-              onChange={(e) => updateSettings({ target_percentage: Number(e.target.value) / 100 })}
-              aria-label="Watch percentage threshold"
-            />
-            <span className="slider-bound">90%</span>
-          </div>
-          <p className="slider-hint">Like triggers when this % of the video is watched.</p>
-        </section>
-
-        {/* ── Whitelist Manager ── */}
-        <section className="section">
-          <div
-            className="section-header-row"
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '10px',
-            }}
+      {isPaused ? (
+        <div className="popup-body">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="paused-overlay"
           >
-            <h2 className="section-title" style={{ marginBottom: 0 }}>
-              Whitelist
-            </h2>
+            <span className="paused-overlay-icon">⏸️</span>
+            <h2 className="paused-overlay-title">Extension is Paused</h2>
+            <p className="paused-overlay-msg">
+              Auto-liking and watch time tracking are currently disabled.
+            </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => chrome.runtime.openOptionsPage()}
-              className="manage-whitelist-btn"
+              className="paused-overlay-btn"
+              onClick={() => updateSettings({ is_paused: false })}
             >
-              <ExternalLink size={12} />
-              Manage
+              Resume Auto-Like
             </motion.button>
-          </div>
-
-          <motion.button
-            id="add-channel-btn"
-            whileHover={activeTabInfo.isYouTube ? { scale: 1.02 } : {}}
-            whileTap={activeTabInfo.isYouTube ? { scale: 0.98 } : {}}
-            className={`add-channel-btn ${activeTabInfo.isYouTube ? '' : 'add-channel-btn--disabled'}`}
-            onClick={addCurrentChannel}
-            disabled={!activeTabInfo.isYouTube}
-            title={
-              activeTabInfo.isYouTube
-                ? activeTabInfo.channelName
-                  ? `Add "${activeTabInfo.channelName}"`
-                  : 'Add current channel'
-                : 'Open a YouTube video to add a channel'
-            }
-          >
-            <span>+</span>
-            {activeTabInfo.channelName
-              ? `Add "${activeTabInfo.channelName}"`
-              : activeTabInfo.isYouTube
-                ? 'Add Current Channel'
-                : 'Open a YouTube video first'}
-          </motion.button>
-
-          {addChannelStatus && (
-            <p className="channel-status" role="status">
-              {addChannelStatus}
-            </p>
-          )}
-        </section>
-
-        {/* ── Reminders Toggle ── */}
-        <section className="section">
-          <h2 className="section-title">Reminders</h2>
-          <label className="toggle-row" htmlFor="reminders-toggle">
-            <span className="toggle-label">
-              <span className="toggle-icon">🔔</span>
-              Show tips every 15 minutes
-            </span>
-            <div className="toggle-switch-wrapper">
-              <input
-                id="reminders-toggle"
-                type="checkbox"
-                className="toggle-input"
-                checked={settings.hourly_reminders_enabled}
-                onChange={(e) => updateSettings({ hourly_reminders_enabled: e.target.checked })}
-              />
-              <span className="toggle-switch" aria-hidden="true" />
+          </motion.div>
+        </div>
+      ) : (
+        <>
+          {/* ── Login Gate ── */}
+          {isLoggedIn === false && (
+            <div className="login-gate" role="alert">
+              <span className="login-gate-icon">🔒</span>
+              <div className="login-gate-body">
+                <span className="login-gate-title">Not Signed In</span>
+                <span className="login-gate-msg">
+                  Auto-liking only works when you&apos;re logged in to YouTube. Please sign in to
+                  your Google account.
+                </span>
+              </div>
             </div>
-          </label>
-          <p className="toggle-hint">
-            A friendly tip appears every 15 minutes of active watch time.
-          </p>
-        </section>
+          )}
 
-        {/* ── Community Support Footer ── */}
-        <footer className="popup-footer">
-          <p className="community-note">
-            🌟 This extension is purely for encouraging community growth. Help creators you love by
-            giving them the engagement they deserve!
-          </p>
-          <div className="footer-links">
-            <a
-              href="https://github.com/Vijay431/yt-autolike"
-              target="_blank"
-              rel="noreferrer"
-              title="Star on GitHub"
-            >
-              ⭐ Star
-            </a>
-            <a
-              href="https://github.com/Vijay431/yt-autolike/issues"
-              target="_blank"
-              rel="noreferrer"
-              title="Raise an Issue"
-            >
-              🛠️ Issue
-            </a>
-            <a href="mailto:vijayanand431@gmail.com" title="Email for help">
-              📧 Help
-            </a>
+          <div className="popup-body">
+            {/* ── Now Playing Card ── */}
+            <AnimatePresence mode="wait" initial={false}>
+              {videoState?.isVideoPage && (
+                <motion.section
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="section now-playing-section"
+                >
+                  {/* Time to like ETA */}
+                  <div className="np-eta-row">
+                    {videoState.alreadyLiked ? (
+                      <span className="np-eta np-eta--done">✅ Already liked this video</span>
+                    ) : timeToLike === null ? (
+                      <span className="np-eta np-eta--unknown">⏳ Waiting for video to load…</span>
+                    ) : timeToLike <= 0 ? (
+                      <span className="np-eta np-eta--ready">
+                        {settings.is_paused
+                          ? '⏸ Auto-like ready (paused)'
+                          : settings.mode === 'whitelist_only' &&
+                              currentChannelWhitelisted === false
+                            ? '🚫 Channel not whitelisted — will not auto-like'
+                            : '🎯 Threshold reached — auto-liking shortly…'}
+                      </span>
+                    ) : (
+                      <span className="np-eta np-eta--pending">
+                        ⏱ {formatMinutes(timeToLike)} to auto-like
+                      </span>
+                    )}
+                  </div>
+                </motion.section>
+              )}
+            </AnimatePresence>
+
+            {/* ── Whitelist mode banner: non-whitelisted channel ── */}
+            {settings.mode === 'whitelist_only' &&
+              videoState?.isVideoPage &&
+              currentChannelWhitelisted === false && (
+                <div className="not-whitelisted-banner" role="status">
+                  🚫 <strong>{videoState.channelName ?? 'This channel'}</strong> is not in your
+                  whitelist — auto-like will be skipped for this video.
+                </div>
+              )}
+
+            {/* ── Stats ── */}
+            <section className="section stats-section">
+              <div className="stats-counter">
+                <span className="stats-number">{stats.total_likes_performed}</span>
+                <span className="stats-label">likes done</span>
+              </div>
+            </section>
+
+            {/* ── Mode Selector ── */}
+            <section className="section">
+              <h2 className="section-title">Auto-Like Mode</h2>
+              <div className="mode-grid" role="radiogroup" aria-label="Auto-like mode">
+                {MODES.map((m) => {
+                  const isActive = settings.mode === m.value;
+                  return (
+                    <motion.button
+                      key={m.value}
+                      id={`mode-${m.value}`}
+                      role="radio"
+                      aria-checked={isActive}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`mode-card ${isActive ? 'mode-card--active' : ''}`}
+                      onClick={() => updateSettings({ mode: m.value })}
+                    >
+                      <span className="mode-icon">{m.icon}</span>
+                      <span className="mode-name">{m.label}</span>
+                      <span className="mode-desc">{m.desc}</span>
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeModeIndicator"
+                          className="mode-card-active-bg"
+                          initial={false}
+                          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        />
+                      )}
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* ── Watch Percentage Slider ── */}
+            <section className="section">
+              <h2 className="section-title">
+                Watch Threshold
+                <span className="slider-value-badge">
+                  {Math.round(settings.target_percentage * 100)}%
+                </span>
+              </h2>
+              <div className="slider-container">
+                <span className="slider-bound">10%</span>
+                <input
+                  id="watch-percentage-slider"
+                  type="range"
+                  className="slider"
+                  min={10}
+                  max={90}
+                  step={5}
+                  value={Math.round(settings.target_percentage * 100)}
+                  onChange={(e) =>
+                    updateSettings({ target_percentage: Number(e.target.value) / 100 })
+                  }
+                  aria-label="Watch percentage threshold"
+                />
+                <span className="slider-bound">90%</span>
+              </div>
+              <p className="slider-hint">Like triggers when this % of the video is watched.</p>
+            </section>
+
+            {/* ── Whitelist Manager ── */}
+            <section className="section">
+              <div
+                className="section-header-row"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '10px',
+                }}
+              >
+                <h2 className="section-title" style={{ marginBottom: 0 }}>
+                  Whitelist
+                </h2>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => chrome.runtime.openOptionsPage()}
+                  className="manage-whitelist-btn"
+                >
+                  <ExternalLink size={12} />
+                  Manage
+                </motion.button>
+              </div>
+
+              <motion.button
+                id="add-channel-btn"
+                whileHover={activeTabInfo.isYouTube ? { scale: 1.02 } : {}}
+                whileTap={activeTabInfo.isYouTube ? { scale: 0.98 } : {}}
+                className={`add-channel-btn ${activeTabInfo.isYouTube ? '' : 'add-channel-btn--disabled'}`}
+                onClick={addCurrentChannel}
+                disabled={!activeTabInfo.isYouTube}
+                title={
+                  activeTabInfo.isYouTube
+                    ? activeTabInfo.channelName
+                      ? `Add "${activeTabInfo.channelName}"`
+                      : 'Add current channel'
+                    : 'Open a YouTube video to add a channel'
+                }
+              >
+                <span>+</span>
+                {activeTabInfo.channelName
+                  ? `Add "${activeTabInfo.channelName}"`
+                  : activeTabInfo.isYouTube
+                    ? 'Add Current Channel'
+                    : 'Open a YouTube video first'}
+              </motion.button>
+
+              {addChannelStatus && (
+                <p className="channel-status" role="status">
+                  {addChannelStatus}
+                </p>
+              )}
+            </section>
+
+            {/* ── Reminders Toggle ── */}
+            <section className="section">
+              <h2 className="section-title">Reminders</h2>
+              <label className="toggle-row" htmlFor="reminders-toggle">
+                <span className="toggle-label">
+                  <span className="toggle-icon">🔔</span>
+                  Show tips every 15 minutes
+                </span>
+                <div className="toggle-switch-wrapper">
+                  <input
+                    id="reminders-toggle"
+                    type="checkbox"
+                    className="toggle-input"
+                    checked={settings.hourly_reminders_enabled}
+                    onChange={(e) => updateSettings({ hourly_reminders_enabled: e.target.checked })}
+                  />
+                  <span className="toggle-switch" aria-hidden="true" />
+                </div>
+              </label>
+              <p className="toggle-hint">
+                A friendly tip appears every 15 minutes of active watch time.
+              </p>
+            </section>
+
+            {/* ── Community Support Footer ── */}
+            <footer className="popup-footer">
+              <p className="community-note">
+                🌟 This extension is purely for encouraging community growth. Help creators you love
+                by giving them the engagement they deserve!
+              </p>
+              <div className="footer-links">
+                <a
+                  href="https://github.com/Vijay431/yt-autolike"
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Star on GitHub"
+                >
+                  ⭐ Star
+                </a>
+                <a
+                  href="https://github.com/Vijay431/yt-autolike/issues"
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Raise an Issue"
+                >
+                  🛠️ Issue
+                </a>
+                <a href="mailto:vijayanand431@gmail.com" title="Email for help">
+                  📧 Help
+                </a>
+              </div>
+              <p className="version-text">YT AutoLike v{VERSION}</p>
+            </footer>
           </div>
-          <p className="version-text">YT AutoLike v{VERSION}</p>
-        </footer>
-      </div>
+        </>
+      )}
     </div>
   );
 }
