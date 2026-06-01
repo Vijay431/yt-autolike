@@ -9,15 +9,15 @@ Firefox AMO (addons.mozilla.org) uses different submission flows and policies fr
 ## Store Listing
 
 **Add-on Name**
-YT AutoLike
+YT AutoLike — Auto Like for YouTube™
 
-**Add-on Slug** *(URL identifier — lowercase, hyphens)*
+**Add-on Slug** _(URL identifier — lowercase, hyphens)_
 `auto-like-yt-videos`
 
-**Short Summary** *(max 250 characters)*
-Automatically like YouTube videos and Shorts after you've watched a configurable percentage. Four targeting modes, whitelist manager, local-only — no data ever leaves your device.
+**Short Summary** _(max 250 characters)_
+Automatically like YouTube videos & Shorts to support creators. 100% private, local, and customizable. Four targeting modes, whitelist manager, and activity feed.
 
-**Detailed Description** *(plain text — AMO renders basic HTML)*
+**Detailed Description** _(plain text — AMO renders basic HTML)_
 
 ```
 YT AutoLike automatically likes YouTube videos and Shorts once you've watched a customizable percentage of them — helping you support the creators you actually watch.
@@ -49,7 +49,7 @@ Open an issue on the project repository for bugs or feature requests.
 **Category**
 Social & Communication (primary) / Productivity
 
-**Tags** *(max 10)*
+**Tags** _(max 10)_
 youtube, autolike, auto-like, shorts, creator-support, productivity, local, privacy
 
 ---
@@ -57,17 +57,21 @@ youtube, autolike, auto-like, shorts, creator-support, productivity, local, priv
 ## Firefox-Specific Technical Notes
 
 ### Manifest Version
+
 The Firefox build uses Manifest V3 (set via `firefox:manifest_version: 3` in the Extension.js manifest). Firefox 109+ supports MV3.
 
 > ⚠️ **Firefox MV3 Note**: Firefox's MV3 support is still catching up to Chrome's. The Extension.js build handles the compatibility layer. If AMO reviewers flag MV3 issues, consider setting `firefox:manifest_version: 2` in `src/manifest.json` as a fallback (Extension.js will adapt the background script accordingly).
 
 ### Background Script
+
 Firefox uses `background.scripts` array instead of `service_worker`. Extension.js handles this via the `firefox:scripts` key in the manifest.
 
 ### `browser.*` vs `chrome.*` APIs
+
 Extension.js includes a polyfill that maps `chrome.*` → `browser.*` in Firefox. The background service worker uses `chrome.*` APIs directly; the polyfill handles translation at runtime.
 
 ### Temporary Extension ID (for development)
+
 AMO requires a stable extension ID for updates. Add a `browser_specific_settings` entry to `src/manifest.json` for Firefox:
 
 ```json
@@ -87,18 +91,19 @@ Replace `[your-domain]` with your actual domain (e.g., `auto-like-yt-videos@vija
 
 AMO has both automated (machine) and manual human review. Key differences from Chrome Web Store:
 
-| Aspect | Chrome Web Store | Firefox AMO |
-|--------|-----------------|-------------|
-| Review type | Automated + human | Automated + human (more thorough) |
-| First submission | 1–3 business days | Can take 1–2 weeks for human review |
-| Source code | Not required | **Required if code is minified/compiled** |
-| Updates | Fast (~24 hours) | Faster after initial approval |
+| Aspect           | Chrome Web Store  | Firefox AMO                               |
+| ---------------- | ----------------- | ----------------------------------------- |
+| Review type      | Automated + human | Automated + human (more thorough)         |
+| First submission | 1–3 business days | Can take 1–2 weeks for human review       |
+| Source code      | Not required      | **Required if code is minified/compiled** |
+| Updates          | Fast (~24 hours)  | Faster after initial approval             |
 
 ### Source Code Submission (AMO Requirement)
 
 Because Extension.js minifies the output, AMO's human reviewers will require the **original source code** as a separate ZIP upload (not included in the extension ZIP).
 
 **How to prepare the source ZIP:**
+
 ```bash
 zip -r yt-autolike-source-v1.0.0.zip . \
   -x ".git/*" \
@@ -124,12 +129,15 @@ Build instructions:
 AMO asks for justifications for each permission during the review submission form:
 
 **`storage`**
+
 > The extension stores user settings (auto-like mode, watch threshold, pause state, reminder opt-out), a channel whitelist, a likes counter, accumulated watch time, and an activity log in browser local storage. This data never leaves the device. Without storage, all configuration is lost when the browser is restarted.
 
 **`tabs`**
+
 > The extension popup queries the active tab's URL to determine whether the user is on a YouTube watch or Shorts page. This enables the "Add Current Channel" button in the popup and allows the popup to communicate with the content script to retrieve the current video's channel name. No tab URLs are stored or logged.
 
 **`*://*.youtube.com/*` (host permission)**
+
 > The content script must be injected on YouTube watch pages (`/watch`) and Shorts pages (`/shorts/`). It reads `video.currentTime` and `video.duration` from the HTML5 video element to compute watch progress, checks the like/dislike button DOM state, and clicks the like button when the user's threshold is reached. The extension does not activate on any other website.
 
 ---
@@ -146,9 +154,9 @@ AMO also accepts a privacy policy entered directly in the submission form. You c
 
 ## Version History
 
-| Version | Date | Changes | Status |
-|---------|------|---------|--------|
-| 1.0.0 | 2026-05-29 | Initial release | Draft |
+| Version | Date       | Changes         | Status |
+| ------- | ---------- | --------------- | ------ |
+| 1.0.0   | 2026-05-29 | Initial release | Draft  |
 
 ---
 

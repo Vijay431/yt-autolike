@@ -7,14 +7,14 @@
 ## Store Listing
 
 **Extension Name**
-YT AutoLike
+YT AutoLike — Auto Like for YouTube™
 
-**Short Description** *(max 132 characters)*
-Automatically like YouTube videos and Shorts after you've watched a set percentage. Fully local — no data leaves your device.
+**Short Description** _(max 132 characters)_
+Automatically like YouTube videos & Shorts to support creators. 100% private, local, and customizable.
 
-*(Current character count: 131)*
+_(Current character count: 104)_
 
-**Detailed Description** *(max 16,000 characters — use plain text, CWS strips markdown)*
+**Detailed Description** _(max 16,000 characters — use plain text, CWS strips markdown)_
 
 ```
 YT AutoLike automatically likes YouTube videos and Shorts once you've watched a customizable percentage of them — helping you support the creators you actually watch.
@@ -55,7 +55,7 @@ Version 1.0.0 — Initial release with all core features: four targeting modes, 
 **Category**
 Productivity
 
-**Single Purpose Statement** *(filled in the developer dashboard — not shown to users)*
+**Single Purpose Statement** _(filled in the developer dashboard — not shown to users)_
 Automatically likes YouTube videos and Shorts after the user watches a configurable percentage of them.
 
 **Primary Language**
@@ -65,16 +65,17 @@ English
 
 ## Graphics & Assets
 
-| Asset | Dimensions | Status | Notes |
-|-------|-----------|--------|-------|
-| Store Icon | 128×128 PNG | 🟡 Use existing `src/images/icon.png` (resize to 128×128) | Must be exactly 128×128 |
-| Screenshot 1 | 1280×800 or 640×400 | ⬜ Not created | Show popup with all 7 sections visible, Global mode active, a few likes recorded |
-| Screenshot 2 | 1280×800 or 640×400 | ⬜ Not created | Show popup with Whitelist Only mode, whitelist channels populated |
-| Screenshot 3 | 1280×800 or 640×400 | ⬜ Not created | Show the hourly reminder toast overlaying a YouTube video |
-| Small Promo Tile | 440×280 | ⬜ Not created | Dark background, red accent, extension logo, tagline |
-| Marquee Promo Tile | 1400×560 | ⬜ Not created | Optional — only needed for featured placement |
+| Asset              | Dimensions          | Status                                                    | Notes                                                                            |
+| ------------------ | ------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Store Icon         | 128×128 PNG         | 🟡 Use existing `src/images/icon.png` (resize to 128×128) | Must be exactly 128×128                                                          |
+| Screenshot 1       | 1280×800 or 640×400 | ⬜ Not created                                            | Show popup with all 7 sections visible, Global mode active, a few likes recorded |
+| Screenshot 2       | 1280×800 or 640×400 | ⬜ Not created                                            | Show popup with Whitelist Only mode, whitelist channels populated                |
+| Screenshot 3       | 1280×800 or 640×400 | ⬜ Not created                                            | Show the hourly reminder toast overlaying a YouTube video                        |
+| Small Promo Tile   | 440×280             | ⬜ Not created                                            | Dark background, red accent, extension logo, tagline                             |
+| Marquee Promo Tile | 1400×560            | ⬜ Not created                                            | Optional — only needed for featured placement                                    |
 
 ### Screenshot Notes
+
 - Screenshot 1: Load a YouTube video, open the popup. Set mode to Global, slider at 50%. Show the stats counter with a non-zero number. Capture at 1280×800.
 - Screenshot 2: Switch to Whitelist Only mode, add 2–3 channels. Show the populated whitelist with delete buttons.
 - Screenshot 3: While watching a YouTube video, trigger the hourly toast (temporarily reduce `WATCH_SECONDS_PER_REMINDER` in constants.ts for testing, then revert). Capture the overlay on the video page.
@@ -83,10 +84,10 @@ English
 
 ## Permissions Justification
 
-| Permission | Type | Justification |
-|------------|------|---------------|
-| `storage` | permissions | Saves the user's auto-like mode, watch percentage threshold, pause state, reminder opt-out preference, whitelisted channels, total likes counter, accumulated watch time, and activity log to `chrome.storage.local`. Without this permission, all configuration is lost when the browser session ends. |
-| `tabs` | permissions | Used exclusively by the popup UI to query the active tab's URL (`chrome.tabs.query`) to determine whether the user is on a YouTube watch or Shorts page. This enables the "Add Current Channel" button to become active and allows the popup to send a message to the content script to retrieve the current channel name. No tab URLs are stored or transmitted. |
+| Permission            | Type             | Justification                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `storage`             | permissions      | Saves the user's auto-like mode, watch percentage threshold, pause state, reminder opt-out preference, whitelisted channels, total likes counter, accumulated watch time, and activity log to `chrome.storage.local`. Without this permission, all configuration is lost when the browser session ends.                                                                                            |
+| `tabs`                | permissions      | Used exclusively by the popup UI to query the active tab's URL (`chrome.tabs.query`) to determine whether the user is on a YouTube watch or Shorts page. This enables the "Add Current Channel" button to become active and allows the popup to send a message to the content script to retrieve the current channel name. No tab URLs are stored or transmitted.                                  |
 | `*://*.youtube.com/*` | host_permissions | Required to inject the content script on YouTube watch pages (`/watch`) and Shorts pages (`/shorts/`). The content script reads the HTML5 video element's `currentTime` and `duration` to compute watch progress, detects the like/dislike button state via DOM, and performs a click on the like button when the user's threshold is reached. The extension does not operate on any other domain. |
 
 ---
@@ -97,24 +98,26 @@ English
 
 **Does the extension collect user data?** Yes — locally only, on-device.
 
-| Data Type | Collected? | Transmitted Off-Device? | Purpose | Shared with Third Parties? |
-|-----------|-----------|------------------------|---------|---------------------------|
-| Personally identifiable info | No | No | N/A | No |
-| Health info | No | No | N/A | No |
-| Financial info | No | No | N/A | No |
-| Authentication info | No | No | N/A | No |
-| Personal communications | No | No | N/A | No |
-| Location | No | No | N/A | No |
-| Web history | No | No | N/A | No |
-| User activity | **Yes** — locally only | **No** | Activity log of auto-like/skip events (video title, channel, timestamp) stored in `chrome.storage.local`; displayed in the popup activity feed; capped at 50 entries | No |
-| Website content | No | No | N/A | No |
+| Data Type                    | Collected?             | Transmitted Off-Device? | Purpose                                                                                                                                                              | Shared with Third Parties? |
+| ---------------------------- | ---------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| Personally identifiable info | No                     | No                      | N/A                                                                                                                                                                  | No                         |
+| Health info                  | No                     | No                      | N/A                                                                                                                                                                  | No                         |
+| Financial info               | No                     | No                      | N/A                                                                                                                                                                  | No                         |
+| Authentication info          | No                     | No                      | N/A                                                                                                                                                                  | No                         |
+| Personal communications      | No                     | No                      | N/A                                                                                                                                                                  | No                         |
+| Location                     | No                     | No                      | N/A                                                                                                                                                                  | No                         |
+| Web history                  | No                     | No                      | N/A                                                                                                                                                                  | No                         |
+| User activity                | **Yes** — locally only | **No**                  | Activity log of auto-like/skip events (video title, channel, timestamp) stored in `chrome.storage.local`; displayed in the popup activity feed; capped at 50 entries | No                         |
+| Website content              | No                     | No                      | N/A                                                                                                                                                                  | No                         |
 
 **Additional clarifications for the CWS disclosure form:**
+
 - The extension reads `video.currentTime` and `video.duration` from the YouTube page DOM to compute watch progress. This data is used in memory only and is never stored or transmitted.
 - The extension reads channel name and channel ID from the YouTube page DOM only when the user clicks "Add Current Channel" in the popup. This data is stored locally in `chrome.storage.local` only.
 - The extension does NOT use `chrome.storage.sync` — data never goes to Google's servers.
 
 ### Data Use Certification
+
 - [x] Data is **NOT** sold to third parties
 - [x] Data is **NOT** used for purposes unrelated to the extension's core functionality
 - [x] Data is **NOT** used for creditworthiness or lending purposes
@@ -123,7 +126,7 @@ English
 
 ## Privacy Policy
 
-**Privacy Policy URL** *(Required — must be publicly hosted before submission)*
+**Privacy Policy URL** _(Required — must be publicly hosted before submission)_
 
 > ⚠️ **ACTION REQUIRED**: Host `PRIVACY_POLICY.md` at a public URL before submitting.
 >
@@ -160,9 +163,9 @@ Privacy Policy URL: `[FILL IN BEFORE SUBMISSION]`
 
 ## Version History
 
-| Version | Date | Changes | Status |
-|---------|------|---------|--------|
-| 1.0.0 | 2026-05-29 | Initial release — four targeting modes, whitelist manager, watch percentage slider, hourly reminder toasts, activity feed, master pause, local-only storage | Draft |
+| Version | Date       | Changes                                                                                                                                                     | Status |
+| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 1.0.0   | 2026-05-29 | Initial release — four targeting modes, whitelist manager, watch percentage slider, hourly reminder toasts, activity feed, master pause, local-only storage | Draft  |
 
 ---
 
@@ -177,7 +180,8 @@ Privacy Policy URL: `[FILL IN BEFORE SUBMISSION]`
 - **Google Fonts request**: The popup imports Inter from Google Fonts. This is a standard browser font request, not extension-to-server communication. Declared in the privacy policy.
 
 ### Rejection History
-*(None yet — first submission)*
+
+_(None yet — first submission)_
 
 ---
 
@@ -186,6 +190,7 @@ Privacy Policy URL: `[FILL IN BEFORE SUBMISSION]`
 Before submitting, verify every item:
 
 **Manifest & Package**
+
 - [x] `manifest_version: 3`
 - [x] Version is `1.0.0`
 - [x] Name matches this document: "YT AutoLike"
@@ -194,12 +199,14 @@ Before submitting, verify every item:
 - [ ] ZIP is under 2GB (expected: ~500KB)
 
 **Permissions**
+
 - [x] Only `storage` and `tabs` permissions requested (minimum required)
 - [x] host_permissions scoped to `*://*.youtube.com/*` only (not `<all_urls>`)
 - [x] Both permissions justified above
 - [x] No unused permissions
 
 **Store Listing**
+
 - [x] Detailed description is specific and function-first
 - [x] Single purpose is narrow ("Automatically likes YouTube videos and Shorts after the user watches a configurable percentage of them.")
 - [x] No trademark violations (extension name does not claim YouTube affiliation)
@@ -207,10 +214,12 @@ Before submitting, verify every item:
 - [ ] Support URL filled in
 
 **Graphics**
+
 - [ ] Store icon: 128×128 PNG
 - [ ] At least 1 screenshot at 1280×800
 
 **Privacy & Compliance**
+
 - [x] Data disclosure table is accurate and matches extension code
 - [x] No `chrome.storage.sync` used (data stays local)
 - [x] No remote code execution
@@ -219,6 +228,7 @@ Before submitting, verify every item:
 - [ ] Privacy policy URL entered in Chrome Developer Dashboard
 
 **Functionality**
+
 - [ ] Extension loaded unpacked in Chrome — all features tested
 - [ ] Popup opens without errors
 - [ ] Content script injects correctly on YouTube watch pages

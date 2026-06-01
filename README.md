@@ -1,6 +1,6 @@
-# 🚀 YT AutoLike — Support Creators Automatically! 👍
+# 🚀 YT AutoLike — Auto Like for YouTube™ & Shorts 👍
 
-Hey there! 👋 Tired of forgetting to hit that like button on videos you love? **YT AutoLike** has your back! It automatically likes YouTube videos and Shorts after you've watched a set percentage. It's the ultimate tool for supporting the community while you just sit back and enjoy the show! 🍿
+Hey there! 👋 Tired of forgetting to hit that like button on videos you love? **YT AutoLike** is a privacy-first browser extension that automatically likes YouTube videos and Shorts after you've watched a set percentage. It's the ultimate tool for supporting your favorite creators and community while you just sit back and enjoy the show! 🍿
 
 **🔒 100% Private & Local** — No data ever leaves your device. No servers, no trackers, just you and your favorite creators.
 
