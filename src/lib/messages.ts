@@ -48,7 +48,7 @@ export const MESSAGES: readonly string[] = [
   'A smart feed requires a trained algorithm. Keep liking quality content.',
   'Give the creator the motivation to tackle even bigger video ideas.',
   'Refine your daily content by giving thumbs up to trusted creators.',
-  "Your like is a message to the writer that their effort was valued.",
+  'Your like is a message to the writer that their effort was valued.',
   'Help the recommendation algorithm find more channels like this one.',
   'Encourage creators to prioritize depth over click-driven trends.',
   'Tell YouTube you want high-effort videos on your home feed.',
@@ -59,7 +59,7 @@ export const MESSAGES: readonly string[] = [
   'Encouraging writers helps them focus on making better content for you.',
   'Refine your homepage to show you more educational and useful clips.',
   'Thumbs up teaches the algorithm to recommend higher standard videos.',
-  "Let the writer know their script made a difference to your day.",
+  'Let the writer know their script made a difference to your day.',
   'Help the creator stay motivated to write detailed explanations.',
   'Liking this video is a direct command to improve your algorithm.',
   'Clean your feed: your likes dictate what YouTube recommends next.',
@@ -79,7 +79,7 @@ export const MESSAGES: readonly string[] = [
   'A refined feed comes from liking the channels you trust.',
   'Encourage the writer behind the screen to keep sharing knowledge.',
   "Let the algorithm know you're interested in this specific topic.",
-  "Thumbs up tells creators their long editing sessions are valued.",
+  'Thumbs up tells creators their long editing sessions are valued.',
   'Clear out the clutter on your feed by liking what you love.',
   'Your support drives writers to create more engaging tutorials.',
   'Liking lets writers focus on content depth instead of clickbait thumbnails.',
@@ -103,9 +103,9 @@ export const MESSAGES: readonly string[] = [
   'Encourage the creator to share their expertise with the world.',
   'Support the hours of research that went into making this script.',
   'Refine your dashboard: likes help curate what you see next.',
-] as const
+] as const;
 
 /** Returns a random message from the pool. */
 export function randomMessage(): string {
-  return MESSAGES[Math.floor(Math.random() * MESSAGES.length)]
+  return MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
 }

@@ -6,69 +6,82 @@
  * class names to prevent YouTube styles from bleeding in.
  */
 
-import {randomMessage} from '../lib/messages'
-import {TOAST_DURATION_MS} from '../lib/constants'
+import { randomMessage } from '../lib/messages';
+import { TOAST_DURATION_MS } from '../lib/constants';
 
-const TOAST_ID = 'yt-autolike-toast'
+const TOAST_ID = 'yt-autolike-toast';
 
 /** Inject and display a generic toast message. Auto-closes after TOAST_DURATION_MS. */
 export function showToast(title: string, message: string): void {
-  // Don't stack multiple toasts.
-  if (document.getElementById(TOAST_ID)) return
+  // Force remove existing toast if it somehow stuck around.
+  const existing = document.getElementById(TOAST_ID);
+  if (existing) {
+    existing.remove();
+  }
 
   // Create host element.
-  const host = document.createElement('div')
-  host.id = TOAST_ID
+  const host = document.createElement('div');
+  host.id = TOAST_ID;
+
+  console.log('YT AutoLike: Injecting toast into DOM...');
 
   // Inject styles into the document head (scoped to our ID).
-  injectStyles()
+  injectStyles();
 
-  // Build inner content.
+  // Build inner content with modern glassmorphism.
   host.innerHTML = `
     <div class="yt-al-toast-inner">
-      <div class="yt-al-toast-icon">👍</div>
-      <div class="yt-al-toast-body">
-        <span class="yt-al-toast-title">${escapeHtml(title)}</span>
-        <span class="yt-al-toast-msg">${escapeHtml(message)}</span>
+      <div class="yt-al-toast-content">
+        <div class="yt-al-toast-icon-wrap">
+          <svg class="yt-al-toast-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 9V5C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5V9H5.5C4.67157 9 4 9.67157 4 10.5V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V10.5C20 9.67157 19.3284 9 18.5 9H14Z" fill="currentColor" opacity="0.2"/>
+            <path d="M14 9V5C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5V9M14 9H18.5C19.3284 9 20 9.67157 20 10.5V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V10.5C4 9.67157 4.67157 9 5.5 9H10M14 9H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 14L11 16L15 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="yt-al-toast-body">
+          <span class="yt-al-toast-title">${escapeHtml(title)}</span>
+          <span class="yt-al-toast-msg">${escapeHtml(message)}</span>
+        </div>
       </div>
-      <button class="yt-al-toast-close" aria-label="Dismiss">✕</button>
+      <div class="yt-al-toast-progress" style="animation-duration: ${TOAST_DURATION_MS}ms;"></div>
     </div>
-  `
+  `;
 
-  document.body.appendChild(host)
+  document.body.appendChild(host);
 
-  // Auto-close.
-  const timer = setTimeout(() => dismiss(host), TOAST_DURATION_MS)
+  // Timer logic.
+  setTimeout(() => dismiss(host), TOAST_DURATION_MS);
 
-  // Manual dismiss.
-  const closeBtn = host.querySelector('.yt-al-toast-close')
-  closeBtn?.addEventListener('click', () => {
-    clearTimeout(timer)
-    dismiss(host)
-  })
-
-  // Trigger entrance animation on next frame.
+  // Trigger entrance animation on next frame reliably
   requestAnimationFrame(() => {
-    host.classList.add('yt-al-toast-visible')
-  })
+    requestAnimationFrame(() => {
+      host.classList.add('yt-al-toast-visible');
+    });
+  });
 }
 
 /** Inject and display the hourly reminder toast. Auto-closes after TOAST_DURATION_MS. */
 export function showReminderToast(): void {
-  const message = randomMessage()
-  showToast('Auto Like YT', message)
+  const message = randomMessage();
+  showToast('YT AutoLike Tip', message);
 }
 
 function dismiss(host: HTMLElement): void {
-  host.classList.remove('yt-al-toast-visible')
-  host.classList.add('yt-al-toast-hiding')
-  host.addEventListener(
-    'transitionend',
-    () => {
-      host.remove()
-    },
-    {once: true},
-  )
+  host.classList.remove('yt-al-toast-visible');
+  host.classList.add('yt-al-toast-hiding');
+
+  let removed = false;
+  const doRemove = () => {
+    if (!removed) {
+      removed = true;
+      host.remove();
+    }
+  };
+
+  host.addEventListener('transitionend', doRemove, { once: true });
+  // Fallback in case transitionend doesn't fire (e.g. background tab)
+  setTimeout(doRemove, 500);
 }
 
 function escapeHtml(str: string): string {
@@ -76,28 +89,26 @@ function escapeHtml(str: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+    .replace(/"/g, '&quot;');
 }
 
-let stylesInjected = false
-
 function injectStyles(): void {
-  if (stylesInjected) return
-  stylesInjected = true
+  if (document.getElementById('yt-al-toast-styles')) return;
 
-  const style = document.createElement('style')
+  const style = document.createElement('style');
+  style.id = 'yt-al-toast-styles';
   style.textContent = `
     #${TOAST_ID} {
       all: initial;
       position: fixed;
-      bottom: 80px;
+      bottom: 24px;
       right: 24px;
       z-index: 2147483647;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      opacity: 0;
-      transform: translateY(16px) scale(0.96);
-      transition: opacity 0.3s ease, transform 0.3s ease;
       pointer-events: auto;
+      filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
+      opacity: 0;
+      transform: translateY(24px) scale(0.95);
+      transition: opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     #${TOAST_ID}.yt-al-toast-visible {
@@ -107,80 +118,92 @@ function injectStyles(): void {
 
     #${TOAST_ID}.yt-al-toast-hiding {
       opacity: 0;
-      transform: translateY(16px) scale(0.96);
+      transform: translateY(16px) scale(0.95);
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
     .yt-al-toast-inner {
       all: initial;
       display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-left: 3px solid #ff0000;
+      flex-direction: column;
+      background: #212121;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 12px;
-      padding: 14px 16px;
-      max-width: 340px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
-      backdrop-filter: blur(8px);
+      min-width: 300px;
+      max-width: 360px;
       box-sizing: border-box;
+      overflow: hidden;
+      position: relative;
+      font-family: 'Roboto', Arial, sans-serif;
+      color: #f1f1f1;
+    }
+
+    .yt-al-toast-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .yt-al-toast-icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ff0000;
+      flex-shrink: 0;
+      color: #ffffff;
     }
 
     .yt-al-toast-icon {
-      all: initial;
-      font-size: 22px;
-      line-height: 1;
-      flex-shrink: 0;
-      margin-top: 2px;
+      width: 22px;
+      height: 22px;
+      display: block;
     }
 
     .yt-al-toast-body {
-      all: initial;
       display: flex;
       flex-direction: column;
       gap: 4px;
       flex: 1;
       min-width: 0;
+      padding-top: 2px;
     }
 
     .yt-al-toast-title {
-      all: initial;
-      font-family: inherit;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #ff4444;
+      font-size: 14px;
+      font-weight: 500;
+      color: #f1f1f1;
+      line-height: 1.2;
+      display: block;
+      margin: 0;
     }
 
     .yt-al-toast-msg {
-      all: initial;
-      font-family: inherit;
       font-size: 13px;
-      line-height: 1.45;
-      color: #e8e8e8;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
+      line-height: 1.4;
+      color: #aaaaaa;
+      display: block;
+      margin: 0;
     }
 
-    .yt-al-toast-close {
-      all: initial;
-      cursor: pointer;
-      color: #888;
-      font-size: 14px;
-      line-height: 1;
-      padding: 2px 4px;
-      border-radius: 4px;
-      transition: color 0.2s ease, background 0.2s ease;
-      flex-shrink: 0;
-      font-family: inherit;
+
+    .yt-al-toast-progress {
+      height: 3px;
+      background: linear-gradient(90deg, #cc0000, #ff4444);
+      width: 100%;
+      transform-origin: left;
+      animation: yt-al-progress linear forwards;
+      display: block;
     }
 
-    .yt-al-toast-close:hover {
-      color: #fff;
-      background: rgba(255,255,255,0.1);
+    @keyframes yt-al-progress {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
     }
-  `
+  `;
 
-  document.head.appendChild(style)
+  document.head.appendChild(style);
 }
