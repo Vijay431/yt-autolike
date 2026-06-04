@@ -54,7 +54,7 @@ build_browser() {
   info "Packaging ${browser} → ${output}"
   (
     cd "$browser_dist"
-    zip -r "../../zips/${EXTENSION_NAME}-v${VERSION}-${browser}.zip" . \
+    zip -r "../zips/${EXTENSION_NAME}-v${VERSION}-${browser}.zip" . \
       -x "*.map" \
       -x ".DS_Store" \
       -x "Thumbs.db" \

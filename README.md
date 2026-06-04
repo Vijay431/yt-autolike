@@ -70,7 +70,8 @@ MIT Licensed. All data is stored locally. See [`PRIVACY_POLICY.md`](PRIVACY_POLI
 - [ ] Chrome Web Store: Run E2E tests to verify performance & Back/Forward cache
 - [ ] Chrome Web Store: Register Developer Account ($5 fee)
 - [ ] Chrome Web Store: Fill Privacy/Justification forms based on `CHROMEWEBSTORE.md`
-- [ ] Firefox AMO: Submit extension for review
+- [ ] Firefox Add-ons (AMO): Submit extension for review
+- [ ] Microsoft Edge Add-ons: Submit extension for review
 - [ ] Support for YouTube Shorts (Auto-like logic)
 - [ ] User-defined ignore list for specific channels
 - [ ] Dark mode support for popup and sidebar

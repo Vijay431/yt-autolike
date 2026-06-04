@@ -57,9 +57,8 @@
           <a href="https://chrome.google.com/webstore" target="_blank" class="btn primary-btn"
             >Get for Chrome</a
           >
-          <a href="https://addons.mozilla.org" target="_blank" class="btn secondary-btn"
-            >Get for Firefox</a
-          >
+          <a href="#manual-install" class="btn secondary-btn">Firefox (Manual)</a>
+          <a href="#manual-install" class="btn secondary-btn">Edge (Manual)</a>
         </div>
       </section>
 
@@ -80,6 +79,50 @@
             <div class="icon">🛡️</div>
             <h3>100% Private</h3>
             <p>No servers. No tracking. Everything stays locally on your device.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="manual-install" class="features container">
+        <h2>Manual Installation (Firefox & Edge)</h2>
+        <p style="margin-bottom: 2rem; max-width: 800px; margin-inline: auto">
+          Some additional time is required to create accounts and publish, which is an internal
+          thing. So until we resolve that, please do the manual installation.
+          <strong
+            >Note: Later we will automate the release in the marketplace itself. Once officially
+            launched, please discard the manual method and update to the latest store
+            version.</strong
+          >
+        </p>
+        <div class="grid">
+          <div class="card">
+            <div class="icon">🦊</div>
+            <h3>Firefox</h3>
+            <ol style="text-align: left; padding-left: 20px; font-size: 0.9rem">
+              <li>
+                <a href="https://github.com/Vijay431/yt-autolike/releases/latest" target="_blank"
+                  >Download the Firefox build zip</a
+                >.
+              </li>
+              <li>Go to <code>about:debugging#/runtime/this-firefox</code>.</li>
+              <li>Click <strong>Load Temporary Add-on...</strong></li>
+              <li>Select the downloaded zip file.</li>
+            </ol>
+          </div>
+          <div class="card">
+            <div class="icon">🌊</div>
+            <h3>Microsoft Edge</h3>
+            <ol style="text-align: left; padding-left: 20px; font-size: 0.9rem">
+              <li>
+                <a href="https://github.com/Vijay431/yt-autolike/releases/latest" target="_blank"
+                  >Download the Edge build zip</a
+                >
+                and extract it.
+              </li>
+              <li>Go to <code>edge://extensions/</code>.</li>
+              <li>Enable <strong>Developer mode</strong>.</li>
+              <li>Click <strong>Load unpacked</strong> and select the folder.</li>
+            </ol>
           </div>
         </div>
       </section>

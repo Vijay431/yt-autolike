@@ -151,13 +151,13 @@ Privacy Policy URL: `[FILL IN BEFORE SUBMISSION]`
 
 ## Developer Info
 
-**Publisher Name**: Vijay
+**Publisher Name**: Vijay Gangatharan
 
-**Contact Email**: `[FILL IN — shown publicly on the store listing]`
+**Contact Email**: vijayanand431@gmail.com
 
-**Support URL**: `[FILL IN — GitHub Issues page recommended]`
+**Support URL**: https://github.com/Vijay431/yt-autolike/issues
 
-**Homepage URL**: `[FILL IN — GitHub repository URL recommended]`
+**Homepage URL**: https://github.com/Vijay431/yt-autolike
 
 ---
 
