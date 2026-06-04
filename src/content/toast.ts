@@ -1,35 +1,46 @@
 /**
  * Toast overlay injector — YT AutoLike
  *
- * Injects a styled overlay directly into document.body (NOT inside Shadow DOM)
- * so it appears on top of all YouTube content. Uses `all: initial` + scoped
- * class names to prevent YouTube styles from bleeding in.
+ * Injects a styled overlay using Shadow DOM to avoid bleed-in/out of styles
+ * so it appears on top of all YouTube content.
  */
 
 import { randomMessage } from '../lib/messages';
 import { TOAST_DURATION_MS } from '../lib/constants';
 
+const HOST_ID = 'yt-autolike-toast-host';
 const TOAST_ID = 'yt-autolike-toast';
 
 /** Inject and display a generic toast message. Auto-closes after TOAST_DURATION_MS. */
 export function showToast(title: string, message: string): void {
-  // Force remove existing toast if it somehow stuck around.
-  const existing = document.getElementById(TOAST_ID);
+  // Force remove existing toast host if it exists.
+  const existing = document.getElementById(HOST_ID);
   if (existing) {
     existing.remove();
   }
 
   // Create host element.
   const host = document.createElement('div');
-  host.id = TOAST_ID;
+  host.id = HOST_ID;
+  host.style.position = 'fixed';
+  host.style.bottom = '0';
+  host.style.right = '0';
+  host.style.width = '0';
+  host.style.height = '0';
+  host.style.zIndex = '2147483647';
+  host.style.pointerEvents = 'none';
 
-  console.log('YT AutoLike: Injecting toast into DOM...');
+  console.log('YT AutoLike: Injecting toast into Shadow DOM...');
 
-  // Inject styles into the document head (scoped to our ID).
-  injectStyles();
+  const shadow = host.attachShadow({ mode: 'open' });
 
-  // Build inner content with modern glassmorphism.
-  host.innerHTML = `
+  // Inject styles directly inside the shadow root.
+  injectStyles(shadow);
+
+  // Build inner toast element inside the shadow root.
+  const toast = document.createElement('div');
+  toast.id = TOAST_ID;
+  toast.innerHTML = `
     <div class="yt-al-toast-inner">
       <div class="yt-al-toast-content">
         <div class="yt-al-toast-icon-wrap">
@@ -48,15 +59,16 @@ export function showToast(title: string, message: string): void {
     </div>
   `;
 
+  shadow.appendChild(toast);
   document.body.appendChild(host);
 
   // Timer logic.
-  setTimeout(() => dismiss(host), TOAST_DURATION_MS);
+  setTimeout(() => dismiss(toast, host), TOAST_DURATION_MS);
 
   // Trigger entrance animation on next frame reliably
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      host.classList.add('yt-al-toast-visible');
+      toast.classList.add('yt-al-toast-visible');
     });
   });
 }
@@ -67,9 +79,9 @@ export function showReminderToast(): void {
   showToast('YT AutoLike Tip', message);
 }
 
-function dismiss(host: HTMLElement): void {
-  host.classList.remove('yt-al-toast-visible');
-  host.classList.add('yt-al-toast-hiding');
+function dismiss(toast: HTMLElement, host: HTMLElement): void {
+  toast.classList.remove('yt-al-toast-visible');
+  toast.classList.add('yt-al-toast-hiding');
 
   let removed = false;
   const doRemove = () => {
@@ -79,7 +91,7 @@ function dismiss(host: HTMLElement): void {
     }
   };
 
-  host.addEventListener('transitionend', doRemove, { once: true });
+  toast.addEventListener('transitionend', doRemove, { once: true });
   // Fallback in case transitionend doesn't fire (e.g. background tab)
   setTimeout(doRemove, 500);
 }
@@ -92,11 +104,8 @@ function escapeHtml(str: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function injectStyles(): void {
-  if (document.getElementById('yt-al-toast-styles')) return;
-
+function injectStyles(shadow: ShadowRoot): void {
   const style = document.createElement('style');
-  style.id = 'yt-al-toast-styles';
   style.textContent = `
     #${TOAST_ID} {
       all: initial;
@@ -189,7 +198,6 @@ function injectStyles(): void {
       margin: 0;
     }
 
-
     .yt-al-toast-progress {
       height: 3px;
       background: linear-gradient(90deg, #cc0000, #ff4444);
@@ -205,5 +213,5 @@ function injectStyles(): void {
     }
   `;
 
-  document.head.appendChild(style);
+  shadow.appendChild(style);
 }
