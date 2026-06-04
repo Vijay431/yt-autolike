@@ -1,4 +1,4 @@
-import { test, expect, chromium } from '@playwright/test';
+import { test, expect, chromium, BrowserContext } from '@playwright/test';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 const extensionPath = path.join(__dirname, '../dist/chrome');
 
 test.describe('YT AutoLike Extension E2E', () => {
-  let browserContext;
+  let browserContext: BrowserContext;
 
   test.beforeAll(async () => {
     // Launch Chrome with the extension loaded
@@ -30,9 +30,9 @@ test.describe('YT AutoLike Extension E2E', () => {
     await page.goto('https://www.google.com');
 
     // Find the extension ID from the background pages
-    let [background] = browserContext.backgroundPages();
+    let background = browserContext.backgroundPages()[0];
     if (!background) {
-      background = browserContext.serviceWorkers()[0];
+      background = browserContext.serviceWorkers()[0] as any;
     }
 
     const extensionId = background.url().split('/')[2];
@@ -46,7 +46,8 @@ test.describe('YT AutoLike Extension E2E', () => {
 
     // The extension is fully local and should be fast
     const perf = await page.evaluate(
-      () => performance.getEntriesByType('navigation')[0].loadEventEnd,
+      () =>
+        (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).loadEventEnd,
     );
     expect(perf).toBeLessThan(1000); // Popup should load in < 1s (Back/Forward Cache compatible)
   });
