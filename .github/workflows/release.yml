@@ -35,7 +35,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Update Codebase Version Locally
         run: |
@@ -50,8 +50,41 @@ jobs:
             fs.writeFileSync('src/manifest.json', JSON.stringify(manifest, null, 2) + '\n');
           "
 
+      - name: Verify
+        run: pnpm run verify
+
       - name: Package Extensions
         run: pnpm run package:all
+
+      - name: Validate ZIP Contents
+        run: |
+          TAG_NAME="${{ inputs.tag_name }}"
+          VERSION="${TAG_NAME#v}"
+          node <<'NODE'
+          const fs = require('fs');
+          const cp = require('child_process');
+          const version = (process.env.VERSION || '').replace(/^v/, '');
+          const zips = fs.readdirSync('dist/zips').filter((name) => name.endsWith('.zip'));
+          if (zips.length === 0) throw new Error('No extension ZIPs found.');
+          for (const zip of zips) {
+            const listing = cp.execFileSync('unzip', ['-l', `dist/zips/${zip}`], { encoding: 'utf8' });
+            for (const required of ['manifest.json', 'images/icon-128.png']) {
+              if (!listing.includes(required)) throw new Error(`${zip} is missing ${required}`);
+            }
+            const manifestText = cp.execFileSync('unzip', ['-p', `dist/zips/${zip}`, 'manifest.json'], {
+              encoding: 'utf8',
+            });
+            const manifest = JSON.parse(manifestText);
+            if (manifest.version !== version) {
+              throw new Error(`${zip} version ${manifest.version} does not match ${version}`);
+            }
+            if (!manifest.background || !manifest.content_scripts?.length) {
+              throw new Error(`${zip} is missing background or content scripts`);
+            }
+          }
+          NODE
+        env:
+          VERSION: ${{ inputs.tag_name && inputs.tag_name || github.event.release.tag_name }}
 
       - name: Upload Assets to GitHub Draft Release
         env:
