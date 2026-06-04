@@ -40,24 +40,7 @@ export function showToast(title: string, message: string): void {
   // Build inner toast element inside the shadow root.
   const toast = document.createElement('div');
   toast.id = TOAST_ID;
-  toast.innerHTML = `
-    <div class="yt-al-toast-inner">
-      <div class="yt-al-toast-content">
-        <div class="yt-al-toast-icon-wrap">
-          <svg class="yt-al-toast-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M14 9V5C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5V9H5.5C4.67157 9 4 9.67157 4 10.5V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V10.5C20 9.67157 19.3284 9 18.5 9H14Z" fill="currentColor" opacity="0.2"/>
-            <path d="M14 9V5C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5V9M14 9H18.5C19.3284 9 20 9.67157 20 10.5V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V10.5C4 9.67157 4.67157 9 5.5 9H10M14 9H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M9 14L11 16L15 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="yt-al-toast-body">
-          <span class="yt-al-toast-title">${escapeHtml(title)}</span>
-          <span class="yt-al-toast-msg">${escapeHtml(message)}</span>
-        </div>
-      </div>
-      <div class="yt-al-toast-progress" style="animation-duration: ${TOAST_DURATION_MS}ms;"></div>
-    </div>
-  `;
+  toast.appendChild(buildToastContent(title, message));
 
   shadow.appendChild(toast);
   document.body.appendChild(host);
@@ -96,12 +79,72 @@ function dismiss(toast: HTMLElement, host: HTMLElement): void {
   setTimeout(doRemove, 500);
 }
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+function buildToastContent(title: string, message: string): HTMLElement {
+  const inner = document.createElement('div');
+  inner.className = 'yt-al-toast-inner';
+
+  const content = document.createElement('div');
+  content.className = 'yt-al-toast-content';
+
+  const iconWrap = document.createElement('div');
+  iconWrap.className = 'yt-al-toast-icon-wrap';
+  iconWrap.appendChild(createToastIcon());
+
+  const body = document.createElement('div');
+  body.className = 'yt-al-toast-body';
+
+  const titleEl = document.createElement('span');
+  titleEl.className = 'yt-al-toast-title';
+  titleEl.textContent = title;
+
+  const messageEl = document.createElement('span');
+  messageEl.className = 'yt-al-toast-msg';
+  messageEl.textContent = message;
+
+  const progress = document.createElement('div');
+  progress.className = 'yt-al-toast-progress';
+  progress.style.animationDuration = `${TOAST_DURATION_MS}ms`;
+
+  body.append(titleEl, messageEl);
+  content.append(iconWrap, body);
+  inner.append(content, progress);
+  return inner;
+}
+
+function createToastIcon(): SVGSVGElement {
+  const svgNamespace = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNamespace, 'svg');
+  svg.classList.add('yt-al-toast-icon');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+
+  const fillPath = document.createElementNS(svgNamespace, 'path');
+  fillPath.setAttribute(
+    'd',
+    'M14 9V5C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5V9H5.5C4.67157 9 4 9.67157 4 10.5V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V10.5C20 9.67157 19.3284 9 18.5 9H14Z',
+  );
+  fillPath.setAttribute('fill', 'currentColor');
+  fillPath.setAttribute('opacity', '0.2');
+
+  const outlinePath = document.createElementNS(svgNamespace, 'path');
+  outlinePath.setAttribute(
+    'd',
+    'M14 9V5C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5V9M14 9H18.5C19.3284 9 20 9.67157 20 10.5V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V10.5C4 9.67157 4.67157 9 5.5 9H10M14 9H10',
+  );
+  outlinePath.setAttribute('stroke', 'currentColor');
+  outlinePath.setAttribute('stroke-width', '2');
+  outlinePath.setAttribute('stroke-linecap', 'round');
+  outlinePath.setAttribute('stroke-linejoin', 'round');
+
+  const checkPath = document.createElementNS(svgNamespace, 'path');
+  checkPath.setAttribute('d', 'M9 14L11 16L15 12');
+  checkPath.setAttribute('stroke', 'currentColor');
+  checkPath.setAttribute('stroke-width', '2');
+  checkPath.setAttribute('stroke-linecap', 'round');
+  checkPath.setAttribute('stroke-linejoin', 'round');
+
+  svg.append(fillPath, outlinePath, checkPath);
+  return svg;
 }
 
 function injectStyles(shadow: ShadowRoot): void {

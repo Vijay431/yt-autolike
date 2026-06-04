@@ -12,7 +12,7 @@ YT AutoLike is a browser extension that automatically likes YouTube videos and S
 
 ## 1. What Data Is Collected
 
-The extension collects and stores only the minimum data required for its features to work. All data is stored exclusively in your browser's local storage (`chrome.storage.local`) and never transmitted off your device.
+The extension collects and stores only the minimum data required for its features to work. Settings and whitelist entries use browser sync storage (`chrome.storage.sync`), while stats and activity logs use local storage (`chrome.storage.local`). No extension data is transmitted to any server controlled by this project.
 
 | Data Type                    | Collected?           | What It Is                                                                                                                               | Purpose                                                                                  |
 | ---------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |

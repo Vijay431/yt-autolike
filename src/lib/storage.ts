@@ -1,6 +1,6 @@
 /**
- * Typed wrappers around chrome.storage.local for the YT AutoLike extension.
- * All defaults match the schema in the TRD.
+ * Typed wrappers around chrome.storage for the YT AutoLike extension.
+ * Settings and whitelist are synced; stats and logs are device-local.
  */
 
 import type { Settings, Whitelist, Stats, LogEntry, WhitelistEntry } from './types';

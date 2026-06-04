@@ -354,6 +354,68 @@ async function checkMode(settings: Settings, pageType: PageType): Promise<boolea
 
 type VoteState = 'liked' | 'disliked' | 'none';
 
+export type AutoLikeDecisionInput = {
+  settings: Settings;
+  pageType: PageType;
+  whitelist: Whitelist;
+  channelId: string | null;
+  channelName: string | null;
+  voteState: VoteState;
+  isLoggedIn: boolean;
+  isActivelyWatching: boolean;
+};
+
+export type AutoLikeDecision =
+  | { allowed: true }
+  | {
+      allowed: false;
+      reason:
+        | 'not active'
+        | 'mode mismatch'
+        | 'not whitelisted'
+        | 'logged out'
+        | 'already liked'
+        | 'already disliked';
+    };
+
+export function hasReachedThreshold(
+  watchedSeconds: number,
+  durationSeconds: number,
+  targetPercentage: number,
+): boolean {
+  return watchedSeconds >= durationSeconds * targetPercentage;
+}
+
+export function canAutoLike(input: AutoLikeDecisionInput): AutoLikeDecision {
+  if (!input.isActivelyWatching) return { allowed: false, reason: 'not active' };
+
+  switch (input.settings.mode) {
+    case 'only_shorts':
+      if (input.pageType !== 'short') return { allowed: false, reason: 'mode mismatch' };
+      break;
+    case 'only_videos':
+      if (input.pageType !== 'video') return { allowed: false, reason: 'mode mismatch' };
+      break;
+    case 'whitelist_only': {
+      const whitelisted = input.whitelist.channels.some(
+        (channel) =>
+          (input.channelId && channel.id === input.channelId) ||
+          (input.channelName && channel.name.toLowerCase() === input.channelName.toLowerCase()),
+      );
+      if (!whitelisted) return { allowed: false, reason: 'not whitelisted' };
+      break;
+    }
+    case 'global':
+      break;
+  }
+
+  if (!input.isLoggedIn) return { allowed: false, reason: 'logged out' };
+  if (input.voteState === 'liked') return { allowed: false, reason: 'already liked' };
+  if (input.voteState === 'disliked') return { allowed: false, reason: 'already disliked' };
+
+  return { allowed: true };
+}
+
 function getLikeState(pageType: PageType): VoteState {
   if (pageType === 'video') {
     const likeButton = findVideoLikeButton();

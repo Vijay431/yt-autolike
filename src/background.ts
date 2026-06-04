@@ -10,11 +10,18 @@
  *     can query it when deciding whether to proceed with an "active-watching" check.
  *
  * IMPORTANT: Service workers are ephemeral (~30 s idle before termination).
- * All state is persisted in chrome.storage.local or chrome.storage.session — never
- * in module-level variables.
+ * Settings/whitelist live in chrome.storage.sync, stats/logs in
+ * chrome.storage.local, popup state in chrome.storage.session.
  */
 
-import { appendLog, getStats, setStats } from './lib/storage';
+import {
+  appendLog,
+  DEFAULT_SETTINGS,
+  DEFAULT_STATS,
+  DEFAULT_WHITELIST,
+  getStats,
+  setStats,
+} from './lib/storage';
 import { WATCH_SECONDS_PER_REMINDER, HEARTBEAT_INTERVAL_MS } from './lib/constants';
 import { isValidMessage } from './lib/messages';
 import type { LogEntry } from './lib/types';
@@ -142,21 +149,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // ---------------------------------------------------------------------------
 
 chrome.runtime.onInstalled.addListener(async () => {
-  const existing = await chrome.storage.local.get(['settings', 'whitelist', 'stats', 'logs']);
+  const [existingSync, existingLocal] = await Promise.all([
+    chrome.storage.sync.get(['settings', 'whitelist']),
+    chrome.storage.local.get(['stats', 'logs']),
+  ]);
 
-  const defaults: Record<string, unknown> = {};
-  if (!existing.settings) {
-    defaults.settings = {
-      mode: 'global',
-      target_percentage: 0.5,
-      hourly_reminders_enabled: true,
-    };
-  }
-  if (!existing.whitelist) defaults.whitelist = { channels: [] };
-  if (!existing.stats) defaults.stats = { total_likes_performed: 0, accumulated_watch_seconds: 0 };
-  if (!existing.logs) defaults.logs = [];
+  const syncDefaults: Record<string, unknown> = {};
+  if (!existingSync.settings) syncDefaults.settings = DEFAULT_SETTINGS;
+  if (!existingSync.whitelist) syncDefaults.whitelist = DEFAULT_WHITELIST;
 
-  if (Object.keys(defaults).length > 0) {
-    await chrome.storage.local.set(defaults);
-  }
+  const localDefaults: Record<string, unknown> = {};
+  if (!existingLocal.stats) localDefaults.stats = DEFAULT_STATS;
+  if (!existingLocal.logs) localDefaults.logs = [];
+
+  await Promise.all([
+    Object.keys(syncDefaults).length > 0 ? chrome.storage.sync.set(syncDefaults) : undefined,
+    Object.keys(localDefaults).length > 0 ? chrome.storage.local.set(localDefaults) : undefined,
+  ]);
 });

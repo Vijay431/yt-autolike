@@ -39,10 +39,10 @@ HOW TO USE
 5. Start watching — the extension handles the rest automatically.
 
 PRIVACY
-This extension stores your settings, whitelist, and activity log locally in your browser using chrome.storage.local. No data is ever transmitted to any server. No analytics, no tracking, no cloud sync. See the full privacy policy for details.
+This extension stores settings and whitelist entries in `chrome.storage.sync`, and stores stats plus the activity log locally in `chrome.storage.local`. No data is ever transmitted to any server controlled by this project. No analytics, no tracking, no remote service. See the full privacy policy for details.
 
 PERMISSIONS
-• "storage" — saves your settings, whitelist, and activity log locally on your device between browser sessions.
+• "storage" — saves settings and whitelist entries in browser sync storage, and saves device-specific stats plus activity logs locally.
 • "tabs" — used only by the popup to detect whether you are on a YouTube page, so the "Add Current Channel" button works correctly.
 • Access to youtube.com — required to inject the content script that monitors your watch progress and interacts with the like button. The extension only activates on YouTube watch and Shorts pages.
 
@@ -86,7 +86,7 @@ English
 
 | Permission            | Type             | Justification                                                                                                                                                                                                                                                                                                                                                                                      |
 | --------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `storage`             | permissions      | Saves the user's auto-like mode, watch percentage threshold, pause state, reminder opt-out preference, whitelisted channels, total likes counter, accumulated watch time, and activity log to `chrome.storage.local`. Without this permission, all configuration is lost when the browser session ends.                                                                                            |
+| `storage`             | permissions      | Saves settings and whitelisted channels to `chrome.storage.sync`, and saves device-specific stats plus activity logs to `chrome.storage.local`. Without this permission, configuration and activity state cannot persist.                                                                                                                                                                          |
 | `tabs`                | permissions      | Used exclusively by the popup UI to query the active tab's URL (`chrome.tabs.query`) to determine whether the user is on a YouTube watch or Shorts page. This enables the "Add Current Channel" button to become active and allows the popup to send a message to the content script to retrieve the current channel name. No tab URLs are stored or transmitted.                                  |
 | `*://*.youtube.com/*` | host_permissions | Required to inject the content script on YouTube watch pages (`/watch`) and Shorts pages (`/shorts/`). The content script reads the HTML5 video element's `currentTime` and `duration` to compute watch progress, detects the like/dislike button state via DOM, and performs a click on the like button when the user's threshold is reached. The extension does not operate on any other domain. |
 
@@ -113,8 +113,8 @@ English
 **Additional clarifications for the CWS disclosure form:**
 
 - The extension reads `video.currentTime` and `video.duration` from the YouTube page DOM to compute watch progress. This data is used in memory only and is never stored or transmitted.
-- The extension reads channel name and channel ID from the YouTube page DOM only when the user clicks "Add Current Channel" in the popup. This data is stored locally in `chrome.storage.local` only.
-- The extension does NOT use `chrome.storage.sync` — data never goes to Google's servers.
+- The extension reads channel name and channel ID from the YouTube page DOM only when the user clicks "Add Current Channel" in the popup. This data is stored in `chrome.storage.sync` so the whitelist can follow the signed-in browser profile.
+- The extension uses `chrome.storage.sync` only for settings and whitelist entries. Stats and logs remain device-local.
 
 ### Data Use Certification
 
@@ -197,6 +197,7 @@ Before submitting, verify every item:
 - [x] Description in manifest ≤ 132 chars
 - [ ] Build output ZIP contains only compiled files (no source maps, no node_modules)
 - [ ] ZIP is under 2GB (expected: ~500KB)
+- [ ] Changelog entry matches submitted version
 
 **Permissions**
 

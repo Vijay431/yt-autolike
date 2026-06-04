@@ -1,12 +1,12 @@
 /**
  * Shared TypeScript types for the YT AutoLike extension.
- * These types mirror the chrome.storage.local schema defined in the TRD.
+ * These types mirror the extension storage schema defined in the TRD.
  */
 
 /** The four targeting modes for auto-like behaviour. */
 export type Mode = 'global' | 'only_shorts' | 'only_videos' | 'whitelist_only';
 
-/** User-facing settings stored in chrome.storage.local under the key "settings". */
+/** User-facing settings stored in chrome.storage.sync under the key "settings". */
 export interface Settings {
   /** Which videos/shorts to auto-like. */
   mode: Mode;
@@ -23,12 +23,12 @@ export interface WhitelistEntry {
   added_at: number; // Unix timestamp ms
 }
 
-/** The whitelist stored under the key "whitelist". */
+/** The whitelist stored in chrome.storage.sync under the key "whitelist". */
 export interface Whitelist {
   channels: WhitelistEntry[];
 }
 
-/** Aggregate statistics stored under the key "stats". */
+/** Aggregate statistics stored in chrome.storage.local under the key "stats". */
 export interface Stats {
   total_likes_performed: number;
   /** Cumulative active-watch seconds; resets every 3600s to trigger the reminder. */
