@@ -109,3 +109,57 @@ export const MESSAGES: readonly string[] = [
 export function randomMessage(): string {
   return MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
 }
+
+import type { Message, LogEntry } from './types';
+
+/** Type guard for LogEntry objects received at runtime. */
+export function isValidLogEntry(entry: unknown): entry is LogEntry {
+  if (!entry || typeof entry !== 'object') return false;
+  const e = entry as Record<string, unknown>;
+  if (typeof e.timestamp !== 'number') return false;
+  if (typeof e.title !== 'string') return false;
+  if (typeof e.channel !== 'string') return false;
+  if (e.type !== 'video' && e.type !== 'short') return false;
+  if (e.status !== 'liked' && e.status !== 'skipped' && e.status !== 'error') return false;
+  if (e.reason !== undefined && typeof e.reason !== 'string') return false;
+  return true;
+}
+
+/** Type guard for Message objects exchanged between extension scripts. */
+export function isValidMessage(msg: unknown): msg is Message {
+  if (!msg || typeof msg !== 'object') return false;
+  const m = msg as Record<string, unknown>;
+  if (typeof m.type !== 'string') return false;
+
+  switch (m.type) {
+    case 'HEARTBEAT':
+    case 'SHOW_REMINDER':
+    case 'IS_POPUP_OPEN':
+    case 'POPUP_OPENED':
+    case 'POPUP_CLOSED':
+    case 'GET_VIDEO_STATE':
+    case 'GET_ACTIVE_TAB_INFO':
+      return true;
+
+    case 'IS_POPUP_OPEN_RESPONSE':
+      return typeof m.open === 'boolean';
+
+    case 'RECORD_LIKE':
+    case 'RECORD_SKIP':
+      return isValidLogEntry(m.entry);
+
+    case 'ACTIVE_TAB_INFO': {
+      if (!m.info || typeof m.info !== 'object') return false;
+      const info = m.info as Record<string, unknown>;
+      if (typeof info.tabId !== 'number') return false;
+      if (typeof info.url !== 'string') return false;
+      if (info.channelId !== null && typeof info.channelId !== 'string') return false;
+      if (info.channelName !== null && typeof info.channelName !== 'string') return false;
+      if (typeof info.isYouTube !== 'boolean') return false;
+      return true;
+    }
+
+    default:
+      return false;
+  }
+}
