@@ -15,16 +15,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Globe,
-  Zap,
-  Film,
-  CheckCircle,
-  Settings,
-  Activity,
-  ExternalLink,
-  Clock,
-} from 'lucide-react';
+import { Globe, Zap, Film, CheckCircle, ExternalLink } from 'lucide-react';
 import type { Settings, Whitelist, Stats, Mode, VideoState } from '../lib/types';
 import { getSettings, setSettings, getWhitelist, setWhitelist, getStats } from '../lib/storage';
 import { DEFAULT_SETTINGS, DEFAULT_WHITELIST, DEFAULT_STATS } from '../lib/storage';
@@ -167,8 +158,8 @@ export default function PopupApp() {
   // Whenever videoState returns a new channelName or channelId, we sync it.
   useEffect(() => {
     if (videoState?.isVideoPage) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTabInfo((prev) => {
-        // eslint-disable-line react-hooks/set-state-in-effect
         if (
           prev.channelName === videoState.channelName &&
           prev.channelId === videoState.channelId &&
@@ -234,12 +225,6 @@ export default function PopupApp() {
     await setWhitelist(updated);
     setAddChannelStatus(`Added "${entry.name}" to whitelist.`);
     setTimeout(() => setAddChannelStatus(null), 2500);
-  }
-
-  async function removeChannel(channelId: string) {
-    const updated = { channels: whitelist.channels.filter((c) => c.id !== channelId) };
-    setWhitelistState(updated);
-    await setWhitelist(updated);
   }
 
   // ---------------------------------------------------------------------------
