@@ -13,6 +13,8 @@ node_modules
 
 # testing
 coverage
+test-results
+playwright-report
 
 # production
 dist
@@ -43,4 +45,3 @@ extension-env.d.ts
 # Local tool data
 .gemini/
 .codegraph/
-

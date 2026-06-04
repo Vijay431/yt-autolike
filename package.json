@@ -28,6 +28,9 @@
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "@playwright/test": "^1.60.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18.3.29",
     "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "^8.60.0",
@@ -39,10 +42,12 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "extension": "^3.18.1",
     "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
     "lint-staged": "^17.0.5",
     "prettier": "^3.8.3",
     "sharp": "^0.34.5",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "vitest": "^4.1.8"
   },
   "scripts": {
     "dev": "extension dev",
@@ -66,6 +71,11 @@
     "package:all": "bash package-extension.sh all",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "verify": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build:all",
     "format": "prettier --write .",
     "prepare": "husky"
   },
