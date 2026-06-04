@@ -1,0 +1,48 @@
+name: Feature request
+description: Suggest an improvement for YT AutoLike
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser target
+      options:
+        - All supported browsers
+        - Chrome
+        - Chromium
+        - Firefox
+        - Edge
+        - Not browser-specific
+    validations:
+      required: true
+  - type: dropdown
+    id: page-type
+    attributes:
+      label: YouTube page type
+      options:
+        - Standard video
+        - Shorts
+        - Channel page
+        - All YouTube pages
+        - Not page-specific
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy or permission impact
+      description: Note any new storage, permissions, or data handling.
