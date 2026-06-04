@@ -68,10 +68,10 @@ English
 | Asset              | Dimensions          | Status                                                    | Notes                                                                            |
 | ------------------ | ------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Store Icon         | 128×128 PNG         | 🟡 Use existing `src/images/icon.png` (resize to 128×128) | Must be exactly 128×128                                                          |
-| Screenshot 1       | 1280×800 or 640×400 | ⬜ Not created                                            | Show popup with all 7 sections visible, Global mode active, a few likes recorded |
-| Screenshot 2       | 1280×800 or 640×400 | ⬜ Not created                                            | Show popup with Whitelist Only mode, whitelist channels populated                |
-| Screenshot 3       | 1280×800 or 640×400 | ⬜ Not created                                            | Show the hourly reminder toast overlaying a YouTube video                        |
-| Small Promo Tile   | 440×280             | ⬜ Not created                                            | Dark background, red accent, extension logo, tagline                             |
+| Screenshot 1       | 1280×800 or 640×400 | 🟢 public/images/screenshot-1.png                         | Show popup with all 7 sections visible, Global mode active, a few likes recorded |
+| Screenshot 2       | 1280×800 or 640×400 | 🟢 public/images/screenshot-2.png                         | Show popup with Whitelist Only mode, whitelist channels populated                |
+| Screenshot 3       | 1280×800 or 640×400 | 🟢 public/images/screenshot-3.png                         | Show the hourly reminder toast overlaying a YouTube video                        |
+| Small Promo Tile   | 440×280             | 🟢 public/images/promo-tile.png                           | Dark background, red accent, extension logo, tagline                             |
 | Marquee Promo Tile | 1400×560            | ⬜ Not created                                            | Optional — only needed for featured placement                                    |
 
 ### Screenshot Notes

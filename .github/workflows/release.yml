@@ -2,11 +2,21 @@ name: Release and Publish
 
 on:
   release:
-    types: [published]
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Version tag of the draft release to build and publish (e.g., v1.1.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
-  release:
-    name: Build, Package, Release & Publish
+  build_and_release:
+    name: Build, Package and Release Assets
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
@@ -27,20 +37,52 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Package Extensions
-        run: bash package-extension.sh all
-
-      - name: Find Chrome Extension ZIP
+      - name: Update Codebase Version Locally
         run: |
-          CHROME_ZIP=$(find dist/zips -name "*-chrome.zip" | head -n 1)
-          echo "CHROME_ZIP_PATH=$CHROME_ZIP" >> $GITHUB_ENV
-          echo "Found Chrome ZIP at: $CHROME_ZIP"
+          TAG_NAME="${{ inputs.tag_name }}"
+          VERSION="${TAG_NAME#v}"
+          echo "Bumping local files to version: $VERSION"
+          npm version "$VERSION" --no-git-tag-version
+          node -e "
+            const fs = require('fs');
+            const manifest = JSON.parse(fs.readFileSync('src/manifest.json', 'utf8'));
+            manifest.version = '$VERSION';
+            fs.writeFileSync('src/manifest.json', JSON.stringify(manifest, null, 2) + '\n');
+          "
 
-      - name: Upload Assets to GitHub Release
+      - name: Package Extensions
+        run: pnpm run package:all
+
+      - name: Upload Assets to GitHub Draft Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} dist/zips/*.zip --clobber
+          gh release upload "${{ inputs.tag_name }}" dist/zips/* --clobber
+
+      - name: Publish Draft Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit "${{ inputs.tag_name }}" --draft=false
+
+  publish_to_store:
+    name: Publish to Chrome Web Store
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Chrome Extension ZIP
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p dist/zips
+          gh release download "${{ github.event.release.tag_name }}" --pattern "*-chrome.zip" --dir dist/zips
+          CHROME_ZIP=$(find dist/zips -name "*-chrome.zip" | head -n 1)
+          echo "CHROME_ZIP_PATH=$CHROME_ZIP" >> $GITHUB_ENV
+          echo "Found Chrome ZIP at: $CHROME_ZIP"
 
       - name: Publish to Chrome Web Store
         uses: mnao305/chrome-extension-upload@v2.2.0
