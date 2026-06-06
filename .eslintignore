@@ -3,12 +3,18 @@
 # AI
 .antigravitycli/
 docs/superpowers/
+.agent/
+.agents/
+.claude/
+.codex/
 
 # dependencies
 node_modules
 
 # testing
 coverage
+test-results
+playwright-report
 
 # production
 dist
@@ -32,6 +38,13 @@ package-lock.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+
+# cache and package artifacts
+.eslintcache
+*.tsbuildinfo
+.pnpm-store/
+*.tgz
 
 # extension.js
 extension-env.d.ts
