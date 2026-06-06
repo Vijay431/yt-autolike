@@ -36,5 +36,5 @@ extension-env.d.ts
 
 # Local tool data
 .gemini/
+.agents/
 .codegraph/
-
