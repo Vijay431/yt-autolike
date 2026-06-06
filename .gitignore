@@ -51,4 +51,5 @@ pnpm-debug.log*
 
 # Local tool data
 .gemini/
+.agents/
 .codegraph/
