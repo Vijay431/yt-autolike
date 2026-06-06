@@ -209,6 +209,25 @@ nav a:hover {
   color: var(--text-secondary);
 }
 
+.download-grid {
+  align-items: stretch;
+}
+
+.download-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.download-card p {
+  flex: 1;
+}
+
+.download-btn {
+  display: inline-block;
+  margin-top: 24px;
+  text-align: center;
+}
+
 .privacy-banner {
   background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(0, 0, 0, 0));
   border: 1px solid var(--border-color);
