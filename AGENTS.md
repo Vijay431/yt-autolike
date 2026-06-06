@@ -14,10 +14,11 @@ Welcome, AI Agent! This file contains instructions and context for your work in 
 
 ## Technical Stack
 
-- **Node.js:** v22+
-- **pnpm:** v11+
+- **Node.js:** v22+ locally; CI uses Node 24.
+- **pnpm:** v11+ via `packageManager` (`pnpm@11.2.2`).
 - **Framework:** React with TypeScript (Extension)
 - **Styling:** Vanilla CSS
+- **Browser Targets:** Chrome, Chromium, Edge, and Firefox.
 
 ## Development Workflow
 
@@ -31,16 +32,27 @@ Ugh! Smash bugs!
 
 ## Build Optimization
 
-- On each completion, run the build to produce browser artifacts. Prefer the convenience script that builds all browser targets in parallel using `concurrently`.
+- On each completion, run the full verification gate when practical:
 
-- Install `concurrently` as a dev dependency if not present:
+  `pnpm run verify`
 
-  `pnpm add -D concurrently`
+  This runs lint, typecheck, unit tests, all browser builds, all runtime packages, and package validation.
 
-- Run the parallel build:
+- For a faster packaging-focused pass, run:
 
   `pnpm run build:all`
 
-  This should run the existing `build:chrome`, `build:firefox`, and `build:edge` scripts concurrently to speed up local and CI builds.
+  `pnpm run package:all`
 
-- If you prefer not to change CI, keep the existing single-target build steps; otherwise replace the CI build step with `pnpm run build:all` to run all targets in parallel.
+  `pnpm run package:validate`
+
+- `build:all` uses `concurrently` to build Chrome, Chromium, Firefox, and Edge targets in parallel.
+- Runtime ZIPs must contain only compiled extension files with `manifest.json` at ZIP root.
+- Repo docs, source files, generated folders, test output, and source maps belong in the source ZIP, not runtime ZIPs.
+- Expected artifacts live in `dist/zips/`:
+  - `yt-autolike-vX.Y.Z-chrome.zip`
+  - `yt-autolike-vX.Y.Z-chromium.zip`
+  - `yt-autolike-vX.Y.Z-edge.zip`
+  - `yt-autolike-vX.Y.Z-firefox.zip`
+  - `yt-autolike-vX.Y.Z-firefox.xpi`
+  - `yt-autolike-vX.Y.Z-source.zip`
