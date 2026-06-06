@@ -2,11 +2,11 @@ name: Release and Publish
 
 on:
   release:
-    types: [created]
+    types: [published]
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Version tag of the draft release to build and publish (e.g., v1.1.0)'
+        description: 'Version tag to build and publish (e.g., v1.1.0)'
         required: true
         type: string
 
@@ -14,9 +14,106 @@ permissions:
   contents: write
 
 jobs:
-  build_and_release:
-    name: Build, Package and Release Assets
-    if: github.event_name == 'workflow_dispatch'
+  build:
+    name: Build and Verify Packages
+    runs-on: ubuntu-latest
+
+    env:
+      TAG_NAME: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag_name }}
+
+    steps:
+      - name: Authorize Manual Dispatch
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          ALLOWED_ACTORS: ${{ secrets.RELEASE_WORKFLOW_ALLOWED_ACTORS }}
+        run: |
+          if [ -z "$ALLOWED_ACTORS" ]; then
+            echo "RELEASE_WORKFLOW_ALLOWED_ACTORS is required for manual dispatch."
+            exit 1
+          fi
+
+          IFS=',' read -ra actors <<< "$ALLOWED_ACTORS"
+          for actor in "${actors[@]}"; do
+            actor="$(echo "$actor" | xargs)"
+            if [ "$actor" = "${{ github.actor }}" ]; then
+              exit 0
+            fi
+          done
+
+          echo "Actor ${{ github.actor }} is not allowed to dispatch this workflow."
+          exit 1
+
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.TAG_NAME }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Update Codebase Version Locally
+        run: |
+          VERSION="${TAG_NAME#v}"
+          echo "Bumping local files to version: $VERSION"
+          npm version "$VERSION" --no-git-tag-version
+          node -e "
+            const fs = require('fs');
+            const manifest = JSON.parse(fs.readFileSync('src/manifest.json', 'utf8'));
+            manifest.version = '$VERSION';
+            fs.writeFileSync('src/manifest.json', JSON.stringify(manifest, null, 2) + '\n');
+          "
+
+      - name: Verify
+        run: pnpm run verify
+
+      - name: Create Stable Download Aliases
+        run: |
+          VERSION="${TAG_NAME#v}"
+          cp "dist/zips/yt-autolike-v${VERSION}-chrome.zip" "dist/zips/yt-autolike-chrome.zip"
+          cp "dist/zips/yt-autolike-v${VERSION}-chromium.zip" "dist/zips/yt-autolike-chromium.zip"
+          cp "dist/zips/yt-autolike-v${VERSION}-edge.zip" "dist/zips/yt-autolike-edge.zip"
+          cp "dist/zips/yt-autolike-v${VERSION}-firefox.zip" "dist/zips/yt-autolike-firefox.zip"
+          cp "dist/zips/yt-autolike-v${VERSION}-firefox.xpi" "dist/zips/yt-autolike-firefox.xpi"
+
+      - name: Upload Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-packages
+          path: dist/zips/*
+          if-no-files-found: error
+
+  upload_github_release_assets:
+    name: Upload GitHub Release Assets
+    needs: build
+    runs-on: ubuntu-latest
+
+    env:
+      TAG_NAME: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag_name }}
+
+    steps:
+      - name: Download Package Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-packages
+          path: dist/zips
+
+      - name: Upload Assets to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$TAG_NAME" dist/zips/* --clobber
+
+  publish_chrome_web_store:
+    name: Upload to Chrome Web Store
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -35,62 +132,46 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Update Codebase Version Locally
-        run: |
-          TAG_NAME="${{ inputs.tag_name }}"
-          VERSION="${TAG_NAME#v}"
-          echo "Bumping local files to version: $VERSION"
-          npm version "$VERSION" --no-git-tag-version
-          node -e "
-            const fs = require('fs');
-            const manifest = JSON.parse(fs.readFileSync('src/manifest.json', 'utf8'));
-            manifest.version = '$VERSION';
-            fs.writeFileSync('src/manifest.json', JSON.stringify(manifest, null, 2) + '\n');
-          "
-
-      - name: Verify
-        run: pnpm run verify
-
-      - name: Validate Packages
-        run: pnpm run package:validate
-
-      - name: Upload Assets to GitHub Draft Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "${{ inputs.tag_name }}" dist/zips/* --clobber
-
-      - name: Publish Draft Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release edit "${{ inputs.tag_name }}" --draft=false
-
-  publish_to_store:
-    name: Publish to Chrome Web Store
-    if: github.event_name == 'release'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-
-      - name: Download Chrome Extension ZIP
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p dist/zips
-          gh release download "${{ github.event.release.tag_name }}" --pattern "*-chrome.zip" --dir dist/zips
-          CHROME_ZIP=$(find dist/zips -name "*-chrome.zip" | head -n 1)
-          echo "CHROME_ZIP_PATH=$CHROME_ZIP" >> $GITHUB_ENV
-          echo "Found Chrome ZIP at: $CHROME_ZIP"
-
-      - name: Publish to Chrome Web Store
-        uses: mnao305/chrome-extension-upload@v2.2.0
+      - name: Download Package Artifact
+        uses: actions/download-artifact@v4
         with:
-          file-path: ${{ env.CHROME_ZIP_PATH }}
-          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
-          client-id: ${{ secrets.CHROME_CLIENT_ID }}
-          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
-          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          publish: true
+          name: release-packages
+          path: dist/zips
+
+      - name: Select Chrome ZIP
+        run: |
+          mapfile -t chrome_zips < <(find dist/zips -type f -name "yt-autolike-v*-chrome.zip")
+          if [ "${#chrome_zips[@]}" -ne 1 ]; then
+            echo "Expected exactly one versioned Chrome ZIP, found ${#chrome_zips[@]}."
+            printf '%s\n' "${chrome_zips[@]}"
+            exit 1
+          fi
+          echo "CHROME_ZIP_PATH=${chrome_zips[0]}" >> "$GITHUB_ENV"
+          echo "Found Chrome ZIP at: ${chrome_zips[0]}"
+
+      - name: Upload to Chrome Web Store
+        env:
+          CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+        run: pnpm run chrome-webstore:upload -- --zip "$CHROME_ZIP_PATH"
+
+  publish_firefox_amo:
+    name: Publish to Firefox AMO
+    needs: build
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skipped Until AMO Account Exists
+        run: echo "Firefox AMO publishing is intentionally disabled until credentials exist."
+
+  publish_edge_addons:
+    name: Publish to Edge Add-ons
+    needs: build
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skipped Until Edge Partner Center Account Exists
+        run: echo "Edge Add-ons publishing is intentionally disabled until credentials exist."
