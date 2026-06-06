@@ -67,14 +67,26 @@ Since the GitHub pipeline runs headless, it needs a refresh token to request tem
 
 ## Local Packaging and Verification
 
-To manually build and package the extension zip files locally:
+To manually build, package, and validate the extension files locally:
 
 ```bash
-# Build and package all targets (Chrome, Firefox, Edge, and Source ZIPs)
-bash package-extension.sh all
+pnpm run build:all
+pnpm run package:all
+pnpm run package:validate
 ```
 
-Output ZIP files will be located in `./dist/zips/`.
+`pnpm run verify` runs lint, typecheck, unit tests, all browser builds, all packages, and package validation.
+
+Output files are written to `./dist/zips/`:
+
+- `yt-autolike-vX.Y.Z-chrome.zip`
+- `yt-autolike-vX.Y.Z-chromium.zip`
+- `yt-autolike-vX.Y.Z-edge.zip`
+- `yt-autolike-vX.Y.Z-firefox.zip`
+- `yt-autolike-vX.Y.Z-firefox.xpi`
+- `yt-autolike-vX.Y.Z-source.zip`
+
+Runtime ZIPs contain only compiled extension files with `manifest.json` at the ZIP root. Repository docs, source files, generated folders, test outputs, and source maps are excluded from browser runtime ZIPs. The source ZIP is built from tracked source files for AMO review.
 
 ---
 
@@ -84,6 +96,6 @@ Output ZIP files will be located in `./dist/zips/`.
 2. Publish the release.
 3. The `release` workflow will trigger automatically:
    - Check out the codebase, setup node, and install dependencies.
-   - Run `package-extension.sh all` to bundle browser targets.
+   - Run `pnpm run verify` to build, package, and validate browser targets.
    - Upload the ZIP archives as assets directly to the GitHub release using `gh release`.
    - Deploy the Chrome ZIP package directly to the Chrome Web Store using Google APIs.

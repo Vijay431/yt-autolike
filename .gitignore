@@ -40,7 +40,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # extension.js
-extension-env.d.ts
+/extension-env.d.ts
 
 # Local tool data
 .gemini/

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Trash2, ShieldCheck } from 'lucide-react';
 import { getWhitelist, setWhitelist, DEFAULT_WHITELIST } from '../lib/storage';
 import type { Whitelist } from '../lib/types';
 
@@ -84,19 +84,6 @@ export default function OptionsApp() {
                       </span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <a
-                        href={`https://youtube.com/channel/${channel.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="pause-toggle"
-                        style={{
-                          padding: '8px',
-                          background: 'var(--bg-card-hover)',
-                          color: 'var(--text-secondary)',
-                        }}
-                      >
-                        <ExternalLink size={18} />
-                      </a>
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}

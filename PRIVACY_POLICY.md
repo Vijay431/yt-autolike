@@ -73,9 +73,7 @@ Required to inject the content script on YouTube pages. The content script monit
 
 ## 5. Third-Party Services
 
-**None.** This extension does not use any third-party services, APIs, analytics platforms, crash reporters, or advertising networks. There are no external dependencies that receive data.
-
-The popup UI imports the [Inter](https://fonts.google.com/specimen/Inter) font from Google Fonts via CSS `@import`. This causes your browser to make a request to `fonts.googleapis.com` when the popup is opened, which is standard browser behaviour. Google's [privacy policy](https://policies.google.com/privacy) governs that request. If you prefer to avoid this, you may use a forked build with the font import removed.
+**None.** This extension does not use any third-party services, APIs, analytics platforms, crash reporters, remote fonts, or advertising networks. There are no external dependencies that receive data.
 
 ---
 

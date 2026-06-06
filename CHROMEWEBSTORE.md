@@ -177,7 +177,7 @@ Privacy Policy URL: `[FILL IN BEFORE SUBMISSION]`
 - **Hourly reminder timing**: The 3,600-second accumulator is based on 5-second heartbeat pings during active playback. Pausing the video or switching tabs stops accumulation. The timer is stored in `chrome.storage.local` and persists across page navigations.
 - **Login detection**: Relies on detecting the `#avatar-btn` element in YouTube's masthead. If YouTube changes this element, the login check may fall back to "assume logged in."
 - **Shorts selector**: Shorts detection relies on the `/shorts/` URL prefix. YouTube's Shorts implementation varies by experiment; the extension has fallback selectors.
-- **Google Fonts request**: The popup imports Inter from Google Fonts. This is a standard browser font request, not extension-to-server communication. Declared in the privacy policy.
+- **Runtime package boundary**: Browser ZIPs contain only compiled extension files with `manifest.json` at the ZIP root. Source and review docs are provided separately in the repository and source ZIP.
 
 ### Rejection History
 
@@ -195,7 +195,7 @@ Before submitting, verify every item:
 - [x] Version is `1.0.0`
 - [x] Name matches this document: "YT AutoLike"
 - [x] Description in manifest ≤ 132 chars
-- [ ] Build output ZIP contains only compiled files (no source maps, no node_modules)
+- [x] Build output ZIP contains only compiled files (no source maps, no node_modules, no root review docs)
 - [ ] ZIP is under 2GB (expected: ~500KB)
 - [ ] Changelog entry matches submitted version
 
@@ -222,7 +222,8 @@ Before submitting, verify every item:
 **Privacy & Compliance**
 
 - [x] Data disclosure table is accurate and matches extension code
-- [x] No `chrome.storage.sync` used (data stays local)
+- [x] `chrome.storage.sync` used only for settings and whitelist; stats/logs stay in `chrome.storage.local`
+- [x] No remote fonts or remote runtime `http(s)` references in packaged extension ZIPs
 - [x] No remote code execution
 - [x] No obfuscated code (Extension.js minifies, does not obfuscate)
 - [ ] Privacy policy URL is live and accessible

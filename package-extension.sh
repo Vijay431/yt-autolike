@@ -6,9 +6,9 @@
 #
 # Usage:
 #   chmod +x package-extension.sh
-#   ./package-extension.sh [chrome|edge|firefox|all]
+#   ./package-extension.sh [chrome|chromium|edge|firefox|all]
 #
-# Output: dist/zips/yt-autolike-v1.0.0-chrome.zip (and edge, firefox)
+# Output: dist/zips/yt-autolike-v1.0.0-chrome.zip (and chromium, edge, firefox)
 # =============================================================================
 
 set -euo pipefail
@@ -42,7 +42,7 @@ build_browser() {
   local output="${OUT_DIR}/${EXTENSION_NAME}-v${VERSION}-${browser}.zip"
 
   info "Building ${browser} extension..."
-  pnpm build --browser "${browser}" || error "Build failed for ${browser}"
+  pnpm run "build:${browser}" || error "Build failed for ${browser}"
 
   if [[ ! -d "$browser_dist" ]]; then
     error "Build output directory not found: ${browser_dist}"
@@ -68,7 +68,7 @@ build_browser() {
   info "✅ ${browser}: ${output} (${size})"
 
   if [[ "$browser" == "firefox" ]]; then
-    local xpi_output="${OUT_DIR}/${EXTENSION_NAME}-v${VERSION}.xpi"
+    local xpi_output="${OUT_DIR}/${EXTENSION_NAME}-v${VERSION}-firefox.xpi"
     cp "$output" "$xpi_output"
     local xpi_size
     xpi_size=$(du -sh "$xpi_output" | cut -f1)
@@ -78,19 +78,17 @@ build_browser() {
 
 package_source() {
   local output="${OUT_DIR}/${EXTENSION_NAME}-v${VERSION}-source.zip"
+  local file_list
   info "Packaging source code (required for Firefox AMO)..."
   mkdir -p "$OUT_DIR"
   rm -f "$output"
+  file_list=$(mktemp)
+  git ls-files \
+    | grep -Ev '(^|/)(dist|node_modules|coverage|playwright-report|test-results|graphify-out|\.agent|\.agents|\.antigravitycli|\.claude|\.codegraph|\.codex|\.gemini)(/|$)' \
+    > "$file_list"
 
-  zip -r "$output" . \
-    -x ".git/*" \
-    -x "node_modules/*" \
-    -x "dist/*" \
-    -x "*.zip" \
-    -x ".DS_Store" \
-    -x "Thumbs.db" \
-    -x "__MACOSX/*" \
-    -x ".antigravitycli/*"
+  zip -q "$output" -@ < "$file_list"
+  rm -f "$file_list"
 
   local size
   size=$(du -sh "$output" | cut -f1)
@@ -99,8 +97,8 @@ package_source() {
   warn "Firefox AMO requires this source ZIP to be uploaded separately during submission."
   warn "Include these build instructions in the AMO submission notes:"
   echo "  1. npm install -g pnpm"
-  echo "  2. pnpm install"
-  echo "  3. pnpm build:firefox"
+  echo "  2. pnpm install --frozen-lockfile"
+  echo "  3. pnpm run build:firefox"
   echo "  4. Output: dist/firefox/"
 }
 
@@ -142,7 +140,7 @@ print_manual_install_instructions() {
     echo -e "    1. Navigate to ${YELLOW}about:config${NC} and search for ${YELLOW}xpinstall.signatures.required${NC}"
     echo -e "    2. Double-click to set it to ${YELLOW}false${NC}."
     echo -e "    3. Navigate to ${YELLOW}about:addons${NC}."
-    echo -e "    4. Drag and drop the XPI file: ${YELLOW}${OUT_DIR}/${EXTENSION_NAME}-v${VERSION}.xpi${NC}"
+    echo -e "    4. Drag and drop the XPI file: ${YELLOW}${OUT_DIR}/${EXTENSION_NAME}-v${VERSION}-firefox.xpi${NC}"
     echo -e "       (Or click the gear icon and select ${YELLOW}Install Add-on From File...${NC})"
   fi
   echo -e "\n=============================================================================\n"
@@ -152,6 +150,11 @@ print_manual_install_instructions() {
 # Main
 # ---------------------------------------------------------------------------
 TARGET="${1:-all}"
+
+mkdir -p "$OUT_DIR"
+rm -f "${OUT_DIR}/${EXTENSION_NAME}-v${VERSION}-"*.zip
+rm -f "${OUT_DIR}/${EXTENSION_NAME}-v${VERSION}-"*.xpi
+rm -f "${OUT_DIR}/${EXTENSION_NAME}-v${VERSION}.xpi"
 
 case "$TARGET" in
   chrome)

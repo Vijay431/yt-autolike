@@ -70,6 +70,18 @@ Firefox uses `background.scripts` array instead of `service_worker`. Extension.j
 
 Extension.js includes a polyfill that maps `chrome.*` → `browser.*` in Firefox. The background service worker uses `chrome.*` APIs directly; the polyfill handles translation at runtime.
 
+### Data Collection Manifest Declaration
+
+Firefox MV3 submissions declare data collection status in the manifest. This project sets:
+
+```json
+"firefox:data_collection_permissions": {
+  "required": ["none"]
+}
+```
+
+The packaged Firefox manifest must contain `data_collection_permissions.required: ["none"]`.
+
 ### Temporary Extension ID (for development)
 
 AMO requires a stable extension ID for updates. Add a `browser_specific_settings` entry to `src/manifest.json` for Firefox:
@@ -105,20 +117,16 @@ Because Extension.js minifies the output, AMO's human reviewers will require the
 **How to prepare the source ZIP:**
 
 ```bash
-zip -r yt-autolike-source-v1.0.0.zip . \
-  -x ".git/*" \
-  -x "node_modules/*" \
-  -x "dist/*" \
-  -x "*.zip"
+pnpm run package:firefox
 ```
 
-Upload this source ZIP in the "Source Code" field during AMO submission. Include a `BUILD.md` or note in the submission comments explaining how to reproduce the build:
+Upload `dist/zips/yt-autolike-v1.0.0-source.zip` in the "Source Code" field during AMO submission. The source ZIP is built from tracked source files and excludes generated package, cache, agent, dependency, and test-output folders. Include these notes in the submission comments explaining how to reproduce the build:
 
 ```
 Build instructions:
 1. Install pnpm: npm install -g pnpm
-2. Install dependencies: pnpm install
-3. Build for Firefox: pnpm build:firefox
+2. Install dependencies: pnpm install --frozen-lockfile
+3. Build for Firefox: pnpm run build:firefox
 4. Output is in dist/firefox/
 ```
 
@@ -163,6 +171,7 @@ AMO also accepts a privacy policy entered directly in the submission form. You c
 ## AMO Pre-Submission Checklist
 
 - [ ] `browser_specific_settings.gecko.id` set in manifest (Firefox-specific)
+- [ ] `data_collection_permissions.required` is `["none"]` in the packaged Firefox manifest
 - [ ] `strict_min_version` set to `"109.0"` or appropriate minimum
 - [ ] Source code ZIP prepared separately for AMO reviewer upload
 - [ ] `BUILD.md` or build instructions prepared for AMO reviewer

@@ -503,22 +503,7 @@ export default function PopupApp() {
               by giving them the engagement they deserve!
             </p>
             <div className="footer-links">
-              <a
-                href="https://github.com/Vijay431/yt-autolike"
-                target="_blank"
-                rel="noreferrer"
-                title="Star on GitHub"
-              >
-                ⭐ Star
-              </a>
-              <a
-                href="https://github.com/Vijay431/yt-autolike/issues"
-                target="_blank"
-                rel="noreferrer"
-                title="Raise an Issue"
-              >
-                🛠️ Issue
-              </a>
+              <span title="Repository: Vijay431/yt-autolike">GitHub: Vijay431/yt-autolike</span>
               <a href="mailto:vijayanand431@gmail.com" title="Email for help">
                 📧 Help
               </a>

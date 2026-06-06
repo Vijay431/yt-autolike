@@ -9,12 +9,27 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const extensionPath = path.join(__dirname, '../dist/chrome');
-const popupPathCandidates = ['popup/index.html', 'action/index.html', 'popup.html'];
 const chromiumExecutablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
 let userDataDir = '';
 
+function getPopupPathCandidates(): string[] {
+  const manifestPath = path.join(extensionPath, 'manifest.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as {
+    action?: { default_popup?: string };
+  };
+  return [
+    manifest.action?.default_popup,
+    'action/index.html',
+    'popup/index.html',
+    'popup.html',
+  ].filter((candidate): candidate is string => Boolean(candidate));
+}
+
 async function getExtensionId(browserContext: BrowserContext): Promise<string> {
-  const background = browserContext.serviceWorkers()[0] ?? browserContext.backgroundPages()[0];
+  const background =
+    browserContext.serviceWorkers()[0] ??
+    browserContext.backgroundPages()[0] ??
+    (await browserContext.waitForEvent('serviceworker', { timeout: 5000 }).catch(() => null));
   if (!background) return getExtensionIdFromPreferences() ?? getUnpackedExtensionId(extensionPath);
 
   return (
@@ -56,8 +71,14 @@ async function openFirstExistingExtensionPage(
   paths: string[],
 ): Promise<void> {
   for (const candidate of paths) {
-    const response = await page.goto(`chrome-extension://${extensionId}/${candidate}`);
-    if (response?.ok()) return;
+    try {
+      const response = await page.goto(`chrome-extension://${extensionId}/${candidate}`);
+      if (response?.ok()) return;
+    } catch (error) {
+      if (!(error instanceof Error) || !error.message.includes('ERR_FILE_NOT_FOUND')) {
+        throw error;
+      }
+    }
   }
 
   throw new Error(`None of these extension pages loaded: ${paths.join(', ')}`);
@@ -73,7 +94,11 @@ test.describe('YT AutoLike Extension E2E', () => {
     browserContext = await chromium.launchPersistentContext(userDataDir, {
       headless: false,
       executablePath: chromiumExecutablePath,
-      args: [`--disable-extensions-except=${extensionPath}`, `--load-extension=${extensionPath}`],
+      args: [
+        ...(process.env.CI ? ['--no-sandbox', '--disable-gpu'] : []),
+        `--disable-extensions-except=${extensionPath}`,
+        `--load-extension=${extensionPath}`,
+      ],
     });
   });
 
@@ -88,11 +113,11 @@ test.describe('YT AutoLike Extension E2E', () => {
     const page = await browserContext.newPage();
 
     const extensionId = await getExtensionId(browserContext);
-    await openFirstExistingExtensionPage(page, extensionId, popupPathCandidates);
+    await openFirstExistingExtensionPage(page, extensionId, getPopupPathCandidates());
 
     // Verify popup loads and check main elements
-    await expect(page.locator('text=YT AutoLike')).toBeVisible();
-    await expect(page.locator('text=Targeting Mode')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'YT AutoLike' })).toBeVisible();
+    await expect(page.getByText('YT AutoLike v1.0.0')).toBeVisible();
 
     // The extension is fully local and should be fast
     const perf = await page.evaluate(
