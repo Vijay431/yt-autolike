@@ -107,7 +107,8 @@ const validateNoRemoteReferences = (zipPath, zipName, entries) => {
         !url.startsWith('http://www.w3.org/1998/') &&
         !url.startsWith('http://www.w3.org/1999/') &&
         !url.startsWith('http://www.w3.org/2000/') &&
-        !url.startsWith('https://reactjs.org/docs/error-decoder.html'),
+        !url.startsWith('https://reactjs.org/docs/error-decoder.html') &&
+        !url.startsWith('https://react.dev/errors/'),
     );
     if (actionableRemoteMatches.length > 0) {
       fail(`${zipName} contains a remote http(s) reference in ${entry}`);
