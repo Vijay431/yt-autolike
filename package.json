@@ -1,8 +1,17 @@
 {
   "private": true,
   "name": "yt-autolike",
-  "description": "YT AutoLike automatically likes YouTube videos",
+  "description": "YT AutoLike is a privacy-first browser extension that automatically likes YouTube videos and Shorts to help support your favorite creators.",
   "version": "1.0.0",
+  "keywords": [
+    "youtube-extension",
+    "auto-liker",
+    "browser-extension",
+    "youtube-shorts",
+    "react-extension",
+    "privacy-first",
+    "productivity"
+  ],
   "license": "MIT",
   "type": "module",
   "author": {
@@ -10,27 +19,93 @@
     "email": "vijayanand431@gmail.com"
   },
   "dependencies": {
+    "framer-motion": "^12.40.0",
+    "lucide-react": "^1.17.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
+    "@playwright/test": "^1.60.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18.3.29",
     "@types/react-dom": "^18.3.7",
-    "extension": "^3.17.0",
-    "typescript": "5.3.3"
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
+    "@typescript-eslint/parser": "^8.60.0",
+    "concurrently": "^10.0.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "extension": "^3.18.1",
+    "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
+    "lint-staged": "^17.0.5",
+    "prettier": "^3.8.3",
+    "sharp": "^0.34.5",
+    "typescript": "5.3.3",
+    "vitest": "^4.1.8"
   },
   "scripts": {
     "dev": "extension dev",
+    "dev:chrome": "extension dev --browser chrome",
+    "dev:chromium": "extension dev --browser chromium",
+    "dev:firefox": "extension dev --browser firefox",
+    "dev:edge": "extension dev --browser edge",
     "start": "extension start",
     "build": "extension build",
     "preview": "extension preview",
     "build:chrome": "extension build --browser chrome",
+    "build:chromium": "extension build --browser chromium",
     "build:firefox": "extension build --browser firefox",
-    "build:edge": "extension build --browser edge"
+    "build:edge": "extension build --browser edge",
+    "build:all": "concurrently -n chrome,chromium,firefox,edge -c green,gray,orange,blue \"pnpm run build:chrome\" \"pnpm run build:chromium\" \"pnpm run build:firefox\" \"pnpm run build:edge\"",
+    "package": "bash scripts/package-extension.sh",
+    "package:chrome": "bash scripts/package-extension.sh chrome",
+    "package:chromium": "bash scripts/package-extension.sh chromium",
+    "package:firefox": "bash scripts/package-extension.sh firefox",
+    "package:edge": "bash scripts/package-extension.sh edge",
+    "package:all": "bash scripts/package-extension.sh all",
+    "package:from-dist": "bash scripts/package-extension.sh from-dist",
+    "package:validate": "node scripts/validate-packages.mjs",
+    "chrome-webstore:upload": "node scripts/chrome-webstore-upload.mjs",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "verify": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build:all && pnpm run package:all && pnpm run package:validate",
+    "format": "prettier --write .",
+    "prepare": "husky"
   },
   "packageManager": "pnpm@11.2.2",
   "engines": {
     "node": ">=22.0.0",
     "pnpm": ">=11.0.0"
+  },
+  "prettier": {
+    "semi": true,
+    "trailingComma": "all",
+    "singleQuote": true,
+    "printWidth": 100,
+    "tabWidth": 2
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,json,md,css,html}": [
+      "prettier --write"
+    ]
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   }
 }

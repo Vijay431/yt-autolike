@@ -1,0 +1,67 @@
+name: Cache Cleanup
+
+on:
+  schedule:
+    # Runs daily at 06:30 IST (01:00 UTC) to purge caches for deleted branches/closed PRs.
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  prune-orphan-ref-caches:
+    name: Remove Caches for Deleted Branches and Closed PRs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete caches whose branch or PR no longer exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          deleted_count=0
+          skipped_count=0
+
+          while IFS= read -r cache_json; do
+            cache_id="$(jq -r '.id' <<< "${cache_json}")"
+            cache_key="$(jq -r '.key' <<< "${cache_json}")"
+            cache_ref="$(jq -r '.ref' <<< "${cache_json}")"
+
+            if [[ "${cache_ref}" == refs/heads/* ]]; then
+              branch="${cache_ref#refs/heads/}"
+              http_status="$(gh api "repos/${REPOSITORY}/branches/${branch}" \
+                --silent -i 2>/dev/null | head -1 | awk '{print $2}' || echo '404')"
+
+              if [[ "${http_status}" == "404" ]]; then
+                echo "Deleting cache id=${cache_id} key=${cache_key}; branch '${branch}' no longer exists."
+                gh api --method DELETE "repos/${REPOSITORY}/actions/caches/${cache_id}" >/dev/null
+                deleted_count=$((deleted_count + 1))
+              else
+                echo "Skipping cache id=${cache_id} key=${cache_key}; branch '${branch}' still exists."
+                skipped_count=$((skipped_count + 1))
+              fi
+
+            elif [[ "${cache_ref}" == refs/pull/*/merge ]]; then
+              pr_number="$(echo "${cache_ref}" | sed 's|refs/pull/\([0-9]*\)/merge|\1|')"
+              pr_state="$(gh api "repos/${REPOSITORY}/pulls/${pr_number}" --jq '.state' 2>/dev/null || echo 'unknown')"
+
+              if [[ "${pr_state}" == "closed" ]]; then
+                echo "Deleting cache id=${cache_id} key=${cache_key}; PR #${pr_number} is closed."
+                gh api --method DELETE "repos/${REPOSITORY}/actions/caches/${cache_id}" >/dev/null
+                deleted_count=$((deleted_count + 1))
+              else
+                echo "Skipping cache id=${cache_id} key=${cache_key}; PR #${pr_number} state is ${pr_state}."
+                skipped_count=$((skipped_count + 1))
+              fi
+            else
+              echo "Skipping cache id=${cache_id} key=${cache_key}; ref '${cache_ref}' is not a branch or PR merge ref."
+              skipped_count=$((skipped_count + 1))
+            fi
+
+          done < <(gh api --paginate "repos/${REPOSITORY}/actions/caches?per_page=100" --jq '.actions_caches[] | @json')
+
+          echo "Done. Deleted=${deleted_count} Skipped=${skipped_count}."

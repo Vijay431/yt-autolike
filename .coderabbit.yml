@@ -1,0 +1,109 @@
+language: en-US
+
+reviews:
+  profile: chill
+  show_prompt: true
+  request_changes_workflow: false
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+
+  summary:
+    auto_update: true
+
+  path_filters:
+    - '!dist/**'
+    - '!node_modules/**'
+    - '!coverage/**'
+    - '!playwright-report/**'
+    - '!test-results/**'
+    - '!graphify-out/**'
+    - '!.agent/**'
+    - '!.agents/**'
+    - '!.antigravitycli/**'
+    - '!.claude/**'
+    - '!.codegraph/**'
+    - '!.codex/**'
+    - '!.gemini/**'
+    - '!.husky/**'
+    - '!**/*.zip'
+    - '!**/*.xpi'
+    - '!**/*.png'
+    - '!**/*.jpg'
+    - '!**/*.jpeg'
+    - '!**/*.gif'
+    - '!**/*.webp'
+    - '!**/*.ico'
+    - '!**/*.map'
+    - '!pnpm-lock.yaml'
+
+  path_instructions:
+    - path: 'src/**/*.{ts,tsx}'
+      instructions: |
+        This is a privacy-first React and TypeScript browser extension for YouTube automation.
+        - Protect explicit user intent: auto-like only after configured watch progress, skip when paused, logged out, already liked/disliked, or outside the allowed mode/whitelist.
+        - Flag changes that make automation broader, less predictable, or less observable to the user.
+        - Watch Chrome, Chromium, Edge, and Firefox compatibility for Manifest V3, Extension.js browser-specific manifest keys, service-worker/background behavior, and `chrome.*` API usage.
+        - Flag new permissions, broader host permissions, remote code, external network calls, analytics, telemetry, or storage behavior that conflicts with the local-only privacy posture.
+        - Treat `chrome.storage.sync` as settings/whitelist storage and `chrome.storage.local` as stats/log storage unless a change updates docs, tests, and privacy rationale together.
+        - Review YouTube DOM selectors for brittleness, overly broad matching, accidental dislike clicks, Shorts/video differences, and failure behavior when YouTube markup changes.
+        - Require meaningful TypeScript types, handled async failures, and cleanup of timers/listeners across popup, content, options, background, and sidebar code.
+        - Use pnpm commands in suggestions.
+
+    - path: 'src/manifest.json'
+      instructions: |
+        Review the browser-extension manifest for store and browser compatibility.
+        - Flag any new permission, host permission, content-script match, externally connectable surface, CSP relaxation, or remote-code capability.
+        - Keep Chrome/Chromium/Edge and Firefox-specific keys aligned with Extension.js conventions.
+        - Verify YouTube host scope stays no broader than needed and privacy/store docs are updated when manifest behavior changes.
+
+    - path: 'tests/**/*.ts'
+      instructions: |
+        These tests use Vitest and Playwright.
+        - Check that tests cover user-visible automation decisions, storage validation, messages, selectors, package tooling, and browser/runtime edge cases when touched.
+        - Prefer focused regression coverage over brittle snapshots or assertions tied to incidental styling.
+        - Flag tests that mock browser APIs so loosely that permission, storage, messaging, or YouTube selector regressions would pass unnoticed.
+
+    - path: '.github/workflows/*.yml'
+      instructions: |
+        CI and release workflows should use pnpm 11 via `packageManager`, Node 24 in CI, and the existing verification/package scripts.
+        - Preserve exact-hit cache reuse and skip install steps only when the restored dependency cache is valid.
+        - Keep CI, release, artifact upload, and store-submission boundaries clear; release artifacts should come from verified build/package steps.
+        - Flag workflow changes that upload secrets, generated source maps, test output, or non-runtime files as runtime extension artifacts.
+        - Use `gh` commands when suggesting GitHub follow-up.
+
+    - path: 'package.json'
+      instructions: |
+        This package defines the extension build, test, and release script contract.
+        - Keep pnpm as the only package manager and preserve Node 22+ local / Node 24 CI compatibility.
+        - Treat Chrome, Chromium, Edge, and Firefox as first-class browser targets for build and packaging scripts.
+        - Ensure `verify` continues to cover lint, typecheck, unit tests, all browser builds, all runtime packages, and package validation.
+        - Review dependency changes for runtime size, privacy impact, remote-code risk, and browser-extension store policy risk.
+
+    - path: 'package-extension.sh'
+      instructions: |
+        This script creates store-ready runtime ZIP/XPI artifacts and the Firefox AMO source ZIP.
+        - Runtime ZIPs must contain only compiled extension files with `manifest.json` at the ZIP root; exclude source maps, docs, tests, generated output, and agent metadata.
+        - Keep `package:from-dist` as a packaging-only path that reuses existing browser build outputs instead of rebuilding.
+        - Preserve Chrome, Chromium, Edge, Firefox ZIP outputs plus Firefox XPI and source ZIP naming under `dist/zips/`.
+        - Source ZIP contents must come from tracked source/review files and avoid generated folders or local agent/cache metadata.
+
+    - path: 'tools/**/*.mjs'
+      instructions: |
+        Review package validation and store-upload tooling for release safety.
+        - Validation should fail on missing browser artifacts, missing root manifests, source maps in runtime packages, leaked docs/tests/source in runtime ZIPs, and missing expected Firefox XPI/source ZIP outputs.
+        - Upload tooling must never log secrets and must fail closed when credentials, extension IDs, or artifact paths are missing.
+        - Keep script behavior deterministic for CI and friendly to pnpm/Node 24.
+
+    - path: '{README.md,CHROMEWEBSTORE.md,FIREFOX_AMO.md,EDGE_ADDONS.md,PRIVACY_POLICY.md,SECURITY.md}'
+      instructions: |
+        Store, privacy, and release docs must stay aligned with actual extension behavior.
+        - Keep Chrome Web Store, Firefox AMO, Edge Add-ons, privacy disclosures, package names, and supported browser targets in sync with manifest, source, and packaging scripts.
+        - Flag claims about data collection, network requests, permissions, automation behavior, or package contents that do not match the code.
+        - Keep build and review instructions pnpm-based.
+
+chat:
+  auto_reply: true

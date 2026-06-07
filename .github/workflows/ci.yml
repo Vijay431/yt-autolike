@@ -1,74 +1,250 @@
 name: CI
 
 on:
-  pull_request:
-    branches:
-      - "**"
   push:
-    branches:
-      - main
+    branches: [main]
+    tags: ['v*']
+  pull_request:
 
 jobs:
-  build:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v6
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
         with:
-          version: 11
+          node-version: 24
+          cache: 'pnpm'
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: "pnpm"
-
-      - name: Cache node_modules
+      - name: Restore dependency cache
+        id: dependency-cache
         uses: actions/cache@v5
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
 
       - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Lint
+        run: pnpm run lint
 
-  publish:
-    needs: build
-    if: github.ref == 'refs/heads/main'
+  typecheck:
+    name: Typecheck
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v6
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
         with:
-          version: 11
+          node-version: 24
+          cache: 'pnpm'
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: "pnpm"
-
-      - name: Cache node_modules
+      - name: Restore dependency cache
+        id: dependency-cache
         uses: actions/cache@v5
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
 
       - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
-      - name: Package Extension
-        run: bash package-extension.sh
+      - name: Typecheck
+        run: pnpm run typecheck
+
+  unit_tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Restore dependency cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
+      - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Unit tests
+        run: pnpm run test
+
+  build_browser:
+    name: Build ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+    needs: [unit_tests]
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, chromium, edge, firefox]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Restore dependency cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
+      - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Build browser
+        run: pnpm run build:${{ matrix.browser }}
+
+      - name: Upload browser build
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist-${{ matrix.browser }}
+          path: dist/${{ matrix.browser }}
+          if-no-files-found: error
+
+  validate_packages:
+    name: Validate packages
+    runs-on: ubuntu-latest
+    needs: [build_browser]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Restore dependency cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
+      - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Download Chrome build
+        uses: actions/download-artifact@v7
+        with:
+          name: dist-chrome
+          path: dist/chrome
+
+      - name: Download Chromium build
+        uses: actions/download-artifact@v7
+        with:
+          name: dist-chromium
+          path: dist/chromium
+
+      - name: Download Edge build
+        uses: actions/download-artifact@v7
+        with:
+          name: dist-edge
+          path: dist/edge
+
+      - name: Download Firefox build
+        uses: actions/download-artifact@v7
+        with:
+          name: dist-firefox
+          path: dist/firefox
+
+      - name: Package existing browser builds
+        run: pnpm run package:from-dist
+
+      - name: Validate packages
+        run: pnpm run package:validate
+
+      - name: Write build metadata
+        run: |
+          mkdir -p dist
+          cat > dist/validated-build.json <<EOF
+          {
+            "sha": "${GITHUB_SHA}",
+            "run_id": "${GITHUB_RUN_ID}",
+            "version": "$(node -p "require('./package.json').version")"
+          }
+          EOF
+
+      - name: Upload validated build
+        uses: actions/upload-artifact@v7
+        with:
+          name: validated-extension-dist
+          path: |
+            dist/chrome
+            dist/chromium
+            dist/edge
+            dist/firefox
+            dist/validated-build.json
+          if-no-files-found: error
+
+  e2e_smoke:
+    name: E2E smoke
+    runs-on: ubuntu-latest
+    needs: [validate_packages]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Restore dependency cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
+      - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore Playwright Chromium cache
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-node-24-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Download Chrome build
+        uses: actions/download-artifact@v7
+        with:
+          name: dist-chrome
+          path: dist/chrome
+
+      - name: E2E smoke
+        run: xvfb-run -a pnpm run test:e2e

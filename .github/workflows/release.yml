@@ -1,0 +1,279 @@
+name: Release and Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Version tag to build and publish (e.g., v1.1.0)'
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  package:
+    name: Prepare Release Packages
+    runs-on: ubuntu-latest
+
+    env:
+      TAG_NAME: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag_name }}
+
+    steps:
+      - name: Authorize Manual Dispatch
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          ALLOWED_ACTORS: ${{ secrets.RELEASE_WORKFLOW_ALLOWED_ACTORS }}
+        run: |
+          if [ -z "$ALLOWED_ACTORS" ]; then
+            echo "RELEASE_WORKFLOW_ALLOWED_ACTORS is required for manual dispatch."
+            exit 1
+          fi
+
+          IFS=',' read -ra actors <<< "$ALLOWED_ACTORS"
+          for actor in "${actors[@]}"; do
+            actor="$(echo "$actor" | xargs)"
+            if [ "$actor" = "${{ github.actor }}" ]; then
+              exit 0
+            fi
+          done
+
+          echo "Actor ${{ github.actor }} is not allowed to dispatch this workflow."
+          exit 1
+
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.TAG_NAME }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Restore Dependency Cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
+      - name: Install Dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Update Codebase Version Locally
+        run: |
+          VERSION="${TAG_NAME#v}"
+          echo "Bumping local files to version: $VERSION"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+          node -e "
+            const fs = require('fs');
+            const manifest = JSON.parse(fs.readFileSync('src/manifest.json', 'utf8'));
+            manifest.version = '$VERSION';
+            fs.writeFileSync('src/manifest.json', JSON.stringify(manifest, null, 2) + '\n');
+          "
+
+      - name: Resolve Release Metadata
+        id: release_metadata
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Find Validated CI Run
+        id: ci_run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_SHA: ${{ steps.release_metadata.outputs.sha }}
+        run: |
+          run_id="$(
+            gh api "/repos/${GITHUB_REPOSITORY}/actions/workflows/ci.yml/runs?head_sha=${RELEASE_SHA}&status=completed&per_page=20" \
+              --jq '.workflow_runs[] | select(.conclusion == "success") | .id' \
+              | head -n 1
+          )"
+
+          if [ -n "$run_id" ]; then
+            echo "Found successful CI run: $run_id"
+          else
+            echo "No successful CI run found for ${RELEASE_SHA}; release will rebuild before packaging."
+          fi
+
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+
+      - name: Download Validated CI Build
+        id: download_validated_build
+        if: steps.ci_run.outputs.run_id != ''
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: validated-extension-dist
+          path: dist
+          run-id: ${{ steps.ci_run.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rebuild Release Build Outputs
+        if: steps.ci_run.outputs.run_id == '' || steps.download_validated_build.outcome == 'failure'
+        run: |
+          echo "Validated CI build artifact is missing or expired; rebuilding release build outputs."
+          rm -rf dist
+          pnpm run build:all
+
+      - name: Validate Release Build Versions
+        env:
+          RELEASE_SHA: ${{ steps.release_metadata.outputs.sha }}
+          RELEASE_VERSION: ${{ steps.release_metadata.outputs.version }}
+          CI_RUN_ID: ${{ steps.ci_run.outputs.run_id }}
+          DOWNLOAD_OUTCOME: ${{ steps.download_validated_build.outcome }}
+        run: |
+          package_version="$(node -p "require('./package.json').version")"
+          source_manifest_version="$(node -p "require('./src/manifest.json').version")"
+
+          if [ "$package_version" != "$RELEASE_VERSION" ]; then
+            echo "package.json version ${package_version} does not match release ${RELEASE_VERSION}."
+            exit 1
+          fi
+
+          if [ "$source_manifest_version" != "$RELEASE_VERSION" ]; then
+            echo "src/manifest.json version ${source_manifest_version} does not match release ${RELEASE_VERSION}."
+            exit 1
+          fi
+
+          if [ -n "$CI_RUN_ID" ] && [ "$DOWNLOAD_OUTCOME" = "success" ]; then
+            node -e "
+              const fs = require('fs');
+              const metadata = JSON.parse(fs.readFileSync('dist/validated-build.json', 'utf8'));
+              if (metadata.sha !== process.env.RELEASE_SHA) {
+                throw new Error('validated CI artifact SHA ' + metadata.sha + ' does not match release SHA ' + process.env.RELEASE_SHA);
+              }
+            "
+          fi
+
+          for browser in chrome chromium edge firefox; do
+            manifest_version="$(node -p "require('./dist/${browser}/manifest.json').version")"
+            if [ "$manifest_version" != "$RELEASE_VERSION" ]; then
+              echo "dist/${browser}/manifest.json version ${manifest_version} does not match release ${RELEASE_VERSION}."
+              exit 1
+            fi
+          done
+
+      - name: Package Existing Build Outputs
+        run: pnpm run package:from-dist
+
+      - name: Validate Packages
+        run: pnpm run package:validate
+
+      - name: Create Stable Download Aliases
+        run: |
+          VERSION="${TAG_NAME#v}"
+          cp "dist/zips/yt-autolike-v${VERSION}-chrome.zip" "dist/zips/yt-autolike-chrome.zip"
+          cp "dist/zips/yt-autolike-v${VERSION}-chromium.zip" "dist/zips/yt-autolike-chromium.zip"
+          cp "dist/zips/yt-autolike-v${VERSION}-edge.zip" "dist/zips/yt-autolike-edge.zip"
+          cp "dist/zips/yt-autolike-v${VERSION}-firefox.zip" "dist/zips/yt-autolike-firefox.zip"
+          cp "dist/zips/yt-autolike-v${VERSION}-firefox.xpi" "dist/zips/yt-autolike-firefox.xpi"
+
+      - name: Upload Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-packages
+          path: dist/zips/*
+          if-no-files-found: error
+
+  upload_github_release_assets:
+    name: Upload GitHub Release Assets
+    needs: package
+    runs-on: ubuntu-latest
+
+    env:
+      TAG_NAME: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag_name }}
+
+    steps:
+      - name: Download Package Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-packages
+          path: dist/zips
+
+      - name: Upload Assets to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$TAG_NAME" dist/zips/* --clobber
+
+  publish_chrome_web_store:
+    name: Upload to Chrome Web Store
+    needs: package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Restore Dependency Cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
+      - name: Install Dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Download Package Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-packages
+          path: dist/zips
+
+      - name: Select Chrome ZIP
+        run: |
+          mapfile -t chrome_zips < <(find dist/zips -type f -name "yt-autolike-v*-chrome.zip")
+          if [ "${#chrome_zips[@]}" -ne 1 ]; then
+            echo "Expected exactly one versioned Chrome ZIP, found ${#chrome_zips[@]}."
+            printf '%s\n' "${chrome_zips[@]}"
+            exit 1
+          fi
+          echo "CHROME_ZIP_PATH=${chrome_zips[0]}" >> "$GITHUB_ENV"
+          echo "Found Chrome ZIP at: ${chrome_zips[0]}"
+
+      - name: Upload to Chrome Web Store
+        env:
+          CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+        run: pnpm run chrome-webstore:upload -- --zip "$CHROME_ZIP_PATH"
+
+  publish_firefox_amo:
+    name: Publish to Firefox AMO
+    needs: package
+    if: vars.ENABLE_FIREFOX_AMO_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skipped Until AMO Account Exists
+        run: echo "Firefox AMO publishing is enabled, but no publish steps are configured yet."
+
+  publish_edge_addons:
+    name: Publish to Edge Add-ons
+    needs: package
+    if: vars.ENABLE_EDGE_ADDONS_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skipped Until Edge Partner Center Account Exists
+        run: echo "Edge Add-ons publishing is enabled, but no publish steps are configured yet."

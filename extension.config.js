@@ -1,10 +1,10 @@
-import fs from 'node:fs'
+import fs from 'node:fs';
 
 /** @type {import('extension').FileConfig} */
 // Extension.js uses a fresh profile on every run.
 // Prefer that default? Remove the profile config below.
-const profile = (name) => `./dist/extension-profile-${name}`
-const ciFlags = process.env.CI ? ['--no-sandbox', '--disable-gpu'] : []
+const profile = (name) => `./dist/extension-profile-${name}`;
+const ciFlags = process.env.CI ? ['--no-sandbox', '--disable-gpu'] : [];
 
 // On Linux, the google-chrome wrapper script redirects stdin/stdout to /dev/null,
 // which breaks the --remote-debugging-pipe required by Extension.js dev runner.
@@ -12,33 +12,58 @@ const ciFlags = process.env.CI ? ['--no-sandbox', '--disable-gpu'] : []
 const getChromiumBinary = () => {
   if (process.platform === 'linux') {
     if (fs.existsSync('/opt/google/chrome/chrome')) {
-      return '/opt/google/chrome/chrome'
+      return '/opt/google/chrome/chrome';
     }
   }
-  return undefined
+  return undefined;
+};
+
+const chromiumBinary = getChromiumBinary();
+const releaseHelperEntries = new Set([
+  'scripts/package-extension.sh',
+  'scripts/validate-packages.mjs',
+  'scripts/chrome-webstore-upload.mjs',
+]);
+
+class IgnoreReleaseHelperEntriesPlugin {
+  apply(compiler) {
+    const removeReleaseHelpers = () => {
+      for (const entryName of Object.keys(compiler.options.entry ?? {})) {
+        if (entryName.startsWith('scripts/') || releaseHelperEntries.has(entryName)) {
+          delete compiler.options.entry[entryName];
+        }
+      }
+    };
+
+    removeReleaseHelpers();
+    compiler.hooks.afterPlugins?.tap('IgnoreReleaseHelperEntriesPlugin', removeReleaseHelpers);
+    compiler.hooks.environment?.tap('IgnoreReleaseHelperEntriesPlugin', removeReleaseHelpers);
+  }
 }
 
-const chromiumBinary = getChromiumBinary()
-
 export default {
+  config(config) {
+    config.plugins = [...(config.plugins ?? []), new IgnoreReleaseHelperEntriesPlugin()];
+    return config;
+  },
   browser: {
     chrome: {
       profile: profile('chrome'),
       browserFlags: ciFlags,
-      ...(chromiumBinary ? { chromiumBinary } : {})
+      ...(chromiumBinary ? { chromiumBinary } : {}),
     },
     chromium: {
       profile: profile('chromium'),
       browserFlags: ciFlags,
-      ...(chromiumBinary ? { chromiumBinary } : {})
+      ...(chromiumBinary ? { chromiumBinary } : {}),
     },
-    edge: {profile: profile('edge'), browserFlags: ciFlags},
-    firefox: {profile: profile('firefox')},
+    edge: { profile: profile('edge'), browserFlags: ciFlags },
+    firefox: { profile: profile('firefox') },
     'chromium-based': {
       profile: profile('chromium-based'),
       browserFlags: ciFlags,
-      ...(chromiumBinary ? { chromiumBinary } : {})
+      ...(chromiumBinary ? { chromiumBinary } : {}),
     },
-    'gecko-based': {profile: profile('gecko-based')}
-  }
-}
+    'gecko-based': { profile: profile('gecko-based') },
+  },
+};

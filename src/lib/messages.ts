@@ -48,7 +48,7 @@ export const MESSAGES: readonly string[] = [
   'A smart feed requires a trained algorithm. Keep liking quality content.',
   'Give the creator the motivation to tackle even bigger video ideas.',
   'Refine your daily content by giving thumbs up to trusted creators.',
-  "Your like is a message to the writer that their effort was valued.",
+  'Your like is a message to the writer that their effort was valued.',
   'Help the recommendation algorithm find more channels like this one.',
   'Encourage creators to prioritize depth over click-driven trends.',
   'Tell YouTube you want high-effort videos on your home feed.',
@@ -59,7 +59,7 @@ export const MESSAGES: readonly string[] = [
   'Encouraging writers helps them focus on making better content for you.',
   'Refine your homepage to show you more educational and useful clips.',
   'Thumbs up teaches the algorithm to recommend higher standard videos.',
-  "Let the writer know their script made a difference to your day.",
+  'Let the writer know their script made a difference to your day.',
   'Help the creator stay motivated to write detailed explanations.',
   'Liking this video is a direct command to improve your algorithm.',
   'Clean your feed: your likes dictate what YouTube recommends next.',
@@ -79,7 +79,7 @@ export const MESSAGES: readonly string[] = [
   'A refined feed comes from liking the channels you trust.',
   'Encourage the writer behind the screen to keep sharing knowledge.',
   "Let the algorithm know you're interested in this specific topic.",
-  "Thumbs up tells creators their long editing sessions are valued.",
+  'Thumbs up tells creators their long editing sessions are valued.',
   'Clear out the clutter on your feed by liking what you love.',
   'Your support drives writers to create more engaging tutorials.',
   'Liking lets writers focus on content depth instead of clickbait thumbnails.',
@@ -103,9 +103,63 @@ export const MESSAGES: readonly string[] = [
   'Encourage the creator to share their expertise with the world.',
   'Support the hours of research that went into making this script.',
   'Refine your dashboard: likes help curate what you see next.',
-] as const
+] as const;
 
 /** Returns a random message from the pool. */
 export function randomMessage(): string {
-  return MESSAGES[Math.floor(Math.random() * MESSAGES.length)]
+  return MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
+}
+
+import type { Message, LogEntry } from './types';
+
+/** Type guard for LogEntry objects received at runtime. */
+export function isValidLogEntry(entry: unknown): entry is LogEntry {
+  if (!entry || typeof entry !== 'object') return false;
+  const e = entry as Record<string, unknown>;
+  if (typeof e.timestamp !== 'number') return false;
+  if (typeof e.title !== 'string') return false;
+  if (typeof e.channel !== 'string') return false;
+  if (e.type !== 'video' && e.type !== 'short') return false;
+  if (e.status !== 'liked' && e.status !== 'skipped' && e.status !== 'error') return false;
+  if (e.reason !== undefined && typeof e.reason !== 'string') return false;
+  return true;
+}
+
+/** Type guard for Message objects exchanged between extension scripts. */
+export function isValidMessage(msg: unknown): msg is Message {
+  if (!msg || typeof msg !== 'object') return false;
+  const m = msg as Record<string, unknown>;
+  if (typeof m.type !== 'string') return false;
+
+  switch (m.type) {
+    case 'HEARTBEAT':
+    case 'SHOW_REMINDER':
+    case 'IS_POPUP_OPEN':
+    case 'POPUP_OPENED':
+    case 'POPUP_CLOSED':
+    case 'GET_VIDEO_STATE':
+    case 'GET_ACTIVE_TAB_INFO':
+      return true;
+
+    case 'IS_POPUP_OPEN_RESPONSE':
+      return typeof m.open === 'boolean';
+
+    case 'RECORD_LIKE':
+    case 'RECORD_SKIP':
+      return isValidLogEntry(m.entry);
+
+    case 'ACTIVE_TAB_INFO': {
+      if (!m.info || typeof m.info !== 'object') return false;
+      const info = m.info as Record<string, unknown>;
+      if (typeof info.tabId !== 'number') return false;
+      if (typeof info.url !== 'string') return false;
+      if (info.channelId !== null && typeof info.channelId !== 'string') return false;
+      if (info.channelName !== null && typeof info.channelName !== 'string') return false;
+      if (typeof info.isYouTube !== 'boolean') return false;
+      return true;
+    }
+
+    default:
+      return false;
+  }
 }

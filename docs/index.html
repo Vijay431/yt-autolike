@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YT AutoLike | Privacy-First Auto Liker for YouTube & Shorts</title>
+    <meta
+      name="description"
+      content="Never forget to hit the like button again. YT AutoLike automatically likes YouTube videos and Shorts based on your watch time. 100% free and open-source."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "YT AutoLike",
+        "operatingSystem": "Chrome, Firefox, Edge",
+        "applicationCategory": "BrowserExtension",
+        "offers": {
+          "@type": "Offer",
+          "price": "0"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="glass-bg"></div>
+    <header>
+      <div class="container header-content">
+        <div class="logo">
+          <img src="logo.png" alt="YT AutoLike Logo" class="logo-img" />
+          <span>YT AutoLike</span>
+        </div>
+        <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
+        <nav id="nav-menu">
+          <a href="#features">Features</a>
+          <a href="#privacy">Privacy</a>
+          <a href="https://github.com/Vijay431/yt-autolike" target="_blank" class="nav-btn"
+            >GitHub</a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero container">
+        <h1>Support Creators <span class="highlight">Automatically</span></h1>
+        <p>
+          The ultimate privacy-first browser extension that likes YouTube videos and Shorts after
+          you watch them. Set it, forget it, and support your favorite channels.
+        </p>
+        <div class="cta-group">
+          <a
+            href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chrome.zip"
+            class="btn primary-btn"
+            >Download Chrome ZIP</a
+          >
+          <a href="#downloads" class="btn secondary-btn">All Downloads</a>
+          <a href="#manual-install" class="btn secondary-btn">Manual Install</a>
+        </div>
+      </section>
+
+      <section id="features" class="features container">
+        <h2>Why YT AutoLike?</h2>
+        <div class="grid">
+          <div class="card">
+            <div class="icon">🎯</div>
+            <h3>Four Modes</h3>
+            <p>Global, Only Shorts, Only Videos, or Whitelist Only. You are in control.</p>
+          </div>
+          <div class="card">
+            <div class="icon">⏲️</div>
+            <h3>Custom Threshold</h3>
+            <p>Set a watch percentage (10% to 90%) to trigger the like automatically.</p>
+          </div>
+          <div class="card">
+            <div class="icon">🛡️</div>
+            <h3>100% Private</h3>
+            <p>No servers. No tracking. Everything stays locally on your device.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="downloads" class="features container">
+        <h2>Downloads</h2>
+        <div class="grid download-grid">
+          <div class="card download-card">
+            <div class="icon">🌐</div>
+            <h3>Chrome</h3>
+            <p>Primary Chrome package while the Chrome Web Store listing is being prepared.</p>
+            <a
+              href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chrome.zip"
+              class="btn primary-btn download-btn"
+              >Chrome ZIP</a
+            >
+          </div>
+          <div class="card download-card">
+            <div class="icon">⚙️</div>
+            <h3>Chromium</h3>
+            <p>Manual package for Chromium browsers that support unpacked extensions.</p>
+            <a
+              href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chromium.zip"
+              class="btn secondary-btn download-btn"
+              >Chromium ZIP</a
+            >
+          </div>
+          <div class="card download-card">
+            <div class="icon">🌊</div>
+            <h3>Microsoft Edge</h3>
+            <p>Manual package for Edge until the Partner Center listing is live.</p>
+            <a
+              href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-edge.zip"
+              class="btn secondary-btn download-btn"
+              >Edge ZIP</a
+            >
+          </div>
+          <div class="card download-card">
+            <div class="icon">🦊</div>
+            <h3>Firefox ZIP</h3>
+            <p>Temporary debugging package for Firefox manual installation.</p>
+            <a
+              href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-firefox.zip"
+              class="btn secondary-btn download-btn"
+              >Firefox ZIP</a
+            >
+          </div>
+          <div class="card download-card">
+            <div class="icon">🧩</div>
+            <h3>Firefox XPI</h3>
+            <p>Add-on package for Firefox Developer, Nightly, ESR, and signed-release flows.</p>
+            <a
+              href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-firefox.xpi"
+              class="btn secondary-btn download-btn"
+              >Firefox XPI</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <section id="manual-install" class="features container">
+        <h2>Manual Installation</h2>
+        <p style="margin-bottom: 2rem; max-width: 800px; margin-inline: auto">
+          Browser marketplace listings are still being prepared. Until the store pages are live, use
+          the latest release ZIPs and manual installation steps below.
+        </p>
+        <div class="grid">
+          <div class="card">
+            <div class="icon">🌐</div>
+            <h3>Chrome / Chromium</h3>
+            <ol style="text-align: left; padding-left: 20px; font-size: 0.9rem">
+              <li>
+                <a
+                  href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chrome.zip"
+                  >Download the Chrome ZIP</a
+                >
+                or
+                <a
+                  href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chromium.zip"
+                  >Chromium ZIP</a
+                >.
+              </li>
+              <li>Extract the downloaded ZIP.</li>
+              <li>Go to <code>chrome://extensions/</code>.</li>
+              <li>Enable <strong>Developer mode</strong>.</li>
+              <li>Click <strong>Load unpacked</strong> and select the extracted folder.</li>
+            </ol>
+          </div>
+          <div class="card">
+            <div class="icon">🦊</div>
+            <h3>Firefox</h3>
+            <ol style="text-align: left; padding-left: 20px; font-size: 0.9rem">
+              <li>
+                <a
+                  href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-firefox.zip"
+                  >Download the Firefox ZIP</a
+                >.
+              </li>
+              <li>Go to <code>about:debugging#/runtime/this-firefox</code>.</li>
+              <li>Click <strong>Load Temporary Add-on...</strong></li>
+              <li>Select the downloaded zip file.</li>
+            </ol>
+          </div>
+          <div class="card">
+            <div class="icon">🌊</div>
+            <h3>Microsoft Edge</h3>
+            <ol style="text-align: left; padding-left: 20px; font-size: 0.9rem">
+              <li>
+                <a
+                  href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-edge.zip"
+                  >Download the Edge ZIP</a
+                >
+                and extract it.
+              </li>
+              <li>Go to <code>edge://extensions/</code>.</li>
+              <li>Enable <strong>Developer mode</strong>.</li>
+              <li>Click <strong>Load unpacked</strong> and select the folder.</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section id="privacy" class="privacy-banner container">
+        <h2>Your Data, Your Business</h2>
+        <p>
+          Unlike other extensions, YT AutoLike is completely open-source and local. We never
+          collect, sell, or view your watch history.
+        </p>
+        <a
+          href="https://github.com/Vijay431/yt-autolike/blob/main/PRIVACY_POLICY.md"
+          target="_blank"
+          class="text-link"
+          >Read our Privacy Policy ➔</a
+        >
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-content">
+        <p>© 2026 YT AutoLike. Released under the MIT License.</p>
+        <div class="links">
+          <a href="https://github.com/Vijay431/yt-autolike/issues" target="_blank"
+            >Report an Issue</a
+          >
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const menuToggle = document.querySelector('.menu-toggle');
+      const navMenu = document.getElementById('nav-menu');
+      menuToggle.addEventListener('click', () => {
+        navMenu.classList.toggle('open');
+      });
+      // Close menu when a link is clicked
+      document.querySelectorAll('#nav-menu a').forEach((link) => {
+        link.addEventListener('click', () => {
+          navMenu.classList.remove('open');
+        });
+      });
+    </script>
+  </body>
+</html>

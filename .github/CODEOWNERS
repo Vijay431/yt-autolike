@@ -1,0 +1,35 @@
+# Critical ownership rules for release, packaging, permissions, privacy, and automation.
+# GitHub requests these owners on matching PR changes. Merge blocking requires
+# branch protection/rulesets with "Require review from Code Owners" enabled.
+
+# CODEOWNERS changes must be owner-reviewed.
+/.github/CODEOWNERS @Vijay431
+
+# CI, release, dependency automation, and agent workflow guidance.
+/.github/workflows/** @Vijay431
+/.github/dependabot.yml @Vijay431
+/AGENTS.md @Vijay431
+/GEMINI.md @Vijay431
+
+# Package metadata, lockfile, release packaging, and upload/validation tooling.
+/package.json @Vijay431
+/pnpm-lock.yaml @Vijay431
+/scripts/package-extension.sh @Vijay431
+/scripts/validate-packages.mjs @Vijay431
+/scripts/chrome-webstore-upload.mjs @Vijay431
+
+# Extension permissions, browser manifest behavior, storage/privacy, and core content automation.
+/src/manifest.json @Vijay431
+/src/background.ts @Vijay431
+/src/content/** @Vijay431
+/src/lib/constants.ts @Vijay431
+/src/lib/messages.ts @Vijay431
+/src/lib/storage.ts @Vijay431
+/src/lib/types.ts @Vijay431
+
+# Store, release, security, and privacy documentation.
+/CHROMEWEBSTORE.md @Vijay431
+/FIREFOX_AMO.md @Vijay431
+/PRIVACY_POLICY.md @Vijay431
+/SECURITY.md @Vijay431
+/DEVELOPER.md @Vijay431
