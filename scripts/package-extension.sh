@@ -66,8 +66,7 @@ package_browser_dist() {
       -x ".DS_Store" \
       -x "Thumbs.db" \
       -x "__MACOSX/*" \
-      -x "screenshot.png" \
-      -x "images/*"
+      -x "screenshot.png"
   )
 
   local size

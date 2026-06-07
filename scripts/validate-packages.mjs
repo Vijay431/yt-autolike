@@ -23,7 +23,6 @@ const runtimeForbidden = [
   /^node_modules\//,
   /^dist\//,
   /^docs?\//,
-  /^images\//,
   /^\.git\//,
   /^\.agent\//,
   /^\.agents\//,
