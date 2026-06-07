@@ -238,5 +238,11 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Download Chrome build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-chrome
+          path: dist/chrome
+
       - name: E2E smoke
         run: xvfb-run -a pnpm run test:e2e
