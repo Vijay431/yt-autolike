@@ -2,12 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [main, dev]
   pull_request:
-    branches: [main, dev]
 
 jobs:
-  build:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -18,28 +17,225 @@ jobs:
           node-version: 24
           cache: 'pnpm'
 
+      - name: Restore dependency cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
       - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Lint
         run: pnpm run lint
 
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Restore dependency cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
+      - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
       - name: Typecheck
         run: pnpm run typecheck
+
+  unit_tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Restore dependency cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
+      - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
 
       - name: Unit tests
         run: pnpm run test
 
-      - name: Build all browsers
-        run: pnpm run build:all
+  build_browser:
+    name: Build ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+    needs: [unit_tests]
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, chromium, edge, firefox]
 
-      - name: Package all browsers
-        run: pnpm run package:all
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Restore dependency cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
+      - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Build browser
+        run: pnpm run build:${{ matrix.browser }}
+
+      - name: Upload browser build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.browser }}
+          path: dist/${{ matrix.browser }}
+          if-no-files-found: error
+
+  validate_packages:
+    name: Validate packages
+    runs-on: ubuntu-latest
+    needs: [build_browser]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Restore dependency cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
+      - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Download Chrome build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-chrome
+          path: dist/chrome
+
+      - name: Download Chromium build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-chromium
+          path: dist/chromium
+
+      - name: Download Edge build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-edge
+          path: dist/edge
+
+      - name: Download Firefox build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-firefox
+          path: dist/firefox
+
+      - name: Package existing browser builds
+        run: pnpm run package:from-dist
 
       - name: Validate packages
         run: pnpm run package:validate
 
+      - name: Write build metadata
+        run: |
+          mkdir -p dist
+          cat > dist/validated-build.json <<EOF
+          {
+            "sha": "${GITHUB_SHA}",
+            "run_id": "${GITHUB_RUN_ID}",
+            "version": "$(node -p "require('./package.json').version")"
+          }
+          EOF
+
+      - name: Upload validated build
+        uses: actions/upload-artifact@v4
+        with:
+          name: validated-extension-dist
+          path: |
+            dist/chrome
+            dist/chromium
+            dist/edge
+            dist/firefox
+            dist/validated-build.json
+          if-no-files-found: error
+
+  e2e_smoke:
+    name: E2E smoke
+    runs-on: ubuntu-latest
+    needs: [validate_packages]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Restore dependency cache
+        id: dependency-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
+
+      - name: Install dependencies
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore Playwright Chromium cache
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-node-24-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
       - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
 
       - name: E2E smoke
