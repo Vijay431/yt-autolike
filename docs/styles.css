@@ -195,15 +195,17 @@ nav {
   color: var(--accent-red);
 }
 
-/* ── Right column: GitHub icon ── */
+/* ── Right column: Nav icons ── */
 .nav-actions {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   grid-column: 3;
+  gap: 8px;
 }
 
-.github-icon-btn {
+.github-icon-btn,
+.linkedin-icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -218,13 +220,22 @@ nav {
   text-decoration: none;
 }
 
-.github-icon-btn:hover {
-  color: var(--accent-red);
+.github-icon-btn:hover,
+.linkedin-icon-btn:hover {
   background: rgba(255, 255, 255, 0.08);
   transform: scale(1.1);
 }
 
-.github-icon-btn svg {
+.github-icon-btn:hover {
+  color: var(--accent-red);
+}
+
+.linkedin-icon-btn:hover {
+  color: #0a66c2;
+}
+
+.github-icon-btn svg,
+.linkedin-icon-btn svg {
   display: block;
   flex-shrink: 0;
 }
