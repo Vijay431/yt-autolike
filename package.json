@@ -69,6 +69,7 @@
     "package:firefox": "bash package-extension.sh firefox",
     "package:edge": "bash package-extension.sh edge",
     "package:all": "bash package-extension.sh all",
+    "package:from-dist": "bash package-extension.sh from-dist",
     "package:validate": "node tools/validate-packages.mjs",
     "chrome-webstore:upload": "node tools/chrome-webstore-upload.mjs",
     "lint": "eslint . --ext .ts,.tsx",

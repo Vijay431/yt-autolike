@@ -6,7 +6,7 @@
 #
 # Usage:
 #   chmod +x package-extension.sh
-#   ./package-extension.sh [chrome|chromium|edge|firefox|all]
+#   ./package-extension.sh [chrome|chromium|edge|firefox|all|from-dist]
 #
 # Output: dist/zips/yt-autolike-v1.0.0-chrome.zip (and chromium, edge, firefox)
 # =============================================================================
@@ -39,10 +39,17 @@ error()   { echo -e "${RED}[ERROR]${NC} $*"; exit 1; }
 build_browser() {
   local browser="$1"
   local browser_dist="${DIST_DIR}/${browser}"
-  local output="${OUT_DIR}/${EXTENSION_NAME}-v${VERSION}-${browser}.zip"
 
   info "Building ${browser} extension..."
   pnpm run "build:${browser}" || error "Build failed for ${browser}"
+
+  package_browser_dist "$browser" "$browser_dist"
+}
+
+package_browser_dist() {
+  local browser="$1"
+  local browser_dist="$2"
+  local output="${OUT_DIR}/${EXTENSION_NAME}-v${VERSION}-${browser}.zip"
 
   if [[ ! -d "$browser_dist" ]]; then
     error "Build output directory not found: ${browser_dist}"
@@ -185,7 +192,18 @@ case "$TARGET" in
     ls -lh "${OUT_DIR}/"
     print_manual_install_instructions "all"
     ;;
+  from-dist)
+    info "Packaging existing browser build outputs..."
+    package_browser_dist "chrome" "${DIST_DIR}/chrome"
+    package_browser_dist "chromium" "${DIST_DIR}/chromium"
+    package_browser_dist "edge" "${DIST_DIR}/edge"
+    package_browser_dist "firefox" "${DIST_DIR}/firefox"
+    package_source
+    echo ""
+    info "All packages ready in ${OUT_DIR}/"
+    ls -lh "${OUT_DIR}/"
+    ;;
   *)
-    error "Unknown target '${TARGET}'. Use: chrome | chromium | edge | firefox | all"
+    error "Unknown target '${TARGET}'. Use: chrome | chromium | edge | firefox | all | from-dist"
     ;;
 esac
