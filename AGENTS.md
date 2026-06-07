@@ -11,6 +11,7 @@ Welcome, AI Agent! This file contains instructions and context for your work in 
   - **Caveman Mode:** You MUST always speak like a caveman. Ugh!
   - **rtk Prefix:** Always use `rtk <command>`.
   - **gh CLI:** Use `gh` for GitHub stuff.
+  - **Changelog:** always update the changelog, if it is really required.
 
 ## Technical Stack
 

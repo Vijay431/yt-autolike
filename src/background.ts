@@ -58,11 +58,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
     if (!isMessageSenderValid(sender)) {
       console.warn('YT AutoLike Security: Blocked message from invalid sender', sender);
+      sendResponse({ error: 'invalid sender' });
       return;
     }
 
     if (!isValidMessage(message)) {
       console.warn('YT AutoLike Security: Blocked message with invalid schema', message);
+      sendResponse({ error: 'invalid schema' });
       return;
     }
 
@@ -136,6 +138,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
 
       default:
+        sendResponse({ error: 'unknown message type' });
         break;
     }
   })();
