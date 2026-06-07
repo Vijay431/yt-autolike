@@ -110,7 +110,7 @@ jobs:
       - name: Download Validated CI Build
         id: download_validated_build
         if: steps.ci_run.outputs.run_id != ''
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         continue-on-error: true
         with:
           name: validated-extension-dist
@@ -195,7 +195,7 @@ jobs:
 
     steps:
       - name: Download Package Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-packages
           path: dist/zips
@@ -235,7 +235,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download Package Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-packages
           path: dist/zips

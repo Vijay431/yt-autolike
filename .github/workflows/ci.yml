@@ -149,25 +149,25 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download Chrome build
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: dist-chrome
           path: dist/chrome
 
       - name: Download Chromium build
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: dist-chromium
           path: dist/chromium
 
       - name: Download Edge build
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: dist-edge
           path: dist/edge
 
       - name: Download Firefox build
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: dist-firefox
           path: dist/firefox
@@ -241,7 +241,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Download Chrome build
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: dist-chrome
           path: dist/chrome
