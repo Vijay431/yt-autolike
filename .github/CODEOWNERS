@@ -14,9 +14,9 @@
 # Package metadata, lockfile, release packaging, and upload/validation tooling.
 /package.json @Vijay431
 /pnpm-lock.yaml @Vijay431
-/package-extension.sh @Vijay431
-/tools/validate-packages.mjs @Vijay431
-/tools/chrome-webstore-upload.mjs @Vijay431
+/scripts/package-extension.sh @Vijay431
+/scripts/validate-packages.mjs @Vijay431
+/scripts/chrome-webstore-upload.mjs @Vijay431
 
 # Extension permissions, browser manifest behavior, storage/privacy, and core content automation.
 /src/manifest.json @Vijay431

@@ -17,16 +17,19 @@ Rules:
 
 ## Build Optimization
 
-- On each completion, run the build to produce browser artifacts. Prefer the convenience script that builds all browser targets in parallel using `concurrently`.
+- On each completion, run the full verification gate when practical:
 
-- Install `concurrently` as a dev dependency if not present:
+  `pnpm run verify`
 
-  `pnpm add -D concurrently`
+  This runs lint, typecheck, unit tests, all browser builds, all runtime packages, and package validation.
 
-- Run the parallel build:
+- For a faster packaging-focused pass, run:
 
   `pnpm run build:all`
 
-  This runs the existing `build:chrome`, `build:firefox`, and `build:edge` scripts concurrently to speed up local and CI builds.
+  `pnpm run package:all`
 
-- If CI should adopt parallel builds, replace the existing build step with `pnpm run build:all`.
+  `pnpm run package:validate`
+
+- `build:all` uses `concurrently` to build Chrome, Chromium, Firefox, and Edge targets in parallel.
+- Release helper scripts live in `scripts/`: `scripts/package-extension.sh`, `scripts/validate-packages.mjs`, and `scripts/chrome-webstore-upload.mjs`.

@@ -19,8 +19,33 @@ const getChromiumBinary = () => {
 };
 
 const chromiumBinary = getChromiumBinary();
+const releaseHelperEntries = new Set([
+  'scripts/package-extension.sh',
+  'scripts/validate-packages.mjs',
+  'scripts/chrome-webstore-upload.mjs',
+]);
+
+class IgnoreReleaseHelperEntriesPlugin {
+  apply(compiler) {
+    const removeReleaseHelpers = () => {
+      for (const entryName of Object.keys(compiler.options.entry ?? {})) {
+        if (entryName.startsWith('scripts/') || releaseHelperEntries.has(entryName)) {
+          delete compiler.options.entry[entryName];
+        }
+      }
+    };
+
+    removeReleaseHelpers();
+    compiler.hooks.afterPlugins?.tap('IgnoreReleaseHelperEntriesPlugin', removeReleaseHelpers);
+    compiler.hooks.environment?.tap('IgnoreReleaseHelperEntriesPlugin', removeReleaseHelpers);
+  }
+}
 
 export default {
+  config(config) {
+    config.plugins = [...(config.plugins ?? []), new IgnoreReleaseHelperEntriesPlugin()];
+    return config;
+  },
   browser: {
     chrome: {
       profile: profile('chrome'),

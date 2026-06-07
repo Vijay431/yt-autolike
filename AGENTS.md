@@ -47,6 +47,8 @@ Ugh! Smash bugs!
   `pnpm run package:validate`
 
 - `build:all` uses `concurrently` to build Chrome, Chromium, Firefox, and Edge targets in parallel.
+- Release-critical helper tooling lives in `scripts/`: `scripts/package-extension.sh`,
+  `scripts/validate-packages.mjs`, and `scripts/chrome-webstore-upload.mjs`.
 - Runtime ZIPs must contain only compiled extension files with `manifest.json` at ZIP root.
 - Repo docs, source files, generated folders, test output, and source maps belong in the source ZIP, not runtime ZIPs.
 - Expected artifacts live in `dist/zips/`:

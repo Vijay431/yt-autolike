@@ -8,7 +8,7 @@ import {
   parseArgs,
   requireEnv,
   resolveZip,
-} from '../tools/chrome-webstore-upload.mjs';
+} from '../scripts/chrome-webstore-upload.mjs';
 
 describe('Chrome Web Store upload helper', () => {
   test('requires named secrets for real uploads', () => {

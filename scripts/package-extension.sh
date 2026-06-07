@@ -5,8 +5,8 @@
 # Chrome Web Store, Edge Add-ons, and Firefox AMO submission.
 #
 # Usage:
-#   chmod +x package-extension.sh
-#   ./package-extension.sh [chrome|chromium|edge|firefox|all|from-dist]
+#   chmod +x scripts/package-extension.sh
+#   ./scripts/package-extension.sh [chrome|chromium|edge|firefox|all|from-dist]
 #
 # Output: dist/zips/yt-autolike-v1.0.0-chrome.zip (and chromium, edge, firefox)
 # =============================================================================

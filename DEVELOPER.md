@@ -75,6 +75,10 @@ pnpm run package:validate
 
 `pnpm run verify` runs lint, typecheck, unit tests, all browser builds, all packages, and package validation.
 
+Release helper scripts live in `scripts/`: `scripts/package-extension.sh`,
+`scripts/validate-packages.mjs`, and `scripts/chrome-webstore-upload.mjs`. Use the `pnpm`
+commands above as the public interface so local usage and CI stay aligned.
+
 Output files are written to `./dist/zips/`:
 
 - `yt-autolike-vX.Y.Z-chrome.zip`
