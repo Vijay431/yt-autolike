@@ -28,20 +28,58 @@
     </script>
   </head>
   <body>
+    <!-- Viewport warning overlay: shown outside the 280px–3840px supported range -->
+    <div class="viewport-warning" role="alert" aria-live="assertive">
+      <div class="viewport-warning__box">
+        <div class="viewport-warning__icon" aria-hidden="true">📐</div>
+        <h2 class="viewport-warning__title">Viewport Not Supported</h2>
+        <p class="viewport-warning__body">
+          This page is optimised for screens between
+          <strong>280 px</strong> and <strong>3840 px</strong> wide. Please resize your browser
+          window or switch to a supported device.
+        </p>
+        <p class="viewport-warning__hint">Current width is outside the supported range.</p>
+      </div>
+    </div>
     <div class="glass-bg"></div>
     <header>
-      <div class="container header-content">
+      <div class="header-content">
         <div class="logo">
           <img src="logo.png" alt="YT AutoLike Logo" class="logo-img" />
           <span>YT AutoLike</span>
+          <span class="version-badge">v1.0.0</span>
         </div>
         <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
         <nav id="nav-menu">
-          <a href="#features">Features</a>
-          <a href="#privacy">Privacy</a>
-          <a href="https://github.com/Vijay431/yt-autolike" target="_blank" class="nav-btn"
-            >GitHub</a
-          >
+          <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#auto-like-modes">Auto-Like Modes</a>
+            <a href="#marketplace-status">Marketplace Status</a>
+            <a href="#manual-installation-guide">Manual Installation Guide</a>
+            <a href="#privacy">Privacy</a>
+          </div>
+          <div class="nav-actions">
+            <a
+              href="https://github.com/Vijay431/yt-autolike"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="github-icon-btn"
+              aria-label="GitHub Repository"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"
+                />
+              </svg>
+            </a>
+          </div>
         </nav>
       </div>
     </header>
@@ -54,13 +92,10 @@
           you watch them. Set it, forget it, and support your favorite channels.
         </p>
         <div class="cta-group">
-          <a
-            href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chrome.zip"
-            class="btn primary-btn"
-            >Download Chrome ZIP</a
+          <a href="#marketplace-status" class="btn primary-btn">View Marketplace Status</a>
+          <a href="#manual-installation-guide" class="btn secondary-btn"
+            >Manual Installation Guide</a
           >
-          <a href="#downloads" class="btn secondary-btn">All Downloads</a>
-          <a href="#manual-install" class="btn secondary-btn">Manual Install</a>
         </div>
       </section>
 
@@ -69,7 +104,7 @@
         <div class="grid">
           <div class="card">
             <div class="icon">🎯</div>
-            <h3>Four Modes</h3>
+            <h3>Auto-Like Modes</h3>
             <p>Global, Only Shorts, Only Videos, or Whitelist Only. You are in control.</p>
           </div>
           <div class="card">
@@ -85,119 +120,156 @@
         </div>
       </section>
 
-      <section id="downloads" class="features container">
-        <h2>Downloads</h2>
+      <section id="auto-like-modes" class="features container">
+        <h2>Auto-Like Modes</h2>
+        <div class="accordion-list">
+          <details class="mode-accordion" open>
+            <summary>🌐 Global</summary>
+            <p>
+              The default mode — set it and forget it! 🙌 YT AutoLike will automatically like
+              <strong>both</strong> regular YouTube videos <em>and</em> Shorts once you've hit your
+              watch threshold. Perfect if you just want everything handled without thinking about
+              it.
+            </p>
+          </details>
+          <details class="mode-accordion">
+            <summary>⚡ Only Shorts</summary>
+            <p>
+              A Shorts-only lane! 🎬 Auto-likes kick in exclusively on YouTube Shorts — those quick
+              vertical videos you binge through. Great if you love supporting short-form creators
+              but prefer to manually like longer videos yourself.
+            </p>
+          </details>
+          <details class="mode-accordion">
+            <summary>🎞️ Only Videos</summary>
+            <p>
+              For the long-form lovers. 📺 Only standard YouTube videos (not Shorts) will get the
+              auto-like treatment. Ideal if you're super selective about Shorts but want to
+              automatically support the channels you actually sit down and watch.
+            </p>
+          </details>
+          <details class="mode-accordion">
+            <summary>✅ Whitelist Only</summary>
+            <p>
+              Your VIP list. 🌟 Auto-likes happen <em>only</em> for channels you've explicitly
+              approved. Everyone else? No automatic like. Perfect if you want laser-precise control
+              — only your favourite creators get the love, automatically.
+            </p>
+          </details>
+        </div>
+      </section>
+
+      <div id="downloads" class="anchor-alias" aria-hidden="true"></div>
+      <section id="marketplace-status" class="features container">
+        <h2>Marketplace Status</h2>
         <div class="grid download-grid">
           <div class="card download-card">
             <div class="icon">🌐</div>
-            <h3>Chrome</h3>
-            <p>Primary Chrome package while the Chrome Web Store listing is being prepared.</p>
-            <a
-              href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chrome.zip"
-              class="btn primary-btn download-btn"
-              >Chrome ZIP</a
-            >
-          </div>
-          <div class="card download-card">
-            <div class="icon">⚙️</div>
-            <h3>Chromium</h3>
-            <p>Manual package for Chromium browsers that support unpacked extensions.</p>
-            <a
-              href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chromium.zip"
-              class="btn secondary-btn download-btn"
-              >Chromium ZIP</a
-            >
+            <h3>Chrome Web Store</h3>
+            <p>Chrome Web Store marketplace listing is coming soon.</p>
+            <span class="status-pill coming-soon">Coming soon</span>
           </div>
           <div class="card download-card">
             <div class="icon">🌊</div>
-            <h3>Microsoft Edge</h3>
-            <p>Manual package for Edge until the Partner Center listing is live.</p>
-            <a
-              href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-edge.zip"
-              class="btn secondary-btn download-btn"
-              >Edge ZIP</a
-            >
-          </div>
-          <div class="card download-card">
-            <div class="icon">🦊</div>
-            <h3>Firefox ZIP</h3>
-            <p>Temporary debugging package for Firefox manual installation.</p>
-            <a
-              href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-firefox.zip"
-              class="btn secondary-btn download-btn"
-              >Firefox ZIP</a
-            >
+            <h3>Microsoft Edge Add-ons</h3>
+            <p>Yet to release in marketplace.</p>
+            <span class="status-pill pending">Yet to release</span>
           </div>
           <div class="card download-card">
             <div class="icon">🧩</div>
-            <h3>Firefox XPI</h3>
-            <p>Add-on package for Firefox Developer, Nightly, ESR, and signed-release flows.</p>
-            <a
-              href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-firefox.xpi"
-              class="btn secondary-btn download-btn"
-              >Firefox XPI</a
-            >
+            <h3>Firefox Add-ons</h3>
+            <p>Yet to release in marketplace.</p>
+            <span class="status-pill pending">Yet to release</span>
           </div>
         </div>
       </section>
 
-      <section id="manual-install" class="features container">
-        <h2>Manual Installation</h2>
+      <div id="manual-install" class="anchor-alias" aria-hidden="true"></div>
+      <section id="manual-installation-guide" class="features container">
+        <h2>Manual Installation Guide</h2>
         <p style="margin-bottom: 2rem; max-width: 800px; margin-inline: auto">
-          Browser marketplace listings are still being prepared. Until the store pages are live, use
-          the latest release ZIPs and manual installation steps below.
+          Use this guide when a marketplace listing is not available for your browser yet. Manual
+          installs depend on files you keep locally, so treat the downloaded package and extracted
+          folder as part of the installation.
         </p>
         <div class="grid">
           <div class="card">
             <div class="icon">🌐</div>
             <h3>Chrome / Chromium</h3>
-            <ol style="text-align: left; padding-left: 20px; font-size: 0.9rem">
+            <ol class="install-steps">
               <li>
+                Download the
                 <a
                   href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chrome.zip"
-                  >Download the Chrome ZIP</a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="external-link"
+                  >Chrome ZIP <span aria-hidden="true" class="external-icon">↗</span></a
                 >
                 or
                 <a
                   href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chromium.zip"
-                  >Chromium ZIP</a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="external-link"
+                  >Chromium ZIP <span aria-hidden="true" class="external-icon">↗</span></a
                 >.
               </li>
-              <li>Extract the downloaded ZIP.</li>
-              <li>Go to <code>chrome://extensions/</code>.</li>
-              <li>Enable <strong>Developer mode</strong>.</li>
+              <li>
+                Move the ZIP to a <strong>permanent folder</strong> — don't delete it later or the
+                extension will break.
+              </li>
+              <li>Extract the ZIP inside that folder.</li>
+              <li>Open <code>chrome://extensions/</code> in your browser.</li>
+              <li>Toggle on <strong>Developer mode</strong> (top-right switch).</li>
               <li>Click <strong>Load unpacked</strong> and select the extracted folder.</li>
             </ol>
           </div>
           <div class="card">
             <div class="icon">🦊</div>
             <h3>Firefox</h3>
-            <ol style="text-align: left; padding-left: 20px; font-size: 0.9rem">
+            <ol class="install-steps">
               <li>
+                Download the
                 <a
                   href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-firefox.zip"
-                  >Download the Firefox ZIP</a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="external-link"
+                  >Firefox ZIP <span aria-hidden="true" class="external-icon">↗</span></a
                 >.
               </li>
-              <li>Go to <code>about:debugging#/runtime/this-firefox</code>.</li>
-              <li>Click <strong>Load Temporary Add-on...</strong></li>
-              <li>Select the downloaded zip file.</li>
+              <li>
+                Move the ZIP to a <strong>permanent folder</strong> — Firefox needs it there to stay
+                installed.
+              </li>
+              <li>Open <code>about:debugging#/runtime/this-firefox</code> in Firefox.</li>
+              <li>Click <strong>Load Temporary Add-on…</strong></li>
+              <li>Select the ZIP file you downloaded.</li>
             </ol>
           </div>
           <div class="card">
             <div class="icon">🌊</div>
             <h3>Microsoft Edge</h3>
-            <ol style="text-align: left; padding-left: 20px; font-size: 0.9rem">
+            <ol class="install-steps">
               <li>
+                Download the
                 <a
                   href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-edge.zip"
-                  >Download the Edge ZIP</a
-                >
-                and extract it.
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="external-link"
+                  >Edge ZIP <span aria-hidden="true" class="external-icon">↗</span></a
+                >.
               </li>
-              <li>Go to <code>edge://extensions/</code>.</li>
-              <li>Enable <strong>Developer mode</strong>.</li>
-              <li>Click <strong>Load unpacked</strong> and select the folder.</li>
+              <li>
+                Move the ZIP to a <strong>permanent folder</strong> — don't delete it later or the
+                extension will break.
+              </li>
+              <li>Extract the ZIP inside that folder.</li>
+              <li>Open <code>edge://extensions/</code> in Edge.</li>
+              <li>Toggle on <strong>Developer mode</strong> (left sidebar).</li>
+              <li>Click <strong>Load unpacked</strong> and select the extracted folder.</li>
             </ol>
           </div>
         </div>
@@ -212,8 +284,9 @@
         <a
           href="https://github.com/Vijay431/yt-autolike/blob/main/PRIVACY_POLICY.md"
           target="_blank"
-          class="text-link"
-          >Read our Privacy Policy ➔</a
+          rel="noopener noreferrer"
+          class="text-link external-link"
+          >Privacy Policy <span aria-hidden="true" class="external-icon">↗</span></a
         >
       </section>
     </main>
@@ -222,8 +295,12 @@
       <div class="container footer-content">
         <p>© 2026 YT AutoLike. Released under the MIT License.</p>
         <div class="links">
-          <a href="https://github.com/Vijay431/yt-autolike/issues" target="_blank"
-            >Report an Issue</a
+          <a
+            href="https://github.com/Vijay431/yt-autolike/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="external-link"
+            >Report an Issue <span aria-hidden="true" class="external-icon">↗</span></a
           >
         </div>
       </div>

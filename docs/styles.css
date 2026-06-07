@@ -1,4 +1,8 @@
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
 :root {
+  /* Colors */
   --bg-color: #0f172a;
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
@@ -6,8 +10,39 @@
   --accent-red-hover: #cc0000;
   --card-bg: rgba(30, 41, 59, 0.7);
   --border-color: rgba(255, 255, 255, 0.1);
+  --status-green: #22c55e;
+  --status-amber: #f59e0b;
+
+  /* ── Space scale (fluid: scales with viewport) ──
+     clamp(min, preferred, max) shrinks on small screens,
+     expands on large ones — no magic numbers needed.        */
+  --space-xs: clamp(8px, 1.5vw, 12px);
+  --space-sm: clamp(12px, 2vw, 20px);
+  --space-md: clamp(20px, 3vw, 30px);
+  --space-lg: clamp(32px, 5vw, 60px);
+  --space-xl: clamp(48px, 7vw, 100px);
+
+  /* ── Layout ──
+     Container uses width: min(95%, 100% - 2rem) pattern:
+     • 95%    → 2.5% gutter on each side on mid/large screens
+     • 100% - 2rem → guarantees ≥ 1rem (16px) edge margin on tiny phones
+     Whichever is smaller wins, so the layout never touches screen edges. */
+  --container-max: 1100px;
+
+  /* ── Header ── */
+  --header-height: 73px; /* keep in sync with actual rendered height */
+
+  /* ── Typography scale (fluid) ── */
+  --text-h1: clamp(2rem, 6vw, 4rem);
+  --text-h2: clamp(1.6rem, 4vw, 2.5rem);
+  --text-h3: clamp(1.1rem, 2.5vw, 1.5rem);
+  --text-body: clamp(1rem, 1.5vw, 1.25rem);
+  --text-sm: 0.94rem;
 }
 
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
 * {
   margin: 0;
   padding: 0;
@@ -22,6 +57,9 @@ body {
   overflow-x: hidden;
 }
 
+/* ============================================================
+   AMBIENT BACKGROUND
+   ============================================================ */
 .glass-bg {
   position: fixed;
   top: -50%;
@@ -33,12 +71,20 @@ body {
   pointer-events: none;
 }
 
+/* ============================================================
+   LAYOUT CONTAINER
+   ============================================================ */
 .container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 20px;
+  max-width: var(--container-max);
+  /* Never touches screen edges: at least 16px each side on tiny phones,
+     2.5% gutter each side on larger viewports — whichever is smaller.  */
+  width: min(95%, 100% - 2rem);
+  margin-inline: auto;
 }
 
+/* ============================================================
+   HEADER & NAV
+   ============================================================ */
 header {
   border-bottom: 1px solid var(--border-color);
   padding: 20px 0;
@@ -48,19 +94,31 @@ header {
   z-index: 100;
 }
 
+/* All anchor targets clear the sticky navbar on every device */
+section[id],
+[id].anchor-alias {
+  scroll-margin-top: var(--header-height, 73px);
+}
+
 .header-content {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  /* 3-column: logo on left | nav-links centered | actions on right */
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
+  /* Mirror container: ≥ 1rem (16px) on each edge, grows to 2.5% on wider screens */
+  padding: 0 max(1rem, 2.5%);
+  gap: var(--space-sm);
 }
 
 .logo {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 10px;
   font-size: 1.5rem;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .logo-img {
@@ -68,45 +126,123 @@ header {
   width: auto;
 }
 
+.version-badge {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  padding: 5px 8px;
+}
+
+/* Hidden on desktop; shown via media query below */
 .menu-toggle {
   display: none;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: var(--text-primary);
   font-size: 2rem;
   cursor: pointer;
   line-height: 1;
+  /* Accessibility: large enough tap target on touch devices */
+  min-width: 44px;
+  min-height: 44px;
 }
 
-nav a {
+nav {
+  /* nav spans all 3 columns when open on mobile; on desktop
+     it is auto-sized and placed in the center column        */
+  display: contents; /* let nav-links and nav-actions participate in the grid */
+}
+
+/* ── Center column: the section links ── */
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-width: 0;
+  /* Center column in the grid */
+  grid-column: 2;
+}
+
+/* Pipe separator: appears before every link except the first */
+.nav-links a + a::before {
+  content: '|';
+  color: var(--text-secondary);
+  font-weight: 400;
+  opacity: 0.5;
+  padding: 0 10px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.nav-links a {
   color: var(--text-primary);
   text-decoration: none;
-  margin-left: 30px;
   font-weight: 600;
+  font-size: var(--text-sm);
   transition: color 0.2s;
+  white-space: nowrap;
+  padding: 4px 2px;
 }
 
-nav a:hover {
+.nav-links a:hover {
   color: var(--accent-red);
 }
 
-.nav-btn {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 8px 16px;
-  border-radius: 8px;
+/* ── Right column: GitHub icon ── */
+.nav-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  grid-column: 3;
 }
 
+.github-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  transition:
+    color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+  text-decoration: none;
+}
+
+.github-icon-btn:hover {
+  color: var(--accent-red);
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.1);
+}
+
+.github-icon-btn svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
 .hero {
   text-align: center;
-  padding: 100px 0 80px;
+  padding: var(--space-xl) 0 var(--space-lg);
 }
 
 .hero h1 {
-  font-size: 4rem;
+  font-size: var(--text-h1);
   font-weight: 800;
   line-height: 1.1;
-  margin-bottom: 20px;
-  letter-spacing: -1px;
+  margin-bottom: var(--space-sm);
+  letter-spacing: 0;
 }
 
 .highlight {
@@ -117,28 +253,34 @@ nav a:hover {
 }
 
 .hero p {
-  font-size: 1.25rem;
+  font-size: var(--text-body);
   color: var(--text-secondary);
   max-width: 600px;
-  margin: 0 auto 40px;
+  margin: 0 auto var(--space-md);
 }
 
+/* ============================================================
+   CTA BUTTONS
+   ============================================================ */
 .cta-group {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 
 .btn {
-  padding: 14px 28px;
+  padding: clamp(10px, 2vw, 14px) clamp(20px, 3vw, 28px);
   border-radius: 12px;
   font-weight: 600;
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
   transition:
     transform 0.2s,
     box-shadow 0.2s,
     background 0.2s;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .primary-btn {
@@ -164,26 +306,33 @@ nav a:hover {
   transform: translateY(-2px);
 }
 
+/* ============================================================
+   FEATURE SECTIONS
+   ============================================================ */
 .features {
-  padding: 80px 0;
+  padding: var(--space-lg) 0;
   text-align: center;
 }
 
 .features h2 {
-  font-size: 2.5rem;
-  margin-bottom: 50px;
+  font-size: var(--text-h2);
+  margin-bottom: var(--space-md);
 }
 
+/* ============================================================
+   CARDS GRID
+   ============================================================ */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
+  /* min(300px, 100%) prevents overflow on narrow phones */
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-md);
 }
 
 .card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  padding: 40px 30px;
+  padding: clamp(24px, 4vw, 40px) clamp(20px, 3vw, 30px);
   border-radius: 20px;
   backdrop-filter: blur(10px);
   transition: transform 0.3s;
@@ -196,19 +345,22 @@ nav a:hover {
 }
 
 .icon {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  margin-bottom: var(--space-sm);
 }
 
 .card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
+  font-size: var(--text-h3);
+  margin-bottom: var(--space-xs);
 }
 
 .card p {
   color: var(--text-secondary);
 }
 
+/* ============================================================
+   DOWNLOAD CARDS
+   ============================================================ */
 .download-grid {
   align-items: stretch;
 }
@@ -224,46 +376,145 @@ nav a:hover {
 
 .download-btn {
   display: inline-block;
-  margin-top: 24px;
+  margin-top: var(--space-md);
   text-align: center;
 }
 
+.install-steps {
+  text-align: left;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ============================================================
+   ANCHOR ALIAS (invisible scroll target helper)
+   ============================================================ */
+.anchor-alias {
+  height: 0;
+  visibility: hidden;
+}
+
+/* ============================================================
+   STATUS PILLS
+   ============================================================ */
+.status-pill {
+  align-self: flex-start;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: var(--space-md);
+  padding: 10px 12px;
+}
+
+.status-pill.coming-soon {
+  background: rgba(34, 197, 94, 0.14);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: var(--status-green);
+}
+
+.status-pill.pending {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: var(--status-amber);
+}
+
+/* ============================================================
+   ACCORDION (Auto-Like Modes)
+   ============================================================ */
+.accordion-list {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0 auto;
+  /* min(820px, 100%) prevents overflow when container is narrow */
+  max-width: min(820px, 100%);
+  text-align: left;
+  width: 100%;
+}
+
+.mode-accordion {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mode-accordion summary {
+  cursor: pointer;
+  font-size: clamp(1rem, 2vw, 1.12rem);
+  font-weight: 700;
+  list-style: none;
+  padding: clamp(14px, 2.5vw, 18px) clamp(16px, 3vw, 22px);
+}
+
+.mode-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.mode-accordion summary::after {
+  color: var(--accent-red);
+  content: '+';
+  float: right;
+  font-weight: 800;
+}
+
+.mode-accordion[open] summary::after {
+  content: '-';
+}
+
+.mode-accordion p {
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: var(--space-sm) clamp(16px, 3vw, 22px) var(--space-md);
+}
+
+/* ============================================================
+   PRIVACY BANNER
+   ============================================================ */
 .privacy-banner {
   background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(0, 0, 0, 0));
   border: 1px solid var(--border-color);
-  border-radius: 24px;
-  padding: 60px;
+  border-radius: clamp(16px, 3vw, 24px);
+  padding: var(--space-lg) var(--space-md);
   text-align: center;
-  margin: 60px auto;
+  margin: var(--space-lg) auto;
 }
 
 .privacy-banner h2 {
-  font-size: 2.2rem;
-  margin-bottom: 20px;
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  margin-bottom: var(--space-sm);
 }
 
 .privacy-banner p {
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 2vw, 1.1rem);
   max-width: 600px;
-  margin: 0 auto 30px;
+  margin: 0 auto var(--space-md);
 }
 
 .text-link {
   color: var(--accent-red);
   text-decoration: none;
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 2vw, 1.1rem);
 }
 
 .text-link:hover {
   text-decoration: underline;
 }
 
+/* ============================================================
+   FOOTER
+   ============================================================ */
 footer {
   border-top: 1px solid var(--border-color);
-  padding: 40px 0;
-  margin-top: 60px;
+  padding: var(--space-lg) 0;
+  margin-top: var(--space-lg);
   color: var(--text-secondary);
 }
 
@@ -271,6 +522,14 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.links {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 
 .links a {
@@ -283,10 +542,14 @@ footer {
   color: var(--text-primary);
 }
 
-/* --- Responsive Design for All Devices --- */
-@media (max-width: 768px) {
+/* ============================================================
+   RESPONSIVE — HAMBURGER NAV  (≤ 1120px)
+   Covers large tablets, small laptops, and everything smaller
+   ============================================================ */
+@media (max-width: 1120px) {
+  /* Switch header back to flex so the hamburger toggle works */
   .header-content {
-    flex-direction: row;
+    display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
@@ -294,88 +557,217 @@ footer {
   }
 
   .menu-toggle {
-    display: block;
+    display: flex;
   }
 
+  /* nav becomes a hidden full-width flex column; shown on .open */
   nav {
     display: none;
     width: 100%;
     flex-direction: column;
-    text-align: center;
-    padding-top: 20px;
-    gap: 15px;
+    align-items: center;
+    padding: var(--space-sm) 0 var(--space-xs);
+    gap: var(--space-xs);
   }
 
   nav.open {
     display: flex;
   }
 
-  nav a {
-    margin: 0;
-    font-size: 1.1rem;
+  /* nav-links stacks vertically, centered */
+  .nav-links {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 0;
+    grid-column: unset;
+  }
+
+  /* Hide the pipe separators on mobile — they look wrong stacked */
+  .nav-links a + a::before {
+    display: none;
+  }
+
+  .nav-links a {
+    font-size: 1.05rem;
     padding: 10px 0;
+    white-space: normal;
+    width: 100%;
+    text-align: center;
+    /* WCAG touch target: at least 44×44px */
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .nav-btn {
-    display: inline-block;
-    margin: 10px auto 0;
-    width: max-content;
+  /* GitHub icon centered below the links */
+  .nav-actions {
+    justify-content: center;
+    padding: var(--space-xs) 0;
+    grid-column: unset;
   }
 
-  .hero {
-    padding: 60px 0 40px;
-  }
-
-  .hero h1 {
-    font-size: 2.5rem;
-  }
-
-  .hero p {
-    font-size: 1.1rem;
-    margin-bottom: 30px;
-  }
-
+  /* Full-width stacked CTA buttons on narrow screens */
   .cta-group {
     flex-direction: column;
-    gap: 15px;
-    padding: 0 20px;
+    align-items: stretch;
   }
 
   .btn {
     width: 100%;
   }
 
-  .features {
-    padding: 50px 0;
+  .download-btn,
+  .status-pill {
+    align-self: stretch;
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE — TABLET  (≤ 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
   }
 
-  .features h2 {
-    font-size: 2rem;
-    margin-bottom: 30px;
+  .links {
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE — SMALL PHONE  (≤ 480px)
+   Extra tweaks for 320–480 px viewports
+   ============================================================ */
+@media (max-width: 480px) {
+  /* Logo slightly smaller so it doesn't crowd the hamburger */
+  .logo {
+    font-size: 1.2rem;
+    gap: 8px;
   }
 
+  .logo-img {
+    height: 28px;
+  }
+
+  /* Softer card corners feel less cramped on tiny screens */
   .card {
-    padding: 30px 20px;
+    border-radius: 14px;
+  }
+
+  /* Extra padding-right so +/− indicator never overlaps text */
+  .mode-accordion summary {
+    padding-right: 40px;
   }
 
   .privacy-banner {
-    padding: 40px 20px;
-    margin: 40px auto;
-  }
-
-  .privacy-banner h2 {
-    font-size: 1.8rem;
+    border-radius: 12px;
   }
 
   .footer-content {
     flex-direction: column;
-    gap: 15px;
     text-align: center;
+    justify-content: center;
+  }
+}
+/* ============================================================
+   VIEWPORT WARNING OVERLAY
+   Base rule shows the overlay; the media query at the bottom
+   hides it when the viewport is within the supported range.
+   Order matters — the media query MUST come last so it wins.
+   ============================================================ */
+
+/* 1. Base: overlay is always present in the DOM */
+.viewport-warning {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(10, 15, 30, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: vw-fade-in 0.3s ease both;
+}
+
+@keyframes vw-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
-@media (max-width: 480px) {
-  .hero h1 {
-    font-size: 2rem;
+.viewport-warning__box {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow:
+    0 0 0 1px rgba(255, 0, 0, 0.15),
+    0 24px 60px rgba(0, 0, 0, 0.5);
+  max-width: 420px;
+  width: 100%;
+  padding: 40px 36px;
+  text-align: center;
+  animation: vw-slide-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes vw-slide-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.viewport-warning__icon {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.viewport-warning__title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  letter-spacing: -0.01em;
+}
+
+.viewport-warning__body {
+  font-size: 0.97rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.viewport-warning__body strong {
+  color: var(--accent-red);
+  font-weight: 700;
+}
+
+.viewport-warning__hint {
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.55);
+  font-style: italic;
+}
+
+/* 2. Override: hide overlay when viewport is within the supported range.
+      MUST be last so it beats the display:flex above in the cascade.    */
+@media (min-width: 280px) and (max-width: 3840px) {
+  .viewport-warning {
+    display: none;
   }
 }
