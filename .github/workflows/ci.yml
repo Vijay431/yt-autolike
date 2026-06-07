@@ -115,7 +115,7 @@ jobs:
         run: pnpm run build:${{ matrix.browser }}
 
       - name: Upload browser build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist-${{ matrix.browser }}
           path: dist/${{ matrix.browser }}
@@ -146,25 +146,25 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download Chrome build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: dist-chrome
           path: dist/chrome
 
       - name: Download Chromium build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: dist-chromium
           path: dist/chromium
 
       - name: Download Edge build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: dist-edge
           path: dist/edge
 
       - name: Download Firefox build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: dist-firefox
           path: dist/firefox
@@ -187,7 +187,7 @@ jobs:
           EOF
 
       - name: Upload validated build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: validated-extension-dist
           path: |
@@ -238,7 +238,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Download Chrome build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: dist-chrome
           path: dist/chrome
