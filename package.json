@@ -74,6 +74,7 @@
     "package:from-dist": "bash scripts/package-extension.sh from-dist",
     "package:validate": "node scripts/validate-packages.mjs",
     "chrome-webstore:upload": "node scripts/chrome-webstore-upload.mjs",
+    "contributors:sync": "node scripts/sync-contributors.mjs",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "typecheck": "tsc --noEmit",

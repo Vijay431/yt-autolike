@@ -26,4 +26,9 @@ versioning.
 - CODEOWNERS, cache cleanup automation, and release helper scripts under
   `scripts/`.
 - Contributor, security, issue, and pull request documentation.
+- Contributor sync automation, contributor credits, and open-source library
+  acknowledgements.
+- Static documentation site accessibility improvements, language selection
+  scaffolding, browser logo cards, and thanks links.
+- Popup-only confetti for confirmed successful auto-likes.
 - Unit-test and verification scripts.
