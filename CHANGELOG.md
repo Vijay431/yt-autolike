@@ -30,5 +30,8 @@ versioning.
   acknowledgements.
 - Static documentation site accessibility improvements, language selection
   scaffolding, browser logo cards, and thanks links.
+- Full documentation translations for English (US), English (UK), English
+  (Global), Tamil, Hindi, and Simplified Chinese, with a roomier language
+  dropdown.
 - Popup-only confetti for confirmed successful auto-likes.
 - Unit-test and verification scripts.
