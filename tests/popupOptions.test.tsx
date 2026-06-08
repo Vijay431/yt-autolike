@@ -1,8 +1,11 @@
 import { describe, expect, test, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import confetti from 'canvas-confetti';
 import PopupApp from '../src/popup/PopupApp';
 import OptionsApp from '../src/options/OptionsApp';
+
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }));
 
 describe('popup and options UI', () => {
   test('renders popup settings and disabled non-YouTube add-channel state', async () => {
@@ -18,6 +21,38 @@ describe('popup and options UI', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /open a youtube video first/i })).toBeDisabled();
     });
+  });
+
+  test('celebrates confirmed likes only through the popup listener', async () => {
+    vi.mocked(chrome.tabs.query).mockImplementation(async () => [
+      { id: 1, url: 'https://example.com/' } as chrome.tabs.Tab,
+    ]);
+
+    const { unmount } = render(<PopupApp />);
+
+    await screen.findByText('YT AutoLike');
+    const listener = vi.mocked(chrome.runtime.onMessage.addListener).mock.calls.at(-1)?.[0];
+    expect(listener).toEqual(expect.any(Function));
+
+    listener?.(
+      {
+        type: 'AUTO_LIKE_CONFIRMED',
+        entry: {
+          timestamp: 1,
+          title: 'A video',
+          channel: 'A channel',
+          type: 'video',
+          status: 'liked',
+        },
+      },
+      {} as chrome.runtime.MessageSender,
+      vi.fn(),
+    );
+
+    expect(confetti).toHaveBeenCalledTimes(1);
+
+    unmount();
+    expect(chrome.runtime.onMessage.removeListener).toHaveBeenCalledWith(expect.any(Function));
   });
 
   test('renders empty options whitelist state', async () => {

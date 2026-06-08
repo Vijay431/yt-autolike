@@ -19,7 +19,6 @@
 import { getSettings, getWhitelist } from '../lib/storage';
 import { HEARTBEAT_INTERVAL_MS, PROGRESS_POLL_INTERVAL_MS } from '../lib/constants';
 import { showReminderToast, showToast } from './toast';
-import confetti from 'canvas-confetti';
 import type { PageType, LogEntry, Settings, Whitelist } from '../lib/types';
 import {
   getActiveVideo,
@@ -306,9 +305,9 @@ async function pollProgress(pageType: PageType): Promise<void> {
     const clicked = clickLikeButton(pageType);
     if (clicked) {
       likedThisVideo = true;
-      await recordLike(pageType);
+      const entry = await recordLike(pageType);
       showToast('Auto-Liked!', '🎉 We successfully auto-liked this video!');
-      triggerConfetti();
+      if (entry) notifyPopupLikeConfirmed(entry);
     }
   } finally {
     pollInProgress = false;
@@ -454,16 +453,6 @@ function getLikeState(pageType: PageType): VoteState {
 // ---------------------------------------------------------------------------
 // Guarded like click
 
-function triggerConfetti() {
-  confetti({
-    particleCount: 100,
-    spread: 70,
-    origin: { y: 0.6 },
-    zIndex: 2147483647,
-  });
-}
-// ---------------------------------------------------------------------------
-
 function clickLikeButton(pageType: PageType): boolean {
   const btn = pageType === 'video' ? findVideoLikeButton() : findShortsLikeButton();
   if (!btn) return false;
@@ -510,8 +499,8 @@ async function sendHeartbeat(): Promise<void> {
 // Logging helpers
 // ---------------------------------------------------------------------------
 
-async function recordLike(pageType: PageType): Promise<void> {
-  if (!isContextAlive()) return;
+async function recordLike(pageType: PageType): Promise<LogEntry | null> {
+  if (!isContextAlive()) return null;
   const pathKey = currentVideoId || location.pathname;
   const entry: LogEntry = {
     timestamp: Date.now(),
@@ -521,10 +510,18 @@ async function recordLike(pageType: PageType): Promise<void> {
     status: 'liked',
   };
   try {
-    await chrome.runtime.sendMessage({ type: 'RECORD_LIKE', entry });
+    const response = await chrome.runtime.sendMessage({ type: 'RECORD_LIKE', entry });
+    return response?.ok === true ? entry : null;
   } catch {
     // SW may be restarting or context invalidated.
+    return null;
   }
+}
+
+function notifyPopupLikeConfirmed(entry: LogEntry): void {
+  chrome.runtime.sendMessage({ type: 'AUTO_LIKE_CONFIRMED', entry }).catch(() => {
+    // Popup may be closed; the like was already recorded successfully.
+  });
 }
 
 async function recordSkip(pageType: PageType, reason: string): Promise<void> {

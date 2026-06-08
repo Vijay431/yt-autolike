@@ -16,12 +16,22 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Zap, Film, CheckCircle, ExternalLink } from 'lucide-react';
-import type { Settings, Whitelist, Stats, Mode, VideoState } from '../lib/types';
+import confetti from 'canvas-confetti';
+import type { Settings, Whitelist, Stats, Mode, VideoState, Message } from '../lib/types';
 import { getSettings, setSettings, getWhitelist, setWhitelist, getStats } from '../lib/storage';
 import { DEFAULT_SETTINGS, DEFAULT_WHITELIST, DEFAULT_STATS } from '../lib/storage';
 
 // Extension version (kept in sync with manifest).
 const VERSION = '1.0.0';
+
+function triggerPopupConfetti() {
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+    zIndex: 2147483647,
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Mode metadata
@@ -143,6 +153,22 @@ export default function PopupApp() {
       chrome.runtime.sendMessage({ type: 'POPUP_CLOSED' }).catch(() => {});
     };
   }, [detectActiveTab]);
+
+  useEffect(() => {
+    const listener = (message: Message) => {
+      if (message.type === 'AUTO_LIKE_CONFIRMED') {
+        triggerPopupConfetti();
+        getStats()
+          .then(setStatsState)
+          .catch(() => {});
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(listener);
+    return () => {
+      chrome.runtime.onMessage.removeListener(listener);
+    };
+  }, []);
 
   // Poll the content script for live video state every 500 ms.
   // Faster cadence = channel name and ETA update near-instantly.

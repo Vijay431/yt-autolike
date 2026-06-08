@@ -20,6 +20,7 @@ describe('runtime message validation', () => {
     { type: 'POPUP_CLOSED' },
     { type: 'GET_VIDEO_STATE' },
     { type: 'GET_ACTIVE_TAB_INFO' },
+    { type: 'AUTO_LIKE_CONFIRMED', entry: logEntry },
     { type: 'RECORD_LIKE', entry: logEntry },
     { type: 'RECORD_SKIP', entry: { ...logEntry, status: 'skipped' } },
     {
