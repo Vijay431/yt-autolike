@@ -87,6 +87,7 @@ export type Message =
   | { type: 'IS_POPUP_OPEN_RESPONSE'; open: boolean }
   | { type: 'POPUP_OPENED' }
   | { type: 'POPUP_CLOSED' }
+  | { type: 'AUTO_LIKE_CONFIRMED'; entry: LogEntry }
   | { type: 'RECORD_LIKE'; entry: LogEntry }
   | { type: 'RECORD_SKIP'; entry: LogEntry }
   | { type: 'GET_ACTIVE_TAB_INFO'; response?: ActiveTabInfo }

@@ -144,6 +144,7 @@ export function isValidMessage(msg: unknown): msg is Message {
     case 'IS_POPUP_OPEN_RESPONSE':
       return typeof m.open === 'boolean';
 
+    case 'AUTO_LIKE_CONFIRMED':
     case 'RECORD_LIKE':
     case 'RECORD_SKIP':
       return isValidLogEntry(m.entry);

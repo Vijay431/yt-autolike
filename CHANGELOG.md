@@ -7,6 +7,10 @@ versioning.
 
 ## [Unreleased]
 
+### Added
+
+- Documentation translations for Telugu, Kannada, and Malayalam.
+
 ## [1.0.0] - 2026-06-07
 
 ### Added
@@ -26,4 +30,12 @@ versioning.
 - CODEOWNERS, cache cleanup automation, and release helper scripts under
   `scripts/`.
 - Contributor, security, issue, and pull request documentation.
+- Contributor sync automation, contributor credits, and open-source library
+  acknowledgements.
+- Static documentation site accessibility improvements, language selection
+  scaffolding, browser logo cards, and thanks links.
+- Full documentation translations for English (US), English (UK), English
+  (Global), Tamil, Hindi, and Simplified Chinese, with a roomier language
+  dropdown.
+- Popup-only confetti for confirmed successful auto-likes.
 - Unit-test and verification scripts.

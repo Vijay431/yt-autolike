@@ -32,7 +32,7 @@ Unlike other auto-likers that might be clunky or data-hungry, **YT AutoLike** is
 
 ## 👨‍💻 For Developers
 
-We love contributors! Please star ⭐, comment, or raise issues if you find something or want to help us improve.
+We love contributors! Please star ⭐, open issues, share ideas, or send PRs if you want to help improve YT AutoLike. Accessibility feedback, translation help, browser-specific reports, and clear reproduction steps are especially welcome because they help make the extension better for more people.
 
 ```bash
 # Install dependencies
@@ -47,13 +47,15 @@ pnpm build:edge
 pnpm build:firefox
 ```
 
+See [`CONTRIBUTORS.md`](CONTRIBUTORS.md) for contributor credits and AI/tooling acknowledgements, and [`ACKNOWLEDGEMENTS.md`](ACKNOWLEDGEMENTS.md) for the open-source libraries and release tooling this project builds on.
+
 ## 📄 Project Docs
 
 Check out our [Project Docs](project-docs/) folder for deep dives into how this works!
 
 ## 🤝 Engagement
 
-Found an issue? Have a cool idea? Reach out!
+Found an issue? Have a cool idea? Need to report something specific to Chrome, Chromium, Edge, or Firefox? Reach out!
 
 - **Email:** vijayanand431@gmail.com
 - **GitHub:** Star the repo, open an issue, or send a PR! 🚀
