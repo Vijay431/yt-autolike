@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Chrome logo</title>
+  <circle cx="32" cy="32" r="30" fill="#fbbc05" />
+  <path fill="#ea4335" d="M32 2a30 30 0 0 1 26 15H32a15 15 0 0 0-13 7.5L10 9.1A29.9 29.9 0 0 1 32 2Z" />
+  <path fill="#34a853" d="M58 17a30 30 0 0 1-26 45l13-22.5A15 15 0 0 0 45 17h13Z" />
+  <path fill="#fbbc05" d="M32 62A30 30 0 0 1 10 9.1l13 22.4A15 15 0 0 0 32 47h13L32 62Z" />
+  <circle cx="32" cy="32" r="15" fill="#4285f4" />
+  <circle cx="32" cy="32" r="8" fill="#e8f0fe" />
+</svg>

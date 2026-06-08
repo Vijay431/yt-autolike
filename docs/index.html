@@ -8,6 +8,8 @@
       name="description"
       content="Never forget to hit the like button again. YT AutoLike automatically likes YouTube videos and Shorts based on your watch time. 100% free and open-source."
     />
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="apple-touch-icon" href="logo.png" />
     <link rel="stylesheet" href="styles.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
@@ -28,17 +30,22 @@
     </script>
   </head>
   <body>
+    <a class="skip-link" href="#main-content" data-i18n="accessibility.skipLink"
+      >Skip to main content</a
+    >
     <!-- Viewport warning overlay: shown outside the 280px–3840px supported range -->
     <div class="viewport-warning" role="alert" aria-live="assertive">
       <div class="viewport-warning__box">
         <div class="viewport-warning__icon" aria-hidden="true">📐</div>
-        <h2 class="viewport-warning__title">Viewport Not Supported</h2>
-        <p class="viewport-warning__body">
+        <h2 class="viewport-warning__title" data-i18n="viewport.title">Viewport Not Supported</h2>
+        <p class="viewport-warning__body" data-i18n-html="viewport.body">
           This page is optimised for screens between
           <strong>280 px</strong> and <strong>3840 px</strong> wide. Please resize your browser
           window or switch to a supported device.
         </p>
-        <p class="viewport-warning__hint">Current width is outside the supported range.</p>
+        <p class="viewport-warning__hint" data-i18n="viewport.hint">
+          Current width is outside the supported range.
+        </p>
       </div>
     </div>
     <div class="glass-bg"></div>
@@ -49,22 +56,45 @@
           <span>YT AutoLike</span>
           <span class="version-badge">v1.0.0</span>
         </div>
-        <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
+        <button
+          class="menu-toggle"
+          type="button"
+          aria-label="Open navigation menu"
+          aria-expanded="false"
+          aria-controls="nav-menu"
+          data-i18n-attr="aria-label:nav.menuOpenLabel"
+        >
+          ☰
+        </button>
         <nav id="nav-menu">
-          <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#auto-like-modes">Auto-Like Modes</a>
-            <a href="#marketplace-status">Marketplace Status</a>
-            <a href="#manual-installation-guide">Manual Installation Guide</a>
-            <a href="#privacy">Privacy</a>
+          <div class="nav-links" aria-label="Primary navigation">
+            <a href="#features" data-i18n="nav.features">Features</a>
+            <a href="#auto-like-modes" data-i18n="nav.modes">Auto-Like Modes</a>
+            <a href="#marketplace-status" data-i18n="nav.marketplace">Marketplace Status</a>
+            <a href="#manual-installation-guide" data-i18n="nav.manual"
+              >Manual Installation Guide</a
+            >
+            <a href="#privacy" data-i18n="nav.privacy">Privacy</a>
+            <a href="#thanks" data-i18n="nav.thanks">Thanks</a>
           </div>
           <div class="nav-actions">
+            <label class="language-select" for="language-select">
+              <span class="sr-only" data-i18n="language.label">Language</span>
+              <select
+                id="language-select"
+                aria-label="Language"
+                data-i18n-attr="aria-label:language.label"
+              >
+                <option value="en">English</option>
+              </select>
+            </label>
             <a
               href="https://github.com/Vijay431/yt-autolike"
               target="_blank"
               rel="noopener noreferrer"
               class="github-icon-btn"
-              aria-label="GitHub Repository"
+              aria-label="Open the YT AutoLike GitHub repository in a new tab"
+              data-i18n-attr="aria-label:actions.githubLabel"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -84,7 +114,8 @@
               target="_blank"
               rel="noopener noreferrer"
               class="linkedin-icon-btn"
-              aria-label="LinkedIn Profile"
+              aria-label="Open Vijay Gangatharan's LinkedIn profile in a new tab"
+              data-i18n-attr="aria-label:actions.linkedinLabel"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -104,48 +135,58 @@
       </div>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="hero container">
-        <h1>Support Creators <span class="highlight">Automatically</span></h1>
-        <p>
+        <h1 data-i18n-html="hero.title">
+          Support Creators <span class="highlight">Automatically</span>
+        </h1>
+        <p data-i18n="hero.body">
           The ultimate privacy-first browser extension that likes YouTube videos and Shorts after
           you watch them. Set it, forget it, and support your favorite channels.
         </p>
         <div class="cta-group">
-          <a href="#marketplace-status" class="btn primary-btn">View Marketplace Status</a>
-          <a href="#manual-installation-guide" class="btn secondary-btn"
+          <a href="#marketplace-status" class="btn primary-btn" data-i18n="hero.marketplaceCta"
+            >View Marketplace Status</a
+          >
+          <a href="#manual-installation-guide" class="btn secondary-btn" data-i18n="hero.manualCta"
             >Manual Installation Guide</a
           >
         </div>
       </section>
 
       <section id="features" class="features container">
-        <h2>Why YT AutoLike?</h2>
+        <h2 data-i18n="features.title">Why YT AutoLike?</h2>
         <div class="grid">
           <div class="card">
             <div class="icon">🎯</div>
-            <h3>Auto-Like Modes</h3>
-            <p>Global, Only Shorts, Only Videos, or Whitelist Only. You are in control.</p>
+            <h3 data-i18n="features.modes.title">Auto-Like Modes</h3>
+            <p data-i18n="features.modes.body">
+              Global, Only Shorts, Only Videos, or Whitelist Only. You are in control.
+            </p>
           </div>
           <div class="card">
             <div class="icon">⏲️</div>
-            <h3>Custom Threshold</h3>
-            <p>Set a watch percentage (10% to 90%) to trigger the like automatically.</p>
+            <h3 data-i18n="features.threshold.title">Custom Threshold</h3>
+            <p data-i18n="features.threshold.body">
+              Set a watch percentage (10% to 90%) to trigger the like automatically.
+            </p>
           </div>
           <div class="card">
             <div class="icon">🛡️</div>
-            <h3>100% Private</h3>
-            <p>No servers. No tracking. Everything stays locally on your device.</p>
+            <h3 data-i18n="features.private.title">100% Private</h3>
+            <p data-i18n="features.private.body">
+              No servers. No tracking. Everything stays locally on your device.
+            </p>
           </div>
         </div>
       </section>
 
       <section id="auto-like-modes" class="features container">
-        <h2>Auto-Like Modes</h2>
+        <h2 data-i18n="modes.title">Auto-Like Modes</h2>
         <div class="accordion-list">
           <details class="mode-accordion" open>
-            <summary>🌐 Global</summary>
-            <p>
+            <summary data-i18n="modes.global.title">🌐 Global</summary>
+            <p data-i18n-html="modes.global.body">
               The default mode — set it and forget it! 🙌 YT AutoLike will automatically like
               <strong>both</strong> regular YouTube videos <em>and</em> Shorts once you've hit your
               watch threshold. Perfect if you just want everything handled without thinking about
@@ -153,24 +194,24 @@
             </p>
           </details>
           <details class="mode-accordion">
-            <summary>⚡ Only Shorts</summary>
-            <p>
+            <summary data-i18n="modes.shorts.title">⚡ Only Shorts</summary>
+            <p data-i18n="modes.shorts.body">
               A Shorts-only lane! 🎬 Auto-likes kick in exclusively on YouTube Shorts — those quick
               vertical videos you binge through. Great if you love supporting short-form creators
               but prefer to manually like longer videos yourself.
             </p>
           </details>
           <details class="mode-accordion">
-            <summary>🎞️ Only Videos</summary>
-            <p>
+            <summary data-i18n="modes.videos.title">🎞️ Only Videos</summary>
+            <p data-i18n="modes.videos.body">
               For the long-form lovers. 📺 Only standard YouTube videos (not Shorts) will get the
               auto-like treatment. Ideal if you're super selective about Shorts but want to
               automatically support the channels you actually sit down and watch.
             </p>
           </details>
           <details class="mode-accordion">
-            <summary>✅ Whitelist Only</summary>
-            <p>
+            <summary data-i18n="modes.whitelist.title">✅ Whitelist Only</summary>
+            <p data-i18n-html="modes.whitelist.body">
               Your VIP list. 🌟 Auto-likes happen <em>only</em> for channels you've explicitly
               approved. Everyone else? No automatic like. Perfect if you want laser-precise control
               — only your favourite creators get the love, automatically.
@@ -181,123 +222,205 @@
 
       <div id="downloads" class="anchor-alias" aria-hidden="true"></div>
       <section id="marketplace-status" class="features container">
-        <h2>Marketplace Status</h2>
+        <h2 data-i18n="marketplace.title">Marketplace Status</h2>
         <div class="grid download-grid">
-          <div class="card download-card">
-            <div class="icon">🌐</div>
-            <h3>Chrome Web Store</h3>
-            <p>Chrome Web Store marketplace listing is coming soon.</p>
-            <span class="status-pill coming-soon">Coming soon</span>
+          <div
+            class="card download-card"
+            aria-label="Chrome Web Store marketplace status: coming soon"
+            data-i18n-attr="aria-label:marketplace.chrome.cardLabel"
+          >
+            <img
+              class="browser-logo"
+              src="images/chrome.svg"
+              alt="Chrome logo"
+              data-i18n-attr="alt:browser.chromeAlt"
+            />
+            <h3 data-i18n="marketplace.chrome.title">Chrome Web Store</h3>
+            <p data-i18n="marketplace.chrome.body">
+              Chrome Web Store marketplace listing is coming soon.
+            </p>
+            <span class="status-pill coming-soon" data-i18n="marketplace.comingSoon"
+              >Coming soon</span
+            >
           </div>
-          <div class="card download-card">
-            <div class="icon">🌊</div>
-            <h3>Microsoft Edge Add-ons</h3>
-            <p>Yet to release in marketplace.</p>
-            <span class="status-pill pending">Yet to release</span>
+          <div
+            class="card download-card"
+            aria-label="Microsoft Edge Add-ons marketplace status: yet to release"
+            data-i18n-attr="aria-label:marketplace.edge.cardLabel"
+          >
+            <img
+              class="browser-logo"
+              src="images/edge.svg"
+              alt="Microsoft Edge logo"
+              data-i18n-attr="alt:browser.edgeAlt"
+            />
+            <h3 data-i18n="marketplace.edge.title">Microsoft Edge Add-ons</h3>
+            <p data-i18n="marketplace.pendingBody">Yet to release in marketplace.</p>
+            <span class="status-pill pending" data-i18n="marketplace.pending">Yet to release</span>
           </div>
-          <div class="card download-card">
-            <div class="icon">🧩</div>
-            <h3>Firefox Add-ons</h3>
-            <p>Yet to release in marketplace.</p>
-            <span class="status-pill pending">Yet to release</span>
+          <div
+            class="card download-card"
+            aria-label="Firefox Add-ons marketplace status: yet to release"
+            data-i18n-attr="aria-label:marketplace.firefox.cardLabel"
+          >
+            <img
+              class="browser-logo"
+              src="images/firefox.svg"
+              alt="Firefox logo"
+              data-i18n-attr="alt:browser.firefoxAlt"
+            />
+            <h3 data-i18n="marketplace.firefox.title">Firefox Add-ons</h3>
+            <p data-i18n="marketplace.pendingBody">Yet to release in marketplace.</p>
+            <span class="status-pill pending" data-i18n="marketplace.pending">Yet to release</span>
           </div>
         </div>
       </section>
 
       <div id="manual-install" class="anchor-alias" aria-hidden="true"></div>
       <section id="manual-installation-guide" class="features container">
-        <h2>Manual Installation Guide</h2>
-        <p style="margin-bottom: 2rem; max-width: 800px; margin-inline: auto">
+        <h2 data-i18n="manual.title">Manual Installation Guide</h2>
+        <p class="section-intro" data-i18n="manual.intro">
           Use this guide when a marketplace listing is not available for your browser yet. Manual
           installs depend on files you keep locally, so treat the downloaded package and extracted
           folder as part of the installation.
         </p>
         <div class="grid">
-          <div class="card">
-            <div class="icon">🌐</div>
-            <h3>Chrome / Chromium</h3>
+          <div
+            class="card"
+            aria-label="Manual installation steps for Chrome and Chromium"
+            data-i18n-attr="aria-label:manual.chrome.cardLabel"
+          >
+            <img
+              class="browser-logo"
+              src="images/chrome.svg"
+              alt="Chrome logo"
+              data-i18n-attr="alt:browser.chromeAlt"
+            />
+            <h3 data-i18n="manual.chrome.title">Chrome / Chromium</h3>
             <ol class="install-steps">
               <li>
-                Download the
+                <span data-i18n="manual.chrome.step1Prefix">Download the</span>
                 <a
                   href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chrome.zip"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="external-link"
+                  aria-label="Download the latest Chrome ZIP from GitHub releases in a new tab"
+                  data-i18n-attr="aria-label:manual.chrome.chromeZipLabel"
                   >Chrome ZIP <span aria-hidden="true" class="external-icon">↗</span></a
                 >
-                or
+                <span data-i18n="manual.chrome.or">or</span>
                 <a
                   href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-chromium.zip"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="external-link"
+                  aria-label="Download the latest Chromium ZIP from GitHub releases in a new tab"
+                  data-i18n-attr="aria-label:manual.chrome.chromiumZipLabel"
                   >Chromium ZIP <span aria-hidden="true" class="external-icon">↗</span></a
                 >.
               </li>
-              <li>
+              <li data-i18n-html="manual.shared.permanentFolder">
                 Move the ZIP to a <strong>permanent folder</strong> — don't delete it later or the
                 extension will break.
               </li>
-              <li>Extract the ZIP inside that folder.</li>
-              <li>Open <code>chrome://extensions/</code> in your browser.</li>
-              <li>Toggle on <strong>Developer mode</strong> (top-right switch).</li>
-              <li>Click <strong>Load unpacked</strong> and select the extracted folder.</li>
+              <li data-i18n="manual.shared.extract">Extract the ZIP inside that folder.</li>
+              <li data-i18n-html="manual.chrome.openExtensions">
+                Open <code>chrome://extensions/</code> in your browser.
+              </li>
+              <li data-i18n-html="manual.chrome.developerMode">
+                Toggle on <strong>Developer mode</strong> (top-right switch).
+              </li>
+              <li data-i18n-html="manual.shared.loadUnpacked">
+                Click <strong>Load unpacked</strong> and select the extracted folder.
+              </li>
             </ol>
           </div>
-          <div class="card">
-            <div class="icon">🦊</div>
-            <h3>Firefox</h3>
+          <div
+            class="card"
+            aria-label="Manual installation steps for Firefox"
+            data-i18n-attr="aria-label:manual.firefox.cardLabel"
+          >
+            <img
+              class="browser-logo"
+              src="images/firefox.svg"
+              alt="Firefox logo"
+              data-i18n-attr="alt:browser.firefoxAlt"
+            />
+            <h3 data-i18n="manual.firefox.title">Firefox</h3>
             <ol class="install-steps">
               <li>
-                Download the
+                <span data-i18n="manual.firefox.step1Prefix">Download the</span>
                 <a
                   href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-firefox.zip"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="external-link"
+                  aria-label="Download the latest Firefox ZIP from GitHub releases in a new tab"
+                  data-i18n-attr="aria-label:manual.firefox.firefoxZipLabel"
                   >Firefox ZIP <span aria-hidden="true" class="external-icon">↗</span></a
                 >.
               </li>
-              <li>
+              <li data-i18n-html="manual.firefox.permanentFolder">
                 Move the ZIP to a <strong>permanent folder</strong> — Firefox needs it there to stay
                 installed.
               </li>
-              <li>Open <code>about:debugging#/runtime/this-firefox</code> in Firefox.</li>
-              <li>Click <strong>Load Temporary Add-on…</strong></li>
-              <li>Select the ZIP file you downloaded.</li>
+              <li data-i18n-html="manual.firefox.openDebugging">
+                Open <code>about:debugging#/runtime/this-firefox</code> in Firefox.
+              </li>
+              <li data-i18n-html="manual.firefox.loadTemporary">
+                Click <strong>Load Temporary Add-on…</strong>
+              </li>
+              <li data-i18n="manual.firefox.selectZip">Select the ZIP file you downloaded.</li>
             </ol>
           </div>
-          <div class="card">
-            <div class="icon">🌊</div>
-            <h3>Microsoft Edge</h3>
+          <div
+            class="card"
+            aria-label="Manual installation steps for Microsoft Edge"
+            data-i18n-attr="aria-label:manual.edge.cardLabel"
+          >
+            <img
+              class="browser-logo"
+              src="images/edge.svg"
+              alt="Microsoft Edge logo"
+              data-i18n-attr="alt:browser.edgeAlt"
+            />
+            <h3 data-i18n="manual.edge.title">Microsoft Edge</h3>
             <ol class="install-steps">
               <li>
-                Download the
+                <span data-i18n="manual.edge.step1Prefix">Download the</span>
                 <a
                   href="https://github.com/Vijay431/yt-autolike/releases/latest/download/yt-autolike-edge.zip"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="external-link"
+                  aria-label="Download the latest Edge ZIP from GitHub releases in a new tab"
+                  data-i18n-attr="aria-label:manual.edge.edgeZipLabel"
                   >Edge ZIP <span aria-hidden="true" class="external-icon">↗</span></a
                 >.
               </li>
-              <li>
+              <li data-i18n-html="manual.shared.permanentFolder">
                 Move the ZIP to a <strong>permanent folder</strong> — don't delete it later or the
                 extension will break.
               </li>
-              <li>Extract the ZIP inside that folder.</li>
-              <li>Open <code>edge://extensions/</code> in Edge.</li>
-              <li>Toggle on <strong>Developer mode</strong> (left sidebar).</li>
-              <li>Click <strong>Load unpacked</strong> and select the extracted folder.</li>
+              <li data-i18n="manual.shared.extract">Extract the ZIP inside that folder.</li>
+              <li data-i18n-html="manual.edge.openExtensions">
+                Open <code>edge://extensions/</code> in Edge.
+              </li>
+              <li data-i18n-html="manual.edge.developerMode">
+                Toggle on <strong>Developer mode</strong> (left sidebar).
+              </li>
+              <li data-i18n-html="manual.shared.loadUnpacked">
+                Click <strong>Load unpacked</strong> and select the extracted folder.
+              </li>
             </ol>
           </div>
         </div>
       </section>
 
       <section id="privacy" class="privacy-banner container">
-        <h2>Your Data, Your Business</h2>
-        <p>
+        <h2 data-i18n="privacy.title">Your Data, Your Business</h2>
+        <p data-i18n="privacy.body">
           Unlike other extensions, YT AutoLike is completely open-source and local. We never
           collect, sell, or view your watch history.
         </p>
@@ -306,38 +429,58 @@
           target="_blank"
           rel="noopener noreferrer"
           class="text-link external-link"
+          aria-label="Read the YT AutoLike privacy policy on GitHub in a new tab"
+          data-i18n-attr="aria-label:privacy.linkLabel"
           >Privacy Policy <span aria-hidden="true" class="external-icon">↗</span></a
         >
+      </section>
+
+      <section id="thanks" class="thanks-section container">
+        <h2 data-i18n="thanks.title">Thanks</h2>
+        <p data-i18n="thanks.body">
+          YT AutoLike exists because of open-source tools, prior art, and community contributions.
+        </p>
+        <div class="thanks-links">
+          <a
+            href="https://github.com/Vijay431/yt-autolike/blob/main/ACKNOWLEDGEMENTS.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn secondary-btn external-link"
+            aria-label="Read acknowledgements on GitHub in a new tab"
+            data-i18n-attr="aria-label:thanks.acknowledgementsLabel"
+            >ACKNOWLEDGEMENTS.md <span aria-hidden="true" class="external-icon">↗</span></a
+          >
+          <a
+            href="https://github.com/Vijay431/yt-autolike/blob/main/CONTRIBUTORS.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn secondary-btn external-link"
+            aria-label="View contributors on GitHub in a new tab"
+            data-i18n-attr="aria-label:thanks.contributorsLabel"
+            >CONTRIBUTORS.md <span aria-hidden="true" class="external-icon">↗</span></a
+          >
+        </div>
       </section>
     </main>
 
     <footer>
       <div class="container footer-content">
-        <p>© 2026 YT AutoLike. Released under the MIT License.</p>
+        <p data-i18n="footer.copyright">© 2026 YT AutoLike. Released under the MIT License.</p>
         <div class="links">
           <a
             href="https://github.com/Vijay431/yt-autolike/issues"
             target="_blank"
             rel="noopener noreferrer"
             class="external-link"
+            aria-label="Report an issue on GitHub in a new tab"
+            data-i18n-attr="aria-label:footer.issueLabel"
             >Report an Issue <span aria-hidden="true" class="external-icon">↗</span></a
           >
         </div>
       </div>
     </footer>
 
-    <script>
-      const menuToggle = document.querySelector('.menu-toggle');
-      const navMenu = document.getElementById('nav-menu');
-      menuToggle.addEventListener('click', () => {
-        navMenu.classList.toggle('open');
-      });
-      // Close menu when a link is clicked
-      document.querySelectorAll('#nav-menu a').forEach((link) => {
-        link.addEventListener('click', () => {
-          navMenu.classList.remove('open');
-        });
-      });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/i18next@25.2.1/dist/umd/i18next.min.js"></script>
+    <script src="i18n.js"></script>
   </body>
 </html>

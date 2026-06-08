@@ -57,6 +57,46 @@ body {
   overflow-x: hidden;
 }
 
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.95);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px rgba(255, 0, 0, 0.45);
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 10000;
+  transform: translateY(-140%);
+  border-radius: 8px;
+  background: var(--text-primary);
+  color: var(--bg-color);
+  font-weight: 800;
+  padding: 10px 14px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ============================================================
    AMBIENT BACKGROUND
    ============================================================ */
@@ -202,6 +242,28 @@ nav {
   align-items: center;
   grid-column: 3;
   gap: 8px;
+}
+
+.language-select {
+  display: inline-flex;
+  align-items: center;
+}
+
+.language-select select {
+  min-height: 38px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 0 32px 0 12px;
+}
+
+.language-select option {
+  background: var(--bg-color);
+  color: var(--text-primary);
 }
 
 .github-icon-btn,
@@ -369,6 +431,12 @@ nav {
   color: var(--text-secondary);
 }
 
+.section-intro {
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  color: var(--text-secondary);
+}
+
 /* ============================================================
    DOWNLOAD CARDS
    ============================================================ */
@@ -383,6 +451,14 @@ nav {
 
 .download-card p {
   flex: 1;
+}
+
+.browser-logo {
+  display: block;
+  width: clamp(42px, 7vw, 56px);
+  height: clamp(42px, 7vw, 56px);
+  margin-bottom: var(--space-sm);
+  object-fit: contain;
 }
 
 .download-btn {
@@ -517,6 +593,33 @@ nav {
 
 .text-link:hover {
   text-decoration: underline;
+}
+
+/* ============================================================
+   THANKS
+   ============================================================ */
+.thanks-section {
+  padding: var(--space-lg) 0;
+  text-align: center;
+}
+
+.thanks-section h2 {
+  font-size: var(--text-h2);
+  margin-bottom: var(--space-sm);
+}
+
+.thanks-section p {
+  max-width: 680px;
+  margin: 0 auto var(--space-md);
+  color: var(--text-secondary);
+  font-size: clamp(1rem, 2vw, 1.1rem);
+}
+
+.thanks-links {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 
 /* ============================================================

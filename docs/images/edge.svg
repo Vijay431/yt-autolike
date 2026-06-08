@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Microsoft Edge logo</title>
+  <defs>
+    <linearGradient id="edge-a" x1="12" x2="52" y1="52" y2="12" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0aa6b7" />
+      <stop offset="1" stop-color="#0b5cad" />
+    </linearGradient>
+    <linearGradient id="edge-b" x1="16" x2="52" y1="16" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2bd88f" />
+      <stop offset="1" stop-color="#0aa6b7" />
+    </linearGradient>
+  </defs>
+  <path fill="url(#edge-a)" d="M56 38.5C53.6 51.5 42.7 60 29.8 60 15.9 60 5 49.8 5 35.9 5 19.6 17.2 4 34.3 4 47.6 4 58 13.5 58 26.2c0 5.9-3 10.6-8.8 10.6H24.7c1.7 5.4 6.8 8.8 13.7 8.8 7.2 0 12.7-2.6 17.6-7.1Z" />
+  <path fill="url(#edge-b)" d="M8.3 41.5c3.4-8.5 11.6-14.2 21.3-14.2h19.6c3.2 0 5.3-1.7 6.2-4.2C53.9 12.3 45 4 34.3 4 17.2 4 5 19.6 5 35.9c0 1.9.2 3.8.6 5.6h2.7Z" />
+  <path fill="#eefcff" d="M24.7 36.8c1.7 5.4 6.8 8.8 13.7 8.8 6.4 0 11.5-2.1 16-5.8-3.3 7-10.4 11.3-19.2 11.3-10 0-18-6.6-18-15.5 0-8.7 7.1-15.1 16.6-15.1 7 0 12.2 3.6 14.7 9.2H29.6c-3.2 0-5.4 2.4-4.9 7.1Z" opacity=".22" />
+</svg>
