@@ -3,6 +3,7 @@
 - **Caveman Mode:** You MUST always speak in a casual, friendly, caveman-style tone (e.g., "Me smash bugs!", "Ugh!").
 - **Command Prefix:** Always prepend your shell commands with `rtk`. If a command fails because `rtk` is missing, fallback to running it normally.
 - **Git Operations:** Use the `gh` CLI for all GitHub-related operations (auth, push, pull requests, etc.) instead of raw git commands where possible.
+- **Changelog:** always update the changelog, if it is really required.
 
 ## graphify
 

@@ -19,6 +19,7 @@
 import { getSettings, getWhitelist } from '../lib/storage';
 import { HEARTBEAT_INTERVAL_MS, PROGRESS_POLL_INTERVAL_MS } from '../lib/constants';
 import { showReminderToast, showToast } from './toast';
+import confetti from 'canvas-confetti';
 import type { PageType, LogEntry, Settings, Whitelist } from '../lib/types';
 import {
   getActiveVideo,
@@ -54,6 +55,7 @@ let pollInProgress = false;
  * Set to true between yt-navigate-finish and initForCurrentPage completing.
  */
 let isNavigating = false;
+let navigateTimeout: ReturnType<typeof setTimeout> | null = null;
 
 /**
  * Permanent shutdown flag — set to true when the extension context is
@@ -105,7 +107,11 @@ function onNavigateFinish(): void {
   }
   isNavigating = true;
   teardown();
-  setTimeout(() => {
+  if (navigateTimeout !== null) {
+    clearTimeout(navigateTimeout);
+  }
+  navigateTimeout = setTimeout(() => {
+    navigateTimeout = null;
     if (!isContextAlive()) {
       destroyEngine();
       return;
@@ -201,6 +207,10 @@ function teardown(): void {
     clearInterval(heartbeatInterval);
     heartbeatInterval = null;
   }
+  if (navigateTimeout !== null) {
+    clearTimeout(navigateTimeout);
+    navigateTimeout = null;
+  }
 }
 
 function getPageType(): PageType | null {
@@ -268,6 +278,14 @@ async function pollProgress(pageType: PageType): Promise<void> {
     }
 
     const settings = cachedSettings;
+
+    const voteState = getLikeState(pageType);
+    if (voteState === 'liked' || voteState === 'disliked') {
+      likedThisVideo = true;
+      await recordSkip(pageType, voteState === 'liked' ? 'already liked' : 'already disliked');
+      return;
+    }
+
     const targetSeconds = video!.duration * settings.target_percentage;
     if (accumulatedWatchSeconds < targetSeconds) return;
 
@@ -285,17 +303,12 @@ async function pollProgress(pageType: PageType): Promise<void> {
 
     if (!isLoggedIn()) return;
 
-    const voteState = getLikeState(pageType);
-    if (voteState === 'liked' || voteState === 'disliked') {
-      likedThisVideo = true;
-      await recordSkip(pageType, voteState === 'liked' ? 'already liked' : 'already disliked');
-      return;
-    }
-
     const clicked = clickLikeButton(pageType);
     if (clicked) {
       likedThisVideo = true;
       await recordLike(pageType);
+      showToast('Auto-Liked!', '🎉 We successfully auto-liked this video!');
+      triggerConfetti();
     }
   } finally {
     pollInProgress = false;
@@ -440,6 +453,15 @@ function getLikeState(pageType: PageType): VoteState {
 
 // ---------------------------------------------------------------------------
 // Guarded like click
+
+function triggerConfetti() {
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+    zIndex: 2147483647,
+  });
+}
 // ---------------------------------------------------------------------------
 
 function clickLikeButton(pageType: PageType): boolean {
