@@ -263,7 +263,7 @@ jobs:
   publish_firefox_amo:
     name: Publish to Firefox AMO
     needs: package
-    if: vars.ENABLE_FIREFOX_AMO_PUBLISH == 'true'
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Skipped Until AMO Account Exists
@@ -272,7 +272,7 @@ jobs:
   publish_edge_addons:
     name: Publish to Edge Add-ons
     needs: package
-    if: vars.ENABLE_EDGE_ADDONS_PUBLISH == 'true'
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Skipped Until Edge Partner Center Account Exists

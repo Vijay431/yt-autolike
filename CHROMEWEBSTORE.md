@@ -17,39 +17,35 @@ _(Current character count: 104)_
 **Detailed Description** _(max 16,000 characters — use plain text, CWS strips markdown)_
 
 ```
-YT AutoLike automatically likes YouTube videos and Shorts once you've watched a customizable percentage of them — helping you support the creators you actually watch.
+Forget to smash the like button? Let YT AutoLike do the heavy lifting! 🏋️‍♂️
 
-FEATURES
-• Four targeting modes — Global (all videos), Only Shorts, Only Videos, or Whitelist Only (approved channels only)
-• Customizable watch threshold — set a trigger from 10% to 90% (default: 50%)
-• Whitelist manager — add trusted channels from the popup while watching their videos
-• Active-watching guard — only likes when you're actually watching (visible tab or popup open)
-• Smart skip logic — skips videos already liked or disliked, and skips if you are logged out
-• Total likes counter — see how many videos you've supported
-• Hourly reminder toasts — friendly, non-intrusive messages every hour of watch time (can be turned off)
-• Activity feed — a log of the last 50 auto-like and skip events
-• Master pause — pause the extension with one click at any time
-• Fully local — all data stays on your device; nothing is ever sent to any server
+Creators rely on likes to beat the algorithm and grow. YT AutoLike is your "set it and forget it" sidekick that automatically likes videos and Shorts after you've watched a set percentage. Support your favorite channels on autopilot while you sit back and enjoy! 🍿
+
+WHY CHOOSE US OVER OTHERS? 🤔
+Unlike clunky or data-hungry alternatives, we put your privacy first.
+🔒 100% Private: No servers. No tracking. Your data stays on your device.
+🧠 Smart Logic: We only act when you're actually watching. If you're logged out or already voted, we skip it!
+
+AWESOME FEATURES ✨
+• 🎯 Target Your Way: Global, Only Shorts, Only Videos, or Whitelist Only!
+• ⏲️ You're In Control: Set watch thresholds from 10% to 90%.
+• 📝 Whitelist Manager: Support only your absolute favorites.
+• 🛡️ Active-Watching Guard: It knows when you're paying attention.
+• 📊 Feed & Stats: Track how many creators you've supported!
+• 👋 Friendly Reminders: Optional toasts every hour of watch time.
+• ⏸️ Master Pause: Take a break with one click.
 
 HOW TO USE
-1. Click the YT AutoLike icon in the Chrome toolbar to open the popup.
-2. Choose your auto-like mode (Global is the default).
-3. Adjust the watch threshold slider to your preferred percentage.
-4. If using Whitelist Only mode, navigate to a YouTube video and click "Add Current Channel" in the popup.
-5. Start watching — the extension handles the rest automatically.
+1. Click the YT AutoLike icon in the toolbar.
+2. Choose your mode and threshold percentage.
+3. Start watching — we handle the rest!
 
-PRIVACY
-This extension stores settings and whitelist entries in `chrome.storage.sync`, and stores stats plus the activity log locally in `chrome.storage.local`. No data is ever transmitted to any server controlled by this project. No analytics, no tracking, no remote service. See the full privacy policy for details.
+PRIVACY & PERMISSIONS
+We request minimal permissions ("storage", "tabs", and access to "youtube.com") solely to make the magic happen locally. Settings sync to your browser, but stats stay on your device. No data ever leaves your browser. See our privacy policy for full details.
 
-PERMISSIONS
-• "storage" — saves settings and whitelist entries in browser sync storage, and saves device-specific stats plus activity logs locally.
-• "tabs" — used only by the popup to detect whether you are on a YouTube page, so the "Add Current Channel" button works correctly.
-• Access to youtube.com — required to inject the content script that monitors your watch progress and interacts with the like button. The extension only activates on YouTube watch and Shorts pages.
-
-SUPPORT
-Found a bug or have a feature request? Open an issue on the project repository.
-
-Version 1.0.0 — Initial release with all core features: four targeting modes, whitelist manager, watch percentage slider, hourly reminders, activity feed.
+SUPPORT & VERSIONS
+Found a bug or have an idea? Open an issue on our GitHub repository!
+Version 1.0.0 — Initial release with all core features.
 ```
 
 **Category**
