@@ -89,10 +89,13 @@ describe('docs i18n', () => {
     ).map((option) => [option.value, option.textContent]);
 
     expect(options).toEqual([
+      ['en', 'English (Global)'],
       ['en-US', 'English (US)'],
       ['en-GB', 'English (UK)'],
-      ['en', 'English (Global)'],
       ['ta', 'Tamil'],
+      ['te', 'Telugu'],
+      ['kn', 'Kannada'],
+      ['ml', 'Malayalam'],
       ['hi', 'Hindi'],
       ['zh-CN', 'Chinese (Simplified)'],
     ]);
@@ -103,7 +106,17 @@ describe('docs i18n', () => {
     const resources = context.window.YTAutoLikeI18n?.resources ?? {};
     const fallbackKeys = collectLeafKeys(resources.en.translation).sort();
 
-    expect(Object.keys(resources).sort()).toEqual(['en', 'en-GB', 'en-US', 'hi', 'ta', 'zh-CN']);
+    expect(Object.keys(resources).sort()).toEqual([
+      'en',
+      'en-GB',
+      'en-US',
+      'hi',
+      'kn',
+      'ml',
+      'ta',
+      'te',
+      'zh-CN',
+    ]);
 
     Object.entries(resources).forEach(([language, resource]) => {
       expect(collectLeafKeys(resource.translation).sort(), language).toEqual(fallbackKeys);
