@@ -60,7 +60,7 @@ jobs:
 
       - name: Restore Dependency Cache
         id: dependency-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
@@ -225,7 +225,7 @@ jobs:
 
       - name: Restore Dependency Cache
         id: dependency-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}

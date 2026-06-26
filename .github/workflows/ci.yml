@@ -21,7 +21,7 @@ jobs:
 
       - name: Restore dependency cache
         id: dependency-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
@@ -47,7 +47,7 @@ jobs:
 
       - name: Restore dependency cache
         id: dependency-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
@@ -74,7 +74,7 @@ jobs:
 
       - name: Restore dependency cache
         id: dependency-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
@@ -105,7 +105,7 @@ jobs:
 
       - name: Restore dependency cache
         id: dependency-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
@@ -139,7 +139,7 @@ jobs:
 
       - name: Restore dependency cache
         id: dependency-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
@@ -216,7 +216,7 @@ jobs:
 
       - name: Restore dependency cache
         id: dependency-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: ${{ runner.os }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'pnpm-workspace.yaml', '.npmrc') }}
@@ -227,7 +227,7 @@ jobs:
 
       - name: Restore Playwright Chromium cache
         id: playwright-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-node-24-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
