@@ -2,7 +2,7 @@
   "private": true,
   "name": "yt-autolike",
   "description": "YT AutoLike is a privacy-first browser extension that automatically likes YouTube videos and Shorts to help support your favorite creators.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "youtube-extension",
     "auto-liker",
@@ -47,7 +47,7 @@
     "jsdom": "^29.1.1",
     "lint-staged": "^17.0.7",
     "prettier": "^3.8.3",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.3",
     "typescript": "6.0.3",
     "vitest": "^4.1.8"
   },
