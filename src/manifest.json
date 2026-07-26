@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/chrome-manifest.json",
   "chromium:manifest_version": 3,
   "firefox:manifest_version": 3,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "YT AutoLike",
   "description": "Automatically like YouTube videos and Shorts after watching a set percentage. Fully local — no data leaves your device.",
   "icons": {
