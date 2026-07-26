@@ -11,6 +11,18 @@ versioning.
 
 - Documentation translations for Telugu, Kannada, and Malayalam.
 
+## [1.0.1] - 2026-07-26
+
+### Security
+
+- Pinned `pnpm-workspace.yaml` dependency overrides to remediate 30 known
+  vulnerabilities (16 high, 12 moderate, 2 low) in transitive dev
+  dependencies, including DoS, prototype-pollution, and request-routing
+  issues in `axios`, `undici`, `brace-expansion`, `js-yaml`, `shell-quote`,
+  `form-data`, `adm-zip`, `fast-uri`, and `postcss`.
+- Updated `sharp` to `^0.35.3` to resolve inherited `libvips` CVEs
+  (CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591).
+
 ## [1.0.0] - 2026-06-07
 
 ### Added
