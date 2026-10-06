@@ -20,6 +20,21 @@ describe('storage boundaries and validation', () => {
     expect(chrome.storage.local.get).not.toHaveBeenCalledWith('settings');
   });
 
+  test('defaults like_celebration_enabled when missing or invalid', async () => {
+    await chrome.storage.sync.set({ settings: { mode: 'global', target_percentage: 0.5 } });
+    await expect(getSettings()).resolves.toMatchObject({ like_celebration_enabled: true });
+
+    await chrome.storage.sync.set({
+      settings: { mode: 'global', target_percentage: 0.5, like_celebration_enabled: 'no' },
+    });
+    await expect(getSettings()).resolves.toMatchObject({ like_celebration_enabled: true });
+
+    await chrome.storage.sync.set({
+      settings: { mode: 'global', target_percentage: 0.5, like_celebration_enabled: false },
+    });
+    await expect(getSettings()).resolves.toMatchObject({ like_celebration_enabled: false });
+  });
+
   test('keeps settings and whitelist in sync storage while stats and logs stay local', async () => {
     await chrome.storage.sync.set({
       whitelist: {

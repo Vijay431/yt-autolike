@@ -125,6 +125,34 @@ export function isValidLogEntry(entry: unknown): entry is LogEntry {
   return true;
 }
 
+/** Validate message sender origins. */
+export function isMessageSenderValid(sender: chrome.runtime.MessageSender): boolean {
+  // Check extension ID matches
+  if (sender.id !== chrome.runtime.id) {
+    return false;
+  }
+
+  // If sender has a tab, it's a content script. Verify it's youtube.com
+  if (sender.tab) {
+    const url = sender.url || sender.tab.url;
+    if (!url) return false;
+    try {
+      const parsed = new URL(url);
+      return parsed.hostname === 'youtube.com' || parsed.hostname.endsWith('.youtube.com');
+    } catch {
+      return false;
+    }
+  }
+
+  // If sender has no tab, it's extension internal (popup, options, etc)
+  if (sender.url) {
+    const extPrefix = chrome.runtime.getURL('');
+    return sender.url.startsWith(extPrefix);
+  }
+
+  return false;
+}
+
 /** Type guard for Message objects exchanged between extension scripts. */
 export function isValidMessage(msg: unknown): msg is Message {
   if (!msg || typeof msg !== 'object') return false;

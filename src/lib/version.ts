@@ -1,2 +1,4 @@
 /** Extension version, read from the manifest at runtime. */
-export const VERSION = chrome.runtime.getManifest().version;
+export function getVersion(): string {
+  return chrome.runtime.getManifest().version;
+}

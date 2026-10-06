@@ -14,6 +14,8 @@ export interface Settings {
   target_percentage: number;
   /** Whether the positive-message reminder toast (every 900s / 15 min; key name kept for persistence) should appear. */
   hourly_reminders_enabled: boolean;
+  /** Whether a toast and popup confetti celebrate each auto-like. */
+  like_celebration_enabled: boolean;
 }
 
 /** A single whitelisted YouTube channel. */

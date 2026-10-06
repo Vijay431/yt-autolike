@@ -61,7 +61,7 @@ export function resetChromeMock() {
   });
 }
 
-// Stub once at load so modules reading `chrome` at import time (e.g. lib/version) work.
+// Stub once at load so modules reading `chrome` at import time work.
 resetChromeMock();
 
 beforeEach(() => {

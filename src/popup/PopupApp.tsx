@@ -17,7 +17,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Zap, Film, CheckCircle, ExternalLink } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import type { Settings, Whitelist, Stats, Mode, VideoState, Message, LogEntry } from '../lib/types';
+import type { Settings, Whitelist, Stats, Mode, VideoState, LogEntry } from '../lib/types';
 import {
   getSettings,
   setSettings,
@@ -27,7 +27,8 @@ import {
   getLogs,
 } from '../lib/storage';
 import { DEFAULT_SETTINGS, DEFAULT_WHITELIST, DEFAULT_STATS } from '../lib/storage';
-import { VERSION } from '../lib/version';
+import { getVersion } from '../lib/version';
+import { isMessageSenderValid, isValidMessage } from '../lib/messages';
 
 function triggerPopupConfetti() {
   confetti({
@@ -80,6 +81,9 @@ export default function PopupApp() {
     tabId: number | null;
   }>({ isYouTube: false, channelName: null, channelId: null, tabId: null });
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const version = getVersion();
+  // Mirror of settings for the long-lived runtime listener, which must not see stale values.
+  const settingsRef = useRef(settings);
   const [addChannelStatus, setAddChannelStatus] = useState<string | null>(null);
   // Live video state from the content script
   const [videoState, setVideoState] = useState<VideoState | null>(null);
@@ -174,9 +178,14 @@ export default function PopupApp() {
   }, [detectActiveTab]);
 
   useEffect(() => {
-    const listener = (message: Message) => {
+    settingsRef.current = settings;
+  }, [settings]);
+
+  useEffect(() => {
+    const listener = (message: unknown, sender: chrome.runtime.MessageSender) => {
+      if (!isMessageSenderValid(sender) || !isValidMessage(message)) return;
       if (message.type === 'AUTO_LIKE_CONFIRMED') {
-        triggerPopupConfetti();
+        if (settingsRef.current.like_celebration_enabled) triggerPopupConfetti();
         getStats()
           .then(setStatsState)
           .catch(() => {});
@@ -328,7 +337,7 @@ export default function PopupApp() {
           />
           <div>
             <h1 className="popup-title">YT AutoLike</h1>
-            <span className="popup-version">v{VERSION}</span>
+            <span className="popup-version">v{version}</span>
           </div>
         </div>
       </header>
@@ -544,6 +553,30 @@ export default function PopupApp() {
             </p>
           </section>
 
+          {/* ── Celebration Toggle ── */}
+          <section className="section">
+            <h2 className="section-title">Celebration</h2>
+            <label className="toggle-row" htmlFor="celebration-toggle">
+              <span className="toggle-label">
+                <span className="toggle-icon">🎉</span>
+                Celebrate auto-likes
+              </span>
+              <div className="toggle-switch-wrapper">
+                <input
+                  id="celebration-toggle"
+                  type="checkbox"
+                  className="toggle-input"
+                  checked={settings.like_celebration_enabled}
+                  onChange={(e) => updateSettings({ like_celebration_enabled: e.target.checked })}
+                />
+                <span className="toggle-switch" aria-hidden="true" />
+              </div>
+            </label>
+            <p className="toggle-hint">
+              Show a toast and confetti each time a video is auto-liked.
+            </p>
+          </section>
+
           {/* ── Activity Feed ── */}
           <section className="section">
             <h2 className="section-title">Recent Activity</h2>
@@ -551,9 +584,9 @@ export default function PopupApp() {
               <p className="empty-hint">No activity yet.</p>
             ) : (
               <ul className="activity-feed">
-                {logs.map((log) => (
+                {logs.map((log, index) => (
                   <li
-                    key={`${log.timestamp}-${log.title}`}
+                    key={`${log.timestamp}-${index}`}
                     className={`log-item log-item--${log.status}`}
                   >
                     <span className="log-status-icon" aria-hidden="true">
@@ -588,7 +621,7 @@ export default function PopupApp() {
                 📧 Help
               </a>
             </div>
-            <p className="version-text">YT AutoLike v{VERSION}</p>
+            <p className="version-text">YT AutoLike v{version}</p>
           </footer>
         </div>
       </>
