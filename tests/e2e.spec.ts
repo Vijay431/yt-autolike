@@ -12,6 +12,11 @@ const extensionPath = path.join(__dirname, '../dist/chrome');
 const chromiumExecutablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
 let userDataDir = '';
 
+function getManifestVersion(): string {
+  const manifestPath = path.join(extensionPath, 'manifest.json');
+  return (JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as { version: string }).version;
+}
+
 function getPopupPathCandidates(): string[] {
   const manifestPath = path.join(extensionPath, 'manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as {
@@ -117,7 +122,7 @@ test.describe('YT AutoLike Extension E2E', () => {
 
     // Verify popup loads and check main elements
     await expect(page.getByRole('heading', { name: 'YT AutoLike' })).toBeVisible();
-    await expect(page.getByText('YT AutoLike v1.0.0')).toBeVisible();
+    await expect(page.getByText(`YT AutoLike v${getManifestVersion()}`)).toBeVisible();
 
     // The extension is fully local and should be fast
     const perf = await page.evaluate(
