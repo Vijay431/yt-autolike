@@ -1,5 +1,5 @@
 /**
- * Pool of 100 positive creator-support messages for hourly reminder toasts.
+ * Pool of 100 positive creator-support messages for periodic (15-minute) reminder toasts.
  * Selected randomly by the toast injector.
  */
 export const MESSAGES: readonly string[] = [
