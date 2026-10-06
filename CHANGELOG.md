@@ -10,6 +10,17 @@ versioning.
 ### Added
 
 - Documentation translations for Telugu, Kannada, and Malayalam.
+- Recent Activity feed in the popup showing the latest likes and skips.
+
+### Changed
+
+- Popup version label now reads from the extension manifest instead of a
+  hardcoded value; the e2e test does the same.
+- Reminder comments now describe the 15-minute interval accurately.
+
+### Removed
+
+- Unused sidebar and empty content-script stubs, and unused popup CSS.
 
 ## [1.0.0] - 2026-06-07
 

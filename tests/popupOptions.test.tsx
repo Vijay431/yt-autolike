@@ -55,6 +55,33 @@ describe('popup and options UI', () => {
     expect(chrome.runtime.onMessage.removeListener).toHaveBeenCalledWith(expect.any(Function));
   });
 
+  test('renders recent activity entries from storage', async () => {
+    await chrome.storage.local.set({
+      logs: [
+        {
+          timestamp: Date.now(),
+          title: 'Great Video Title',
+          channel: 'Creator One',
+          type: 'video',
+          status: 'liked',
+        },
+      ],
+    });
+
+    render(<PopupApp />);
+
+    expect(await screen.findByText('Recent Activity')).toBeInTheDocument();
+    expect(await screen.findByText('Great Video Title')).toBeInTheDocument();
+    expect(screen.getByText('Creator One')).toBeInTheDocument();
+  });
+
+  test('shows empty state when there is no activity', async () => {
+    render(<PopupApp />);
+
+    expect(await screen.findByText('Recent Activity')).toBeInTheDocument();
+    expect(screen.getByText('No activity yet.')).toBeInTheDocument();
+  });
+
   test('renders empty options whitelist state', async () => {
     render(<OptionsApp />);
 

@@ -17,12 +17,17 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Zap, Film, CheckCircle, ExternalLink } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import type { Settings, Whitelist, Stats, Mode, VideoState, Message } from '../lib/types';
-import { getSettings, setSettings, getWhitelist, setWhitelist, getStats } from '../lib/storage';
+import type { Settings, Whitelist, Stats, Mode, VideoState, Message, LogEntry } from '../lib/types';
+import {
+  getSettings,
+  setSettings,
+  getWhitelist,
+  setWhitelist,
+  getStats,
+  getLogs,
+} from '../lib/storage';
 import { DEFAULT_SETTINGS, DEFAULT_WHITELIST, DEFAULT_STATS } from '../lib/storage';
-
-// Extension version (kept in sync with manifest).
-const VERSION = '1.0.0';
+import { VERSION } from '../lib/version';
 
 function triggerPopupConfetti() {
   confetti({
@@ -54,6 +59,12 @@ const MODES: { value: Mode; label: string; desc: string; icon: React.ReactNode }
   },
 ];
 
+const STATUS_ICONS: Record<LogEntry['status'], string> = {
+  liked: '👍',
+  skipped: '⏭',
+  error: '⚠️',
+};
+
 // ---------------------------------------------------------------------------
 // Root component
 // ---------------------------------------------------------------------------
@@ -68,6 +79,7 @@ export default function PopupApp() {
     channelId: string | null;
     tabId: number | null;
   }>({ isYouTube: false, channelName: null, channelId: null, tabId: null });
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [addChannelStatus, setAddChannelStatus] = useState<string | null>(null);
   // Live video state from the content script
   const [videoState, setVideoState] = useState<VideoState | null>(null);
@@ -129,10 +141,16 @@ export default function PopupApp() {
   // Load all data on mount.
   useEffect(() => {
     async function load() {
-      const [s, w, st] = await Promise.all([getSettings(), getWhitelist(), getStats()]);
+      const [s, w, st, l] = await Promise.all([
+        getSettings(),
+        getWhitelist(),
+        getStats(),
+        getLogs(),
+      ]);
       setSettingsState(s);
       setWhitelistState(w);
       setStatsState(st);
+      setLogs(l);
     }
     load();
 
@@ -146,6 +164,7 @@ export default function PopupApp() {
     // Reload stats periodically while popup is open.
     const refresh = setInterval(() => {
       getStats().then(setStatsState);
+      getLogs().then(setLogs);
     }, 3000);
 
     return () => {
@@ -160,6 +179,9 @@ export default function PopupApp() {
         triggerPopupConfetti();
         getStats()
           .then(setStatsState)
+          .catch(() => {});
+        getLogs()
+          .then(setLogs)
           .catch(() => {});
       }
     };
@@ -522,6 +544,38 @@ export default function PopupApp() {
             </p>
           </section>
 
+          {/* ── Activity Feed ── */}
+          <section className="section">
+            <h2 className="section-title">Recent Activity</h2>
+            {logs.length === 0 ? (
+              <p className="empty-hint">No activity yet.</p>
+            ) : (
+              <ul className="activity-feed">
+                {logs.map((log) => (
+                  <li
+                    key={`${log.timestamp}-${log.title}`}
+                    className={`log-item log-item--${log.status}`}
+                  >
+                    <span className="log-status-icon" aria-hidden="true">
+                      {STATUS_ICONS[log.status]}
+                    </span>
+                    <div className="log-details">
+                      <span className="log-title" title={log.title}>
+                        {log.title}
+                      </span>
+                      <span className="log-meta">
+                        {[log.channel, log.reason].filter(Boolean).join(' · ')}
+                      </span>
+                    </div>
+                    <time className="log-time" dateTime={new Date(log.timestamp).toISOString()}>
+                      {formatLogTime(log.timestamp)}
+                    </time>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
           {/* ── Community Support Footer ── */}
           <footer className="popup-footer">
             <p className="community-note">
@@ -567,4 +621,12 @@ function formatMinutes(seconds: number): string {
   if (m === 0) return `${s} sec`;
   if (s === 0) return `${m} min`;
   return `${m} min ${s} sec`;
+}
+
+/** Format a log timestamp as a relative time ("just now", "5m ago") or HH:MM. */
+function formatLogTime(timestamp: number): string {
+  const diffMs = Date.now() - timestamp;
+  if (diffMs < 60_000) return 'just now';
+  if (diffMs < 3_600_000) return `${Math.floor(diffMs / 60_000)}m ago`;
+  return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
