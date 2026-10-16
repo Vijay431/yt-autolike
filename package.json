@@ -82,8 +82,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "verify": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build:all && pnpm run package:all && pnpm run package:validate",
+    "verify": "pnpm run lint && pnpm run format:check && pnpm run typecheck && pnpm run test && pnpm run build:all && pnpm run package:all && pnpm run package:validate",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "prepare": "husky"
   },
   "packageManager": "pnpm@11.2.2",
@@ -99,11 +100,11 @@
     "tabWidth": 2
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
+    "*.{ts,tsx,js,mjs,cjs}": [
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{js,json,md,css,html}": [
+    "*.{json,md,css,html,yml,yaml}": [
       "prettier --write"
     ]
   },
