@@ -1,6 +1,6 @@
 # Developer Guide & Release Pipeline Setup
 
-This guide documents how to configure and use the release pipeline for YT AutoLike. The workflow builds browser packages, attaches them to a GitHub release, and uploads the Chrome ZIP to the Chrome Developer Dashboard. It does not submit the item for review automatically.
+This guide documents how to configure and use the release pipeline for YT AutoLike. The workflow runs when a `vX.Y.Z` tag is pushed. It builds browser packages, creates the GitHub release with them attached, and uploads the Chrome ZIP to the Chrome Developer Dashboard. It does not submit the item for review automatically.
 
 ---
 
@@ -73,7 +73,7 @@ pnpm run package:all
 pnpm run package:validate
 ```
 
-`pnpm run verify` runs lint, typecheck, unit tests, all browser builds, all packages, and package validation.
+`pnpm run verify` runs lint, format check, typecheck, unit tests, all browser builds, all packages, and package validation.
 
 Release helper scripts live in `scripts/`: `scripts/package-extension.sh`,
 `scripts/validate-packages.mjs`, and `scripts/chrome-webstore-upload.mjs`. Use the `pnpm`
@@ -100,14 +100,14 @@ pnpm run chrome-webstore:upload -- --zip dist/zips/yt-autolike-v1.0.0-chrome.zip
 
 ## Pipeline Execution Flow
 
-1. Create a draft GitHub release for the target tag.
-2. Publish the GitHub release. Draft releases do not run the workflow.
-3. The `Release and Publish` workflow checks out the release tag, updates local build metadata to the tag version, runs `pnpm run verify`, and uploads the packaged artifacts as a workflow artifact.
-4. Downstream jobs run in parallel:
-   - GitHub release upload attaches all versioned ZIP/XPI/source artifacts plus stable latest-download aliases.
+1. Bump `version` in `package.json` and `src/manifest.json` to the same value, update `CHANGELOG.md`, and merge to `main` through a PR.
+2. Tag the merged commit and push the tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+3. The `Release and Publish` workflow runs on the tag push. It fails unless the tag, `package.json`, and `src/manifest.json` versions match, reuses the validated CI build (or rebuilds), packages, and validates the artifacts.
+4. The GitHub Release is created with all versioned ZIP/XPI/source artifacts plus stable latest-download aliases (generated release notes).
+5. After the Release exists, publish jobs run:
    - Chrome Web Store upload sends the versioned Chrome ZIP to Chrome Web Store API v2.
    - Firefox AMO and Edge Add-ons jobs stay visible but are intentionally skipped until marketplace accounts exist.
-5. Open the Chrome Developer Dashboard, review the uploaded draft package and listing state, then manually submit it for review.
+6. Open the Chrome Developer Dashboard, review the uploaded draft package and listing state, then manually submit it for review.
 
 The automation only calls the API v2 upload and status endpoints. It does not call the publish endpoint, so review submission stays manual.
 
