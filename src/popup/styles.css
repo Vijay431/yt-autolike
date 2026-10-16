@@ -808,7 +808,8 @@ body {
 }
 
 .slider {
-  min-height: 24px;
+  box-sizing: content-box;
+  padding: 10px 0;
   background-clip: content-box;
 }
 
