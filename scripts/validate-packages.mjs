@@ -63,7 +63,8 @@ const zipList = (zipPath) =>
     .map((entry) => entry.trim())
     .filter(Boolean);
 
-const zipText = (zipPath, entry) => execFileSync('unzip', ['-p', zipPath, entry], { encoding: 'utf8' });
+const zipText = (zipPath, entry) =>
+  execFileSync('unzip', ['-p', zipPath, entry], { encoding: 'utf8' });
 
 const requireEntry = (zipName, entries, entry) => {
   if (!entries.includes(entry)) {
@@ -122,7 +123,9 @@ const validateRuntimePackage = (zipPath, browser) => {
   const entrySet = new Set(entries);
 
   requireEntry(zipName, entries, 'manifest.json');
-  if (entries.some((entry) => entry.startsWith(`${path.basename(zipPath, path.extname(zipPath))}/`))) {
+  if (
+    entries.some((entry) => entry.startsWith(`${path.basename(zipPath, path.extname(zipPath))}/`))
+  ) {
     fail(`${zipName} appears to contain a top-level wrapper folder`);
   }
 
@@ -138,7 +141,9 @@ const validateRuntimePackage = (zipPath, browser) => {
 
   const manifest = JSON.parse(zipText(zipPath, 'manifest.json'));
   if (manifest.version !== version) {
-    fail(`${zipName} manifest version ${manifest.version} does not match package version ${version}`);
+    fail(
+      `${zipName} manifest version ${manifest.version} does not match package version ${version}`,
+    );
   }
 
   for (const ref of collectManifestRefs(manifest)) {
@@ -182,7 +187,13 @@ const validateSourcePackage = (zipPath) => {
       fail(`${zipName} contains generated/cache file ${entry}`);
     }
   }
-  for (const required of ['package.json', 'pnpm-lock.yaml', 'src/manifest.json', 'README.md', 'FIREFOX_AMO.md']) {
+  for (const required of [
+    'package.json',
+    'pnpm-lock.yaml',
+    'src/manifest.json',
+    'README.md',
+    'FIREFOX_AMO.md',
+  ]) {
     requireEntry(zipName, entries, required);
   }
   console.log(`Validated ${zipName}`);
