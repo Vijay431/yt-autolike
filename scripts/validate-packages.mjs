@@ -15,7 +15,7 @@ const runtimeDocs = new Set([
   'CONTRIBUTING.md',
   'SECURITY.md',
   'AGENTS.md',
-  'GEMINI.md',
+  'CLAUDE.md',
 ]);
 const runtimeForbidden = [
   /^src\//,

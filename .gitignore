@@ -1,15 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# AI
-.antigravitycli/
-docs/superpowers/
-.agent/
-.agents/
-.claude/
-.codex/
-
 # dependencies
 node_modules
+.pnpm-store/
 
 # testing
 coverage
@@ -18,11 +11,6 @@ playwright-report
 
 # production
 dist
-graphify-out/
-
-# misc
-.DS_Store
-project-docs/
 
 # local env files
 .env
@@ -30,7 +18,7 @@ project-docs/
 !.env.example
 !.env.sample
 
-# lock files
+# lock files (pnpm-lock.yaml is the only lockfile)
 yarn.lock
 package-lock.json
 
@@ -43,16 +31,24 @@ pnpm-debug.log*
 # cache and package artifacts
 .eslintcache
 *.tsbuildinfo
-.pnpm-store/
 *.tgz
 
-# extension.js
+# Extension.js generated shim
 /extension-env.d.ts
 
-# Local tool data
-.gemini/
-.agents/
-.codegraph/
+# OS
+.DS_Store
 
-# Others
-TODO.md
+# Local AI tooling and planning state
+.agent/
+.agents/
+.antigravitycli/
+.claude/
+.codegraph/
+.codex/
+.gemini/
+.graphifyignore
+graphify-out/
+openspec/
+docs/superpowers/
+project-docs/

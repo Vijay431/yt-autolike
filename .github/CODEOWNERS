@@ -9,7 +9,7 @@
 /.github/workflows/** @Vijay431
 /.github/dependabot.yml @Vijay431
 /AGENTS.md @Vijay431
-/GEMINI.md @Vijay431
+/CLAUDE.md @Vijay431
 
 # Package metadata, lockfile, release packaging, and upload/validation tooling.
 /package.json @Vijay431
