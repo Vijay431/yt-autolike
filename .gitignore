@@ -53,3 +53,6 @@ graphify-out/
 openspec/
 docs/superpowers/
 project-docs/
+
+# Extension.js local session state
+.extension-js
