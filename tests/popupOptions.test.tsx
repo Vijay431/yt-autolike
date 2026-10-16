@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, test, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -138,10 +140,28 @@ describe('popup and options UI', () => {
     render(<OptionsApp />);
 
     expect(await screen.findByText('Creator One')).toBeInTheDocument();
-    await user.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button', { name: 'Remove Creator One from whitelist' }));
 
     await waitFor(() => {
       expect(screen.queryByText('Creator One')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('stylesheet accessibility baseline', () => {
+    const css = readFileSync(path.resolve(__dirname, '../src/popup/styles.css'), 'utf8');
+
+    test('honours reduced motion', () => {
+      expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)/);
+    });
+
+    test('shows keyboard focus on controls, including the visually hidden toggle', () => {
+      expect(css).toMatch(/:focus-visible\s*\{/);
+      expect(css).toMatch(/\.toggle-input:focus-visible \+ \.toggle-switch/);
+    });
+
+    test('supports light and dark colour schemes', () => {
+      expect(css).toMatch(/color-scheme: dark light/);
+      expect(css).toMatch(/@media \(prefers-color-scheme: light\)/);
     });
   });
 });

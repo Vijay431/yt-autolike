@@ -13,15 +13,59 @@
   --accent-glow: rgba(255, 0, 0, 0.4);
   --text-primary: #f1f1f1;
   --text-secondary: #aaaaaa;
-  --text-muted: #71717a;
+  --text-muted: #9a9aa4;
   --green: #2ba640;
   --green-dim: rgba(43, 166, 64, 0.15);
   --yellow: #fbc02d;
   --yellow-dim: rgba(251, 192, 45, 0.15);
+  --surface-2: #333333;
+  --border-strong: #444444;
+  --control-off: #888888;
+  --on-accent: #ffffff;
+  --info: var(--info);
+  --info-dim: var(--info-dim);
+  --info-border: var(--info-border);
+  --warn: var(--warn);
+  --warn-dim: var(--warn-dim);
+  --warn-border: var(--warn-border);
+  --header-bg: rgba(9, 9, 11, 0.85);
+  --card-stats: linear-gradient(135deg, #1a0a0a 0%, #1a1a1a 100%);
+  --card-now: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  --footer-bg: linear-gradient(0deg, #1c1c1c 0%, var(--bg-base) 100%);
+  --focus-ring: #6cb2ff;
   --radius-sm: 8px;
   --radius: 8px;
   --radius-lg: 16px;
   --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color-scheme: dark light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-base: #ffffff;
+    --bg-card: #f4f4f5;
+    --bg-card-hover: #e6e6e8;
+    --bg-input: #ffffff;
+    --border: #d0d0d4;
+    --accent: #cc0000;
+    --accent-dim: rgba(204, 0, 0, 0.1);
+    --accent-glow: rgba(204, 0, 0, 0.3);
+    --text-primary: #111111;
+    --text-secondary: #4a4a52;
+    --text-muted: #5f5f68;
+    --green: #1e7a30;
+    --yellow: #8a6100;
+    --surface-2: #d8d8dc;
+    --border-strong: #b8b8be;
+    --control-off: #6f6f78;
+    --info: #1558b0;
+    --warn: #8a4b00;
+    --header-bg: rgba(255, 255, 255, 0.9);
+    --card-stats: linear-gradient(135deg, #fff1f1 0%, #f4f4f5 100%);
+    --card-now: linear-gradient(135deg, #eef5ff 0%, #f4f4f5 100%);
+    --footer-bg: linear-gradient(0deg, #ececee 0%, var(--bg-base) 100%);
+    --focus-ring: #0b57d0;
+  }
 }
 
 /* ============================================================
@@ -69,7 +113,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px 14px;
-  background: rgba(9, 9, 11, 0.85); /* Translucent background */
+  background: var(--header-bg); /* Translucent background */
   backdrop-filter: blur(12px); /* Glassmorphism effect */
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
@@ -127,7 +171,7 @@ body {
   flex: 1;
   padding: 4px 0 16px;
   scrollbar-width: thin;
-  scrollbar-color: #333 transparent;
+  scrollbar-color: var(--surface-2) transparent;
 }
 
 .popup-body::-webkit-scrollbar {
@@ -137,7 +181,7 @@ body {
   background: transparent;
 }
 .popup-body::-webkit-scrollbar-thumb {
-  background: #333;
+  background: var(--surface-2);
   border-radius: 4px;
 }
 
@@ -168,8 +212,8 @@ body {
    Stats section
    ============================================================ */
 .stats-section {
-  background: linear-gradient(135deg, #1a0a0a 0%, #1a1a1a 100%);
-  border-left: 3px solid var(--accent);
+  background: var(--card-stats);
+  border-left: 1px solid var(--accent-dim);
 }
 
 .stats-counter {
@@ -224,7 +268,7 @@ body {
 
 .mode-card:hover {
   background: var(--bg-card-hover);
-  border-color: #444;
+  border-color: var(--border-strong);
   transform: translateY(-1px);
 }
 
@@ -263,7 +307,7 @@ body {
    ============================================================ */
 .slider-value-badge {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border-radius: 10px;
   padding: 1px 8px;
   font-size: 11px;
@@ -299,7 +343,6 @@ body {
     var(--border) var(--pct, 50%)
   );
   border-radius: 4px;
-  outline: none;
   cursor: pointer;
 }
 
@@ -348,7 +391,7 @@ body {
   width: 100%;
   padding: 11px 16px;
   background: var(--bg-card);
-  border: 1px dashed #444;
+  border: 1px dashed var(--border-strong);
   border-radius: var(--radius);
   color: var(--text-secondary);
   font-family: inherit;
@@ -430,7 +473,7 @@ body {
   display: block;
   width: 40px;
   height: 22px;
-  background: #333;
+  background: var(--surface-2);
   border-radius: 11px;
   position: relative;
   transition: background var(--transition);
@@ -444,7 +487,7 @@ body {
   left: 3px;
   width: 16px;
   height: 16px;
-  background: #888;
+  background: var(--control-off);
   border-radius: 50%;
   transition:
     transform var(--transition),
@@ -456,7 +499,7 @@ body {
 }
 
 .toggle-input:checked + .toggle-switch::after {
-  background: #fff;
+  background: var(--on-accent);
   transform: translateX(18px);
 }
 
@@ -476,7 +519,7 @@ body {
   max-height: 200px;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #333 transparent;
+  scrollbar-color: var(--surface-2) transparent;
 }
 
 .log-item {
@@ -496,7 +539,7 @@ body {
 }
 
 .log-item--skipped {
-  border-left-color: #555;
+  border-left-color: var(--border-strong);
 }
 
 .log-item--error {
@@ -589,8 +632,8 @@ body {
    Now Playing card
    ============================================================ */
 .now-playing-section {
-  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-  border-left: 3px solid #4a9eff;
+  background: var(--card-now);
+  border-left: 1px solid var(--info-border);
 }
 
 /* ETA row */
@@ -607,15 +650,15 @@ body {
 }
 
 .np-eta--pending {
-  background: rgba(74, 158, 255, 0.1);
-  color: #4a9eff;
-  border: 1px solid rgba(74, 158, 255, 0.2);
+  background: var(--info-dim);
+  color: var(--info);
+  border: 1px solid var(--info-border);
 }
 
 .np-eta--ready {
-  background: rgba(255, 165, 0, 0.1);
-  color: #ffaa33;
-  border: 1px solid rgba(255, 165, 0, 0.2);
+  background: var(--warn-dim);
+  color: var(--warn);
+  border: 1px solid var(--warn-border);
 }
 
 .np-eta--done {
@@ -654,7 +697,7 @@ body {
    ============================================================ */
 .popup-footer {
   padding: 16px;
-  background: linear-gradient(0deg, #1c1c1c 0%, var(--bg-base) 100%);
+  background: var(--footer-bg);
   border-top: 1px solid var(--border);
   text-align: center;
 }
@@ -739,4 +782,56 @@ body {
 .manage-whitelist-btn:hover {
   background: rgba(255, 0, 0, 0.25);
   transform: translateY(-1px);
+}
+
+/* ============================================================
+   Accessibility: focus, targets, wrapping, reduced motion
+   ============================================================ */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.toggle-input:focus-visible + .toggle-switch {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.slider:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.slider:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.slider {
+  min-height: 24px;
+  background-clip: content-box;
+}
+
+.toggle-row,
+.pause-toggle {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.toggle-label,
+.toggle-hint,
+.slider-hint {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }

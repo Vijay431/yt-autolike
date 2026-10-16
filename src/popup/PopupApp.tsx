@@ -36,6 +36,7 @@ function triggerPopupConfetti() {
     spread: 70,
     origin: { y: 0.6 },
     zIndex: 2147483647,
+    disableForReducedMotion: true,
   });
 }
 

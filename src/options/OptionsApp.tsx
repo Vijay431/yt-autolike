@@ -89,6 +89,7 @@ export default function OptionsApp() {
                         whileTap={{ scale: 0.9 }}
                         onClick={() => removeChannel(channel.id)}
                         className="pause-toggle"
+                        aria-label={`Remove ${channel.name} from whitelist`}
                         style={{
                           padding: '8px',
                           background: 'rgba(255,0,0,0.1)',
