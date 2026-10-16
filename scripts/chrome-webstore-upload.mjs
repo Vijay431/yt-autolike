@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-/* eslint-env node */
-
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

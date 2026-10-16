@@ -28,6 +28,7 @@
   "devDependencies": {
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
+    "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.60.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -35,20 +36,20 @@
     "@types/canvas-confetti": "^1.9.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.60.1",
-    "@typescript-eslint/parser": "^8.60.1",
     "concurrently": "^10.0.3",
-    "eslint": "^8.57.1",
+    "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "extension": "^3.18.2",
+    "globals": "^17.13.0",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "lint-staged": "^17.0.7",
     "prettier": "^3.8.3",
     "sharp": "^0.35.3",
     "typescript": "6.0.3",
+    "typescript-eslint": "^8.71.2",
     "vitest": "^4.1.8"
   },
   "scripts": {
@@ -75,8 +76,8 @@
     "package:validate": "node scripts/validate-packages.mjs",
     "chrome-webstore:upload": "node scripts/chrome-webstore-upload.mjs",
     "contributors:sync": "node scripts/sync-contributors.mjs",
-    "lint": "eslint . --ext .ts,.tsx",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -87,7 +88,7 @@
   },
   "packageManager": "pnpm@11.2.2",
   "engines": {
-    "node": ">=22.0.0",
+    "node": "24.x",
     "pnpm": ">=11.0.0"
   },
   "prettier": {
