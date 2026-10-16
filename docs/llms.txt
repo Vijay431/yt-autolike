@@ -1,0 +1,27 @@
+# YT AutoLike
+
+> Privacy-first Manifest V3 browser extension (Chrome, Chromium, Edge, Firefox) that automatically likes YouTube videos and Shorts after a configurable watch threshold. No telemetry, no remote code, no hidden network calls. Built with React, TypeScript, and Extension.js; Node.js 24 and pnpm 11.
+
+## Docs
+
+- [README](https://github.com/Vijay431/yt-autolike/blob/main/README.md): features, install, usage
+- [Contributing](https://github.com/Vijay431/yt-autolike/blob/main/CONTRIBUTING.md): setup, verification gates, PR rules
+- [Developer guide](https://github.com/Vijay431/yt-autolike/blob/main/release/DEVELOPER.md): build, package, and release workflow
+- [Privacy policy](https://github.com/Vijay431/yt-autolike/blob/main/PRIVACY_POLICY.md): data handling and permissions
+- [Security policy](https://github.com/Vijay431/yt-autolike/blob/main/SECURITY.md): vulnerability reporting
+- [Changelog](https://github.com/Vijay431/yt-autolike/blob/main/CHANGELOG.md): release history
+- [Repository](https://github.com/Vijay431/yt-autolike): source code and issues
+
+## Source
+
+- [src/manifest.json](https://github.com/Vijay431/yt-autolike/blob/main/src/manifest.json): permissions and entry points
+- [src/content/engine.ts](https://github.com/Vijay431/yt-autolike/blob/main/src/content/engine.ts): watch-time tracking and auto-like decision logic
+- [src/background.ts](https://github.com/Vijay431/yt-autolike/blob/main/src/background.ts): service worker, messaging, storage orchestration
+- [src/popup/PopupApp.tsx](https://github.com/Vijay431/yt-autolike/blob/main/src/popup/PopupApp.tsx): popup UI
+- [AGENTS.md](https://github.com/Vijay431/yt-autolike/blob/main/AGENTS.md): conventions and repo map for AI coding agents
+
+## Optional
+
+- [Chrome Web Store listing notes](https://github.com/Vijay431/yt-autolike/blob/main/release/CHROMEWEBSTORE.md)
+- [Firefox AMO listing notes](https://github.com/Vijay431/yt-autolike/blob/main/release/FIREFOX_AMO.md)
+- [Contributors](https://github.com/Vijay431/yt-autolike/blob/main/CONTRIBUTORS.md)
