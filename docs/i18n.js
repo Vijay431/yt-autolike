@@ -160,7 +160,6 @@ const englishGlobal = {
   thanks: {
     title: 'Thanks',
     body: 'YT AutoLike exists because of open-source tools, prior art, and community contributions.',
-    acknowledgementsLabel: 'Read acknowledgements on GitHub in a new tab',
     contributorsLabel: 'View contributors on GitHub in a new tab',
   },
   footer: {
@@ -336,7 +335,6 @@ const resources = {
     thanks: {
       title: 'நன்றி',
       body: 'Open-source கருவிகள், முன் முயற்சிகள், மற்றும் community பங்களிப்புகள் காரணமாக YT AutoLike உருவானது.',
-      acknowledgementsLabel: 'GitHub-இல் acknowledgements-ஐ புதிய தாவலில் படிக்கவும்',
       contributorsLabel: 'GitHub-இல் contributors-ஐ புதிய தாவலில் பார்க்கவும்',
     },
     footer: {
@@ -478,7 +476,6 @@ const resources = {
     thanks: {
       title: 'धन्यवाद',
       body: 'YT AutoLike open-source tools, prior art, और community contributions की वजह से मौजूद है.',
-      acknowledgementsLabel: 'GitHub पर acknowledgements नए tab में पढ़ें',
       contributorsLabel: 'GitHub पर contributors नए tab में देखें',
     },
     footer: {
@@ -620,7 +617,6 @@ const resources = {
     thanks: {
       title: '致谢',
       body: 'YT AutoLike 的存在离不开开源工具、前人的工作和社区贡献。',
-      acknowledgementsLabel: '在 GitHub 新标签页中阅读 acknowledgements',
       contributorsLabel: '在 GitHub 新标签页中查看 contributors',
     },
     footer: {
@@ -765,7 +761,6 @@ const resources = {
     thanks: {
       title: 'కృతజ్ఞతలు',
       body: 'ఓపెన్-సోర్స్ టూల్స్, మునుపటి ఆర్ట్ మరియు కమ్యూనిటీ సహకారాల కారణంగా YT ఆటోలైక్ ఉనికిలో ఉంది.',
-      acknowledgementsLabel: 'కొత్త ట్యాబ్‌లో GitHub లో అక్నాలెడ్జ్‌మెంట్స్ చదవండి',
       contributorsLabel: 'కొత్త ట్యాబ్‌లో GitHub లో కంట్రిబ్యూటర్స్‌ని చూడండి',
     },
     footer: {
@@ -913,7 +908,6 @@ const resources = {
     thanks: {
       title: 'ಧನ್ಯವಾದಗಳು',
       body: 'ಓಪನ್-ಸೋರ್ಸ್ ಪರಿಕರಗಳು, ಹಿಂದಿನ ಕಲೆ ಮತ್ತು ಸಮುದಾಯದ ಕೊಡುಗೆಗಳಿಂದಾಗಿ YT ಆಟೋಲೈಕ್ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ.',
-      acknowledgementsLabel: 'ಹೊಸ ಟ್ಯಾಬ್‌ನಲ್ಲಿ GitHub ನಲ್ಲಿ ಸ್ವೀಕೃತಿಗಳನ್ನು ಓದಿ',
       contributorsLabel: 'ಹೊಸ ಟ್ಯಾಬ್‌ನಲ್ಲಿ GitHub ನಲ್ಲಿ ಕೊಡುಗೆದಾರರನ್ನು ವೀಕ್ಷಿಸಿ',
     },
     footer: {
@@ -1062,7 +1056,6 @@ const resources = {
     thanks: {
       title: 'നന്ദി',
       body: 'ഓപ്പൺ-സോഴ്സ് ടൂളുകൾ, മുൻകാല വർക്കുകൾ, കമ്മ്യൂണിറ്റി സംഭാവനകൾ എന്നിവ കാരണമാണ് YT ഓട്ടോലൈക്ക് നിലനിൽക്കുന്നത്.',
-      acknowledgementsLabel: 'ഒരു പുതിയ ടാബിൽ GitHub-ൽ അക്നോളജ്മെൻ്റുകൾ വായിക്കുക',
       contributorsLabel: 'ഒരു പുതിയ ടാബിൽ GitHub-ൽ സംഭാവകർ കാണുക',
     },
     footer: {

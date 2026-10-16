@@ -2,7 +2,6 @@ language: en-US
 
 reviews:
   profile: chill
-  show_prompt: true
   request_changes_workflow: false
   collapse_walkthrough: false
   auto_review:
@@ -10,9 +9,6 @@ reviews:
     drafts: false
     base_branches:
       - main
-
-  summary:
-    auto_update: true
 
   path_filters:
     - '!dist/**'
@@ -29,6 +25,7 @@ reviews:
     - '!.codex/**'
     - '!.gemini/**'
     - '!.husky/**'
+    - '!openspec/**'
     - '!**/*.zip'
     - '!**/*.xpi'
     - '!**/*.png'
@@ -69,7 +66,7 @@ reviews:
 
     - path: '.github/workflows/*.yml'
       instructions: |
-        CI and release workflows should use pnpm 11 via `packageManager`, Node 24 in CI, and the existing verification/package scripts.
+        CI and release workflows should use pnpm 11 via `packageManager`, Node 24 everywhere (local and CI), and the existing verification/package scripts.
         - Preserve exact-hit cache reuse and skip install steps only when the restored dependency cache is valid.
         - Keep CI, release, artifact upload, and store-submission boundaries clear; release artifacts should come from verified build/package steps.
         - Flag workflow changes that upload secrets, generated source maps, test output, or non-runtime files as runtime extension artifacts.
@@ -78,12 +75,12 @@ reviews:
     - path: 'package.json'
       instructions: |
         This package defines the extension build, test, and release script contract.
-        - Keep pnpm as the only package manager and preserve Node 22+ local / Node 24 CI compatibility.
+        - Keep pnpm as the only package manager and enforce Node 24 only (`engines.node` is `24.x`).
         - Treat Chrome, Chromium, Edge, and Firefox as first-class browser targets for build and packaging scripts.
-        - Ensure `verify` continues to cover lint, typecheck, unit tests, all browser builds, all runtime packages, and package validation.
+        - Ensure `verify` continues to cover lint, format check, typecheck, unit tests, all browser builds, all runtime packages, and package validation.
         - Review dependency changes for runtime size, privacy impact, remote-code risk, and browser-extension store policy risk.
 
-    - path: 'package-extension.sh'
+    - path: 'scripts/package-extension.sh'
       instructions: |
         This script creates store-ready runtime ZIP/XPI artifacts and the Firefox AMO source ZIP.
         - Runtime ZIPs must contain only compiled extension files with `manifest.json` at the ZIP root; exclude source maps, docs, tests, generated output, and agent metadata.
@@ -91,19 +88,33 @@ reviews:
         - Preserve Chrome, Chromium, Edge, Firefox ZIP outputs plus Firefox XPI and source ZIP naming under `dist/zips/`.
         - Source ZIP contents must come from tracked source/review files and avoid generated folders or local agent/cache metadata.
 
-    - path: 'tools/**/*.mjs'
+    - path: 'scripts/**/*.mjs'
       instructions: |
         Review package validation and store-upload tooling for release safety.
         - Validation should fail on missing browser artifacts, missing root manifests, source maps in runtime packages, leaked docs/tests/source in runtime ZIPs, and missing expected Firefox XPI/source ZIP outputs.
         - Upload tooling must never log secrets and must fail closed when credentials, extension IDs, or artifact paths are missing.
         - Keep script behavior deterministic for CI and friendly to pnpm/Node 24.
 
-    - path: '{README.md,CHROMEWEBSTORE.md,FIREFOX_AMO.md,EDGE_ADDONS.md,PRIVACY_POLICY.md,SECURITY.md}'
+    - path: '{README.md,release/**/*.md,PRIVACY_POLICY.md,SECURITY.md}'
       instructions: |
-        Store, privacy, and release docs must stay aligned with actual extension behavior.
+        Store, privacy, and release docs (`release/`) must stay aligned with actual extension behavior.
         - Keep Chrome Web Store, Firefox AMO, Edge Add-ons, privacy disclosures, package names, and supported browser targets in sync with manifest, source, and packaging scripts.
         - Flag claims about data collection, network requests, permissions, automation behavior, or package contents that do not match the code.
         - Keep build and review instructions pnpm-based.
+
+    - path: '{AGENTS.md,CLAUDE.md,llms.txt,docs/llms.txt}'
+      instructions: |
+        Agent and LLM-discovery docs must match the repo.
+        - `CLAUDE.md` must start with `@AGENTS.md`; `AGENTS.md` is the single source of agent rules.
+        - Node version, scripts, repo map, and links must match `package.json`, `.nvmrc`, and the real file layout.
+        - `llms.txt` follows llmstxt.org: H1, blockquote summary, H2 link sections, working links.
+
+    - path: '{eslint.config.js,.editorconfig,.gitattributes,.prettierignore,.gitignore}'
+      instructions: |
+        Tooling config has one owner per concern.
+        - ESLint flat config covers ts/tsx/js/mjs/cjs; Prettier is the only formatter.
+        - `.editorconfig` must mirror the Prettier settings in `package.json`.
+        - Flag duplicated ignore entries or new ignore files that overlap `.gitignore`.
 
 chat:
   auto_reply: true

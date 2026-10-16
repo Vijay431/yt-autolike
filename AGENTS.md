@@ -1,61 +1,58 @@
 # AGENTS.md
 
-Welcome, AI Agent! This file contains instructions and context for your work in this repository.
+Instructions for AI coding agents working in this repository. `CLAUDE.md` imports this file.
 
-## General Guidelines
+## Project
 
-- **Follow Project Conventions:** Adhere to the established coding style, naming conventions, and architectural patterns.
-- **Safety First:** Never expose secrets or sensitive information.
-- **Testing:** Always ensure changes are verified with tests.
-- **Mandatory Behavior:**
-  - **Caveman Mode:** You MUST always speak like a caveman. Ugh!
-  - **rtk Prefix:** Always use `rtk <command>`.
-  - **gh CLI:** Use `gh` for GitHub stuff.
-  - **Changelog:** always update the changelog, if it is really required.
+YT AutoLike is a privacy-first browser extension (Manifest V3) that auto-likes YouTube videos and
+Shorts after a watch threshold. Targets: Chrome, Chromium, Edge, Firefox. No telemetry, no remote
+code, no hidden network calls.
 
-## Technical Stack
+## Stack
 
-- **Node.js:** v22+ locally; CI uses Node 24.
-- **pnpm:** v11+ via `packageManager` (`pnpm@11.2.2`).
-- **Framework:** React with TypeScript (Extension)
-- **Styling:** Vanilla CSS
-- **Browser Targets:** Chrome, Chromium, Edge, and Firefox.
+- **Node.js 24** (strict: `.nvmrc`, `engines.node = 24.x`, `engineStrict` in `pnpm-workspace.yaml`).
+- **pnpm 11** via `packageManager`.
+- React 19 + TypeScript, built with Extension.js (`extension.config.js`).
+- Vanilla CSS, Vitest + Testing Library, Playwright for e2e.
+- ESLint 9 flat config (`eslint.config.js`) and Prettier cover every source and doc file.
 
-## Development Workflow
+## Repo map
 
-1. Research and understand the task.
-2. Propose a plan.
-3. Implement surgical changes.
-4. Verify and test.
-5. Document your work.
+| Path       | Purpose                                                                     |
+| ---------- | --------------------------------------------------------------------------- |
+| `src/`     | Extension source: `background.ts`, `content/`, `popup/`, `options/`, `lib/` |
+| `tests/`   | Vitest unit tests and Playwright e2e                                        |
+| `scripts/` | Packaging, package validation, Chrome Web Store upload, contributor sync    |
+| `release/` | Maintainer and store docs (`DEVELOPER.md`, store listings) and store art    |
+| `docs/`    | GitHub Pages site (`index.html`, `i18n.js`, `llms.txt`)                     |
+| `.github/` | Workflows, CODEOWNERS, Dependabot, issue/PR templates                       |
 
-Ugh! Smash bugs!
+`scripts/` is reserved by Extension.js; `extension.config.js` strips it from the build entries.
+Store art lives in `release/store-assets/`, never in `public/`, so it cannot ship in runtime ZIPs.
 
-## Build Optimization
+## Rules
 
-- On each completion, run the full verification gate when practical:
+- Follow existing conventions; keep changes surgical and scoped to the task.
+- Never expose secrets. Settings/whitelist live in `chrome.storage.sync`, stats/logs in
+  `chrome.storage.local`, popup state in `chrome.storage.session`.
+- Any new permission must be documented in `release/CHROMEWEBSTORE.md` and called out in the PR.
+- Add or update tests for behavior changes.
+- Use Conventional Commits (enforced by commitlint via Husky `commit-msg`).
+- Use `gh` for GitHub operations.
+- Update `CHANGELOG.md` (Unreleased) for user-visible changes.
+- Branch from `main`; open PRs against `main`.
 
-  `pnpm run verify`
+## Verification
 
-  This runs lint, typecheck, unit tests, all browser builds, all runtime packages, and package validation.
+Run the full gate before finishing when practical:
 
-- For a faster packaging-focused pass, run:
+```bash
+pnpm run verify
+```
 
-  `pnpm run build:all`
+It runs lint, `format:check`, typecheck, unit tests, all browser builds, packaging, and package
+validation. Faster packaging pass: `pnpm run build:all && pnpm run package:all && pnpm run package:validate`.
+E2E needs a display: `pnpm run build:chrome && pnpm run test:e2e`.
 
-  `pnpm run package:all`
-
-  `pnpm run package:validate`
-
-- `build:all` uses `concurrently` to build Chrome, Chromium, Firefox, and Edge targets in parallel.
-- Release-critical helper tooling lives in `scripts/`: `scripts/package-extension.sh`,
-  `scripts/validate-packages.mjs`, and `scripts/chrome-webstore-upload.mjs`.
-- Runtime ZIPs must contain only compiled extension files with `manifest.json` at ZIP root.
-- Repo docs, source files, generated folders, test output, and source maps belong in the source ZIP, not runtime ZIPs.
-- Expected artifacts live in `dist/zips/`:
-  - `yt-autolike-vX.Y.Z-chrome.zip`
-  - `yt-autolike-vX.Y.Z-chromium.zip`
-  - `yt-autolike-vX.Y.Z-edge.zip`
-  - `yt-autolike-vX.Y.Z-firefox.zip`
-  - `yt-autolike-vX.Y.Z-firefox.xpi`
-  - `yt-autolike-vX.Y.Z-source.zip`
+Runtime ZIPs in `dist/zips/` contain only compiled extension files with `manifest.json` at the root;
+docs, source, tests, store art, and source maps belong only in the source ZIP.

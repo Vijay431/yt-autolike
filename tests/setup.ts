@@ -38,6 +38,7 @@ export function resetChromeMock() {
   vi.stubGlobal('chrome', {
     runtime: {
       id: 'test-extension-id',
+      getManifest: () => ({ version: '1.0.0' }),
       getURL: (path = '') => `chrome-extension://test-extension-id/${path}`,
       sendMessage: vi.fn(async () => undefined),
       onMessage: {
@@ -59,6 +60,9 @@ export function resetChromeMock() {
     },
   });
 }
+
+// Stub once at load so modules reading `chrome` at import time work.
+resetChromeMock();
 
 beforeEach(() => {
   resetChromeMock();

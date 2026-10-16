@@ -23,36 +23,8 @@ import {
   setStats,
 } from './lib/storage';
 import { WATCH_SECONDS_PER_REMINDER, HEARTBEAT_INTERVAL_MS } from './lib/constants';
-import { isValidMessage } from './lib/messages';
+import { isMessageSenderValid, isValidMessage } from './lib/messages';
 import type { LogEntry } from './lib/types';
-
-/** Helper to validate message sender origins. */
-function isMessageSenderValid(sender: chrome.runtime.MessageSender): boolean {
-  // Check extension ID matches
-  if (sender.id !== chrome.runtime.id) {
-    return false;
-  }
-
-  // If sender has a tab, it's a content script. Verify it's youtube.com
-  if (sender.tab) {
-    const url = sender.url || sender.tab.url;
-    if (!url) return false;
-    try {
-      const parsed = new URL(url);
-      return parsed.hostname === 'youtube.com' || parsed.hostname.endsWith('.youtube.com');
-    } catch {
-      return false;
-    }
-  }
-
-  // If sender has no tab, it's extension internal (popup, options, etc)
-  if (sender.url) {
-    const extPrefix = chrome.runtime.getURL('');
-    return sender.url.startsWith(extPrefix);
-  }
-
-  return false;
-}
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
@@ -134,6 +106,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       case 'IS_POPUP_OPEN': {
         const session = await chrome.storage.session.get('popupOpen');
         sendResponse({ type: 'IS_POPUP_OPEN_RESPONSE', open: !!session.popupOpen });
+        break;
+      }
+
+      // Popup-only broadcast from the content script; nothing to do here.
+      case 'AUTO_LIKE_CONFIRMED': {
+        sendResponse({ ok: true });
         break;
       }
 

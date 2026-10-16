@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-/* eslint-env node */
-
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -75,7 +73,8 @@ export const assertAcceptableUploadState = (response, label = 'upload') => {
     throw new Error(`${label} response did not include uploadState`);
   }
   if (/FAILED|FAILURE|INVALID|ERROR|NOT_FOUND|UNSPECIFIED/i.test(state)) {
-    const details = response?.statusDetail ?? response?.itemStatus?.statusDetail ?? response?.error?.message;
+    const details =
+      response?.statusDetail ?? response?.itemStatus?.statusDetail ?? response?.error?.message;
     throw new Error(`${label} failed with uploadState ${state}${details ? `: ${details}` : ''}`);
   }
   return state;
@@ -93,7 +92,8 @@ const requestJson = async (url, options) => {
     }
   }
   if (!response.ok) {
-    const message = body?.error_description ?? body?.error?.message ?? body?.raw ?? response.statusText;
+    const message =
+      body?.error_description ?? body?.error?.message ?? body?.raw ?? response.statusText;
     throw new Error(`HTTP ${response.status} ${response.statusText}: ${message}`);
   }
   return body;

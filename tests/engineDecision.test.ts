@@ -6,6 +6,7 @@ const settings: Settings = {
   mode: 'global',
   target_percentage: 0.5,
   hourly_reminders_enabled: true,
+  like_celebration_enabled: true,
 };
 
 const whitelist: Whitelist = {
