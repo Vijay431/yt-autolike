@@ -7,9 +7,6 @@ const version = process.env.npm_package_version;
 const packagePrefix = `yt-autolike-v${version}`;
 const runtimeDocs = new Set([
   'README.md',
-  'DEVELOPER.md',
-  'CHROMEWEBSTORE.md',
-  'FIREFOX_AMO.md',
   'PRIVACY_POLICY.md',
   'CHANGELOG.md',
   'CONTRIBUTING.md',
@@ -34,7 +31,9 @@ const runtimeForbidden = [
   /^graphify-out\//,
   /^test-results\//,
   /(^|\/).*\.map$/,
-  /^screenshot\.png$/,
+  /^release\//,
+  /^images\/(promo-tile|screenshot[^/]*)\.png$/,
+  /^logo-1024\.png$/,
   /(^|\/).*\.tsx?$/,
 ];
 const sourceForbidden = [
@@ -192,7 +191,7 @@ const validateSourcePackage = (zipPath) => {
     'pnpm-lock.yaml',
     'src/manifest.json',
     'README.md',
-    'FIREFOX_AMO.md',
+    'release/FIREFOX_AMO.md',
   ]) {
     requireEntry(zipName, entries, required);
   }

@@ -28,8 +28,8 @@
 /src/lib/types.ts @Vijay431
 
 # Store, release, security, and privacy documentation.
-/CHROMEWEBSTORE.md @Vijay431
-/FIREFOX_AMO.md @Vijay431
+/release/CHROMEWEBSTORE.md @Vijay431
+/release/FIREFOX_AMO.md @Vijay431
 /PRIVACY_POLICY.md @Vijay431
 /SECURITY.md @Vijay431
-/DEVELOPER.md @Vijay431
+/release/DEVELOPER.md @Vijay431

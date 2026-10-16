@@ -47,7 +47,7 @@ pnpm build:edge
 pnpm build:firefox
 ```
 
-See [`CONTRIBUTORS.md`](CONTRIBUTORS.md) for contributor credits and AI/tooling acknowledgements, and [`ACKNOWLEDGEMENTS.md`](ACKNOWLEDGEMENTS.md) for the open-source libraries and release tooling this project builds on.
+See [`CONTRIBUTORS.md`](CONTRIBUTORS.md) for contributor credits, AI/tooling acknowledgements, and the open-source libraries and release tooling this project builds on.
 
 ## 📄 Project Docs
 
@@ -71,7 +71,7 @@ MIT Licensed. All data is stored locally. See [`PRIVACY_POLICY.md`](PRIVACY_POLI
 - [ ] Chrome Web Store: Verify `src/images/icon-128.png` is exactly 128x128
 - [ ] Chrome Web Store: Run E2E tests to verify performance & Back/Forward cache
 - [ ] Chrome Web Store: Register Developer Account ($5 fee)
-- [ ] Chrome Web Store: Fill Privacy/Justification forms based on `CHROMEWEBSTORE.md`
+- [ ] Chrome Web Store: Fill Privacy/Justification forms based on `release/CHROMEWEBSTORE.md`
 - [ ] Firefox Add-ons (AMO): Submit extension for review
 - [ ] Microsoft Edge Add-ons: Submit extension for review
 - [ ] Support for YouTube Shorts (Auto-like logic)
