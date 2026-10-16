@@ -278,13 +278,6 @@ async function pollProgress(pageType: PageType): Promise<void> {
 
     const settings = cachedSettings;
 
-    const voteState = getLikeState(pageType);
-    if (voteState === 'liked' || voteState === 'disliked') {
-      likedThisVideo = true;
-      await recordSkip(pageType, voteState === 'liked' ? 'already liked' : 'already disliked');
-      return;
-    }
-
     const targetSeconds = video!.duration * settings.target_percentage;
     if (accumulatedWatchSeconds < targetSeconds) return;
 
@@ -302,11 +295,20 @@ async function pollProgress(pageType: PageType): Promise<void> {
 
     if (!isLoggedIn()) return;
 
+    const voteState = getLikeState(pageType);
+    if (voteState === 'liked' || voteState === 'disliked') {
+      likedThisVideo = true;
+      await recordSkip(pageType, voteState === 'liked' ? 'already liked' : 'already disliked');
+      return;
+    }
+
     const clicked = clickLikeButton(pageType);
     if (clicked) {
       likedThisVideo = true;
       const entry = await recordLike(pageType);
-      showToast('Auto-Liked!', '🎉 We successfully auto-liked this video!');
+      if (settings.like_celebration_enabled) {
+        showToast('Auto-Liked!', '🎉 We successfully auto-liked this video!');
+      }
       if (entry) notifyPopupLikeConfirmed(entry);
     }
   } finally {

@@ -164,17 +164,6 @@ body {
   gap: 8px;
 }
 
-.count-badge {
-  background: var(--accent-dim);
-  color: var(--accent);
-  border-radius: 10px;
-  padding: 1px 7px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
 /* ============================================================
    Stats section
    ============================================================ */
@@ -399,64 +388,6 @@ body {
   font-style: italic;
 }
 
-.whitelist {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 140px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #333 transparent;
-}
-
-.whitelist-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  transition: background var(--transition);
-}
-
-.whitelist-item:hover {
-  background: var(--bg-card-hover);
-}
-
-.whitelist-icon {
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-.whitelist-name {
-  flex: 1;
-  font-size: 12px;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.whitelist-remove {
-  all: unset;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 12px;
-  padding: 2px 5px;
-  border-radius: 4px;
-  transition:
-    color var(--transition),
-    background var(--transition);
-  flex-shrink: 0;
-}
-
-.whitelist-remove:hover {
-  color: var(--accent);
-  background: var(--accent-dim);
-}
-
 /* ============================================================
    Toggle
    ============================================================ */
@@ -662,59 +593,6 @@ body {
   border-left: 3px solid #4a9eff;
 }
 
-.np-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #4a9eff;
-  box-shadow: 0 0 6px rgba(74, 158, 255, 0.6);
-  animation: np-pulse 1.8s ease-in-out infinite;
-  flex-shrink: 0;
-}
-
-@keyframes np-pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(0.8);
-  }
-}
-
-.np-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.np-channel {
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-.np-not-whitelisted {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.np-is-whitelisted {
-  color: var(--green);
-  font-weight: 600;
-}
-
 /* ETA row */
 .np-eta-row {
   margin-top: 2px;
@@ -769,26 +647,6 @@ body {
 
 .not-whitelisted-banner strong {
   color: var(--text-primary);
-}
-
-/* ============================================================
-   Whitelist item — current playing highlight
-   ============================================================ */
-.whitelist-item--current {
-  border-color: rgba(74, 158, 255, 0.4);
-  background: rgba(74, 158, 255, 0.06);
-}
-
-.whitelist-now {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #4a9eff;
-  background: rgba(74, 158, 255, 0.15);
-  border-radius: 4px;
-  padding: 1px 5px;
-  flex-shrink: 0;
 }
 
 /* ============================================================

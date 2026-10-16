@@ -56,7 +56,7 @@ export function showToast(title: string, message: string): void {
   });
 }
 
-/** Inject and display the hourly reminder toast. Auto-closes after TOAST_DURATION_MS. */
+/** Inject and display the periodic (15-minute) reminder toast. Auto-closes after TOAST_DURATION_MS. */
 export function showReminderToast(): void {
   const message = randomMessage();
   showToast('YT AutoLike Tip', message);

@@ -23,36 +23,101 @@ describe('popup and options UI', () => {
     });
   });
 
-  test('celebrates confirmed likes only through the popup listener', async () => {
-    vi.mocked(chrome.tabs.query).mockImplementation(async () => [
-      { id: 1, url: 'https://example.com/' } as chrome.tabs.Tab,
-    ]);
+  describe('auto-like confirmation listener', () => {
+    const likeMessage = {
+      type: 'AUTO_LIKE_CONFIRMED',
+      entry: {
+        timestamp: 1,
+        title: 'A video',
+        channel: 'A channel',
+        type: 'video',
+        status: 'liked',
+      },
+    };
+    const youtubeSender = {
+      id: 'test-extension-id',
+      url: 'https://www.youtube.com/watch?v=x',
+      tab: { url: 'https://www.youtube.com/watch?v=x' },
+    } as chrome.runtime.MessageSender;
 
-    const { unmount } = render(<PopupApp />);
+    async function renderWithListener() {
+      vi.mocked(confetti).mockClear();
+      vi.mocked(chrome.tabs.query).mockImplementation(async () => [
+        { id: 1, url: 'https://example.com/' } as chrome.tabs.Tab,
+      ]);
+      const view = render(<PopupApp />);
+      await screen.findByText('YT AutoLike');
+      const listener = vi.mocked(chrome.runtime.onMessage.addListener).mock.calls.at(-1)?.[0];
+      expect(listener).toEqual(expect.any(Function));
+      return { ...view, listener: listener! };
+    }
 
-    await screen.findByText('YT AutoLike');
-    const listener = vi.mocked(chrome.runtime.onMessage.addListener).mock.calls.at(-1)?.[0];
-    expect(listener).toEqual(expect.any(Function));
+    test('celebrates confirmed likes only through the popup listener', async () => {
+      const { unmount, listener } = await renderWithListener();
 
-    listener?.(
-      {
-        type: 'AUTO_LIKE_CONFIRMED',
-        entry: {
-          timestamp: 1,
-          title: 'A video',
-          channel: 'A channel',
+      listener(likeMessage, youtubeSender, vi.fn());
+      expect(confetti).toHaveBeenCalledTimes(1);
+
+      unmount();
+      expect(chrome.runtime.onMessage.removeListener).toHaveBeenCalledWith(expect.any(Function));
+    });
+
+    test('ignores confirmations from invalid senders', async () => {
+      const { listener } = await renderWithListener();
+
+      listener(likeMessage, {} as chrome.runtime.MessageSender, vi.fn());
+      expect(confetti).not.toHaveBeenCalled();
+    });
+
+    test('skips confetti but still refreshes logs when celebration is disabled', async () => {
+      await chrome.storage.sync.set({
+        settings: {
+          mode: 'global',
+          target_percentage: 0.5,
+          hourly_reminders_enabled: true,
+          like_celebration_enabled: false,
+        },
+      });
+      const { listener } = await renderWithListener();
+      await waitFor(() => {
+        expect(screen.getByRole('checkbox', { name: /celebrate auto-likes/i })).not.toBeChecked();
+      });
+      vi.mocked(chrome.storage.local.get).mockClear();
+
+      listener(likeMessage, youtubeSender, vi.fn());
+
+      expect(confetti).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(chrome.storage.local.get).toHaveBeenCalledWith('logs');
+      });
+    });
+  });
+
+  test('renders recent activity entries from storage', async () => {
+    await chrome.storage.local.set({
+      logs: [
+        {
+          timestamp: Date.now(),
+          title: 'Great Video Title',
+          channel: 'Creator One',
           type: 'video',
           status: 'liked',
         },
-      },
-      {} as chrome.runtime.MessageSender,
-      vi.fn(),
-    );
+      ],
+    });
 
-    expect(confetti).toHaveBeenCalledTimes(1);
+    render(<PopupApp />);
 
-    unmount();
-    expect(chrome.runtime.onMessage.removeListener).toHaveBeenCalledWith(expect.any(Function));
+    expect(await screen.findByText('Recent Activity')).toBeInTheDocument();
+    expect(await screen.findByText('Great Video Title')).toBeInTheDocument();
+    expect(screen.getByText('Creator One')).toBeInTheDocument();
+  });
+
+  test('shows empty state when there is no activity', async () => {
+    render(<PopupApp />);
+
+    expect(await screen.findByText('Recent Activity')).toBeInTheDocument();
+    expect(screen.getByText('No activity yet.')).toBeInTheDocument();
   });
 
   test('renders empty options whitelist state', async () => {

@@ -15,6 +15,7 @@ export const DEFAULT_SETTINGS: Settings = {
   mode: 'global',
   target_percentage: DEFAULT_PERCENTAGE,
   hourly_reminders_enabled: true,
+  like_celebration_enabled: true,
 };
 
 export const DEFAULT_WHITELIST: Whitelist = { channels: [] };
@@ -52,7 +53,12 @@ function validateSettings(val: unknown): Settings {
       ? s.hourly_reminders_enabled
       : DEFAULT_SETTINGS.hourly_reminders_enabled;
 
-  return { mode, target_percentage, hourly_reminders_enabled };
+  const like_celebration_enabled =
+    typeof s.like_celebration_enabled === 'boolean'
+      ? s.like_celebration_enabled
+      : DEFAULT_SETTINGS.like_celebration_enabled;
+
+  return { mode, target_percentage, hourly_reminders_enabled, like_celebration_enabled };
 }
 
 function validateWhitelist(val: unknown): Whitelist {

@@ -12,8 +12,10 @@ export interface Settings {
   mode: Mode;
   /** Fraction (0.1–0.9). Like triggers when currentTime/duration >= this value. */
   target_percentage: number;
-  /** Whether the hourly positive-message toast should appear. */
+  /** Whether the positive-message reminder toast (every 900s / 15 min; key name kept for persistence) should appear. */
   hourly_reminders_enabled: boolean;
+  /** Whether a toast and popup confetti celebrate each auto-like. */
+  like_celebration_enabled: boolean;
 }
 
 /** A single whitelisted YouTube channel. */
@@ -31,7 +33,7 @@ export interface Whitelist {
 /** Aggregate statistics stored in chrome.storage.local under the key "stats". */
 export interface Stats {
   total_likes_performed: number;
-  /** Cumulative active-watch seconds; resets every 3600s to trigger the reminder. */
+  /** Cumulative active-watch seconds; resets every 900s (15 min) to trigger the reminder. */
   accumulated_watch_seconds: number;
 }
 

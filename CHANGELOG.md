@@ -10,6 +10,27 @@ versioning.
 ### Added
 
 - Documentation translations for Telugu, Kannada, and Malayalam.
+- Recent Activity feed in the popup showing the latest likes and skips.
+- "Celebrate auto-likes" setting to turn the auto-like toast and popup
+  confetti on or off.
+
+### Changed
+
+- Popup version label now reads from the extension manifest instead of a
+  hardcoded value; the e2e test does the same.
+- Reminder comments now describe the 15-minute interval accurately.
+- `contributors:sync` now fails instead of overwriting `CONTRIBUTORS.md` when
+  the GitHub API is unavailable; pass `--allow-fallback` for offline use.
+- Popup ignores auto-like confirmations from invalid senders.
+
+### Fixed
+
+- Already-liked/disliked skips are logged only for videos eligible for
+  auto-like, not every video visited.
+
+### Removed
+
+- Unused sidebar and empty content-script stubs, and unused popup CSS.
 
 ## [1.0.0] - 2026-06-07
 

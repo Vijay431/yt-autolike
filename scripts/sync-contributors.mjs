@@ -37,7 +37,7 @@ const AI_ACKNOWLEDGEMENTS = [
 
 const args = new Set(process.argv.slice(2));
 const checkMode = args.has('--check');
-const noFallback = args.has('--no-fallback');
+const allowFallback = args.has('--allow-fallback');
 
 async function fetchContributors() {
   const headers = {
@@ -91,7 +91,7 @@ async function getContributors() {
 
     return { contributors, usedFallback: false, warning: null };
   } catch (error) {
-    if (noFallback) {
+    if (!allowFallback) {
       throw error;
     }
 
@@ -171,4 +171,9 @@ async function main() {
   console.log(`Wrote ${CONTRIBUTORS_FILE}.`);
 }
 
-await main();
+try {
+  await main();
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
+}
