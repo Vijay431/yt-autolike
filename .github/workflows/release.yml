@@ -44,10 +44,21 @@ jobs:
           echo "Actor ${{ github.actor }} is not allowed to dispatch this workflow."
           exit 1
 
+      - name: Require Stable Semver Tag
+        run: |
+          if ! [[ "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag $TAG_NAME is not a stable vX.Y.Z version; refusing to release."
+            exit 1
+          fi
+
       - name: Checkout Code
         uses: actions/checkout@v6
         with:
           ref: ${{ env.TAG_NAME }}
+          fetch-depth: 0
+
+      - name: Require Tag On Main
+        run: git merge-base --is-ancestor HEAD origin/main || { echo "Tag commit is not on main."; exit 1; }
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
