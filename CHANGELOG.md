@@ -9,6 +9,8 @@ versioning.
 
 ### Added
 
+- `.editorconfig`, `.gitattributes`, `llms.txt`, and `CLAUDE.md` (imports `AGENTS.md`).
+- `format:check` script, enforced in `verify`, CI, and lint-staged; `commit-msg` hook runs commitlint.
 - Documentation translations for Telugu, Kannada, and Malayalam.
 - Recent Activity feed in the popup showing the latest likes and skips.
 - "Celebrate auto-likes" setting to turn the auto-like toast and popup
@@ -16,6 +18,11 @@ versioning.
 
 ### Changed
 
+- Node.js 24 is now required (`.nvmrc`, `engines.node`, pnpm `engineStrict`).
+- ESLint 9 flat config (`eslint.config.js`) now lints ts, tsx, js, mjs, and cjs files.
+- Maintainer and store docs moved to `release/`; store art moved to `release/store-assets/`.
+- `ACKNOWLEDGEMENTS.md` merged into the generated `CONTRIBUTORS.md`.
+- `AGENTS.md` rewritten; `.coderabbit.yml` paths and schema fixed.
 - Popup version label now reads from the extension manifest instead of a
   hardcoded value; the e2e test does the same.
 - Reminder comments now describe the 15-minute interval accurately.
@@ -30,6 +37,7 @@ versioning.
 
 ### Removed
 
+- `GEMINI.md`, `.geminiignore`, `.eslintignore`, `.eslintrc.cjs`, `.npmrc`, and duplicate ignore entries.
 - Unused sidebar and empty content-script stubs, and unused popup CSS.
 
 ## [1.0.1] - 2026-07-26

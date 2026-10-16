@@ -34,6 +34,8 @@ Unlike other auto-likers that might be clunky or data-hungry, **YT AutoLike** is
 
 We love contributors! Please star ⭐, open issues, share ideas, or send PRs if you want to help improve YT AutoLike. Accessibility feedback, translation help, browser-specific reports, and clear reproduction steps are especially welcome because they help make the extension better for more people.
 
+Requires Node.js 24 (`nvm use`) and pnpm 11.
+
 ```bash
 # Install dependencies
 pnpm install

@@ -4,10 +4,10 @@
 
 ## Verification
 
-- [ ] `rtk pnpm run lint`
-- [ ] `rtk pnpm run typecheck`
-- [ ] `rtk pnpm run test`
-- [ ] `rtk pnpm run build:all`
+- [ ] `pnpm run lint`
+- [ ] `pnpm run typecheck`
+- [ ] `pnpm run test`
+- [ ] `pnpm run build:all`
 
 ## Extension Review
 
